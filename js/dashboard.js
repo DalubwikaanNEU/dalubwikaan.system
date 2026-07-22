@@ -1,6 +1,6 @@
 // =================================
 // DALUBWIKAAN TREASURY DASHBOARD
-// VERSION 4.0
+// VERSION 5.0 POLISHED
 // FIREBASE REAL-TIME
 // PROJECT TRANSPARENCY
 // BUDGET MONITORING
@@ -14,11 +14,11 @@ import { db } from "./firebase.js";
 
 import {
 
-collection,
-onSnapshot,
-query,
-orderBy,
-getDocs
+    collection,
+    onSnapshot,
+    query,
+    orderBy,
+    getDocs
 
 }
 
@@ -34,15 +34,16 @@ from
 // =================================
 
 
-let collectionChart;
+let collectionChart = null;
 
-let budgetChart;
+let budgetChart = null;
 
 
 
 window.totalFunds = 0;
 
 window.currentExpenses = 0;
+
 
 
 
@@ -55,19 +56,19 @@ let projectExpenses = {};
 let reportData = {
 
 
-funds:0,
+    funds:0,
 
 
-expenses:0,
+    expenses:0,
 
 
-remaining:0,
+    remaining:0,
 
 
-years:{},
+    years:{},
 
 
-projects:[]
+    projects:[]
 
 
 };
@@ -85,20 +86,21 @@ projects:[]
 // =================================
 
 
+
 function setText(id,value){
 
 
-const element =
+    const element =
 
-document.getElementById(id);
+    document.getElementById(id);
 
 
 
-if(element){
+    if(element){
 
-element.textContent=value;
+        element.textContent = value;
 
-}
+    }
 
 
 }
@@ -112,14 +114,16 @@ element.textContent=value;
 function peso(value){
 
 
-return "₱" +
+    return "₱" +
 
-Number(value || 0)
+    Number(value || 0)
 
-.toLocaleString(
-"en-PH"
-);
-
+    .toLocaleString(
+        "en-PH",
+        {
+            minimumFractionDigits:2
+        }
+    );
 
 
 }
@@ -128,123 +132,157 @@ Number(value || 0)
 
 
 
+
+
+
+
+// =================================
+// PROJECT STATUS BADGE
+// =================================
 
 
 function statusBadge(status){
 
 
+    const currentStatus =
 
-switch(status){
-
-
-
-case "Completed":
-
-return `
-
-<span class="status completed">
-
-🟢 Completed
-
-</span>
-
-`;
+    String(status || "Planning")
+    .trim();
 
 
 
-
-case "Ongoing":
-
-return `
-
-<span class="status ongoing">
-
-🔵 Ongoing
-
-</span>
-
-`;
+    if(currentStatus === "Completed"){
 
 
+        return `
+
+        <span class="status completed">
+
+        🟢 Completed
+
+        </span>
+
+        `;
+
+
+    }
 
 
 
-default:
+    if(currentStatus === "Ongoing"){
 
-return `
 
-<span class="status planning">
+        return `
 
-🟡 Planning
+        <span class="status ongoing">
 
-</span>
+        🔵 Ongoing
 
-`;
+        </span>
 
+        `;
+
+
+    }
+
+
+
+
+
+    return `
+
+    <span class="status planning">
+
+    🟡 Planning
+
+    </span>
+
+    `;
 
 
 }
 
 
 
-}
 
 
 
 
 
+
+// =================================
+// FINANCIAL STATUS
+// =================================
 
 
 function financialStatus(
-budget,
-spent
+    budget,
+    spent
 ){
 
 
 
-const difference =
+    const difference =
 
-budget - spent;
+    Number(budget || 0)
 
+    -
 
-
-
-
-if(difference < 0){
+    Number(spent || 0);
 
 
 
-return `
-
-<span class="danger-status">
-
-🔴 Abonado 
-
-${peso(
-Math.abs(difference)
-)}
-
-</span>
-
-`;
 
 
 
-}
+
+    if(difference < 0){
 
 
 
-return `
+        return `
 
-<span class="success-status">
 
-🟢 Remaining
+        <span class="danger-status">
 
-${peso(difference)}
 
-</span>
+        🔴 Abonado
 
-`;
+        ${peso(
+            Math.abs(difference)
+        )}
+
+
+        </span>
+
+
+        `;
+
+
+
+    }
+
+
+
+
+
+
+
+    return `
+
+
+    <span class="success-status">
+
+
+    🟢 Remaining
+
+    ${peso(difference)}
+
+
+    </span>
+
+
+    `;
 
 
 
@@ -267,55 +305,53 @@ function loadCollections(){
 
 
 
-const q = query(
+    const q = query(
 
-collection(
-db,
-"collections"
-),
+        collection(
+            db,
+            "collections"
+        ),
 
-orderBy(
-"createdAt",
-"desc"
-)
+        orderBy(
+            "createdAt",
+            "desc"
+        )
 
-);
-
-
+    );
 
 
 
 
-onSnapshot(
-
-q,
-
-(snapshot)=>{
 
 
+    onSnapshot(
 
-let totalFunds=0;
+        q,
+
+        (snapshot)=>{
 
 
 
-let yearTotals={
+            let totalFunds = 0;
 
 
 
-"First Year":0,
+            let yearTotals = {
 
 
-"Second Year":0,
+                "First Year":0,
 
 
-"Third Year":0,
+                "Second Year":0,
 
 
-"Fourth Year":0
+                "Third Year":0,
 
 
+                "Fourth Year":0
 
-};
+
+            };
 
 
 
@@ -323,396 +359,475 @@ let yearTotals={
 
 
 
-const table =
+            const table =
 
-document.getElementById(
-"transactionTable"
-);
-
-
+            document.getElementById(
+                "transactionTable"
+            );
 
 
 
 
 
-if(table){
 
-table.innerHTML="";
+            if(table){
+
+                table.innerHTML="";
+
+            }
+
+
+
+
+
+
+
+
+
+            snapshot.forEach((doc)=>{
+
+
+
+                const data =
+
+                doc.data();
+
+
+
+
+
+
+                const amount =
+
+                Number(
+                    data.amount || 0
+                );
+
+
+
+
+
+
+                totalFunds += amount;
+
+
+
+
+
+
+
+                if(
+                    yearTotals[data.year]
+                    !== undefined
+                ){
+
+
+                    yearTotals[data.year] += amount;
+
+
+                }
+
+
+
+
+
+
+
+
+                if(table){
+
+
+
+                    table.innerHTML += `
+
+
+                    <tr>
+
+
+                    <td>
+
+                    ${data.date || "N/A"}
+
+                    </td>
+
+
+
+
+                    <td>
+
+                    ${data.year || "N/A"}
+
+                    </td>
+
+
+
+
+                    <td>
+
+                    ${peso(amount)}
+
+                    </td>
+
+
+
+
+                    <td>
+
+
+                    <span class="verified">
+
+                    ✔ Recorded
+
+                    </span>
+
+
+                    </td>
+
+
+
+                    </tr>
+
+
+                    `;
+
+
+
+                }
+
+
+
+
+
+            });
+
+
+
+
+
+
+
+
+            if(snapshot.empty && table){
+
+
+
+                table.innerHTML = `
+
+
+                <tr>
+
+
+                <td colspan="4">
+
+
+                No collection records yet.
+
+
+                </td>
+
+
+                </tr>
+
+
+                `;
+
+
+
+            }
+
+
+
+
+
+
+
+
+            window.totalFunds =
+
+            totalFunds;
+
+
+
+
+
+
+
+            reportData.funds =
+
+            totalFunds;
+
+
+
+
+
+
+
+            reportData.years =
+
+            yearTotals;
+
+
+
+
+
+
+
+
+
+            setText(
+
+                "totalFunds",
+
+                peso(totalFunds)
+
+            );
+
+
+
+
+
+
+
+
+            setText(
+
+                "firstYear",
+
+                peso(
+                    yearTotals["First Year"]
+                )
+
+            );
+
+
+
+
+
+
+            setText(
+
+                "secondYear",
+
+                peso(
+                    yearTotals["Second Year"]
+                )
+
+            );
+
+
+
+
+
+
+            setText(
+
+                "thirdYear",
+
+                peso(
+                    yearTotals["Third Year"]
+                )
+
+            );
+
+
+
+
+
+
+            setText(
+
+                "fourthYear",
+
+                peso(
+                    yearTotals["Fourth Year"]
+                )
+
+            );
+
+
+
+
+
+
+
+            updateProgress(
+                yearTotals
+            );
+
+
+
+
+
+
+
+            createCollectionChart(
+                yearTotals
+            );
+
+
+
+
+
+
+
+            updateBalance();
+
+
+
+
+
+
+            hideLoader();
+
+
+
+        }
+
+
+
+    );
+
+
 
 }
 
-
-
-
-
-
-
-
-snapshot.forEach((doc)=>{
-
-
-
-const data =
-doc.data();
-
-
-
-
-const amount =
-
-Number(
-data.amount || 0
-);
-
-
-
-
-
-totalFunds += amount;
-
-
-
-
-
-
-if(yearTotals[data.year]
-!==undefined){
-
-
-
-yearTotals[data.year]+=amount;
-
-
-
-}
-
-
-
-
-
-
-
-if(table){
-
-
-
-table.innerHTML += `
-
-<tr>
-
-<td>
-
-${data.date || "N/A"}
-
-</td>
-
-
-<td>
-
-${data.year || "N/A"}
-
-</td>
-
-
-<td>
-
-${peso(amount)}
-
-</td>
-
-
-<td>
-
-<span class="verified">
-
-✔ Recorded
-
-</span>
-
-</td>
-
-
-</tr>
-
-`;
-
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-
-
-
-if(snapshot.empty && table){
-
-
-
-table.innerHTML=`
-
-<tr>
-
-<td colspan="4">
-
-No collection records yet.
-
-</td>
-
-</tr>
-
-`;
-
-
-
-}
-
-
-
-
-
-
-
-
-window.totalFunds =
-totalFunds;
-
-
-
-reportData.funds =
-totalFunds;
-
-
-
-reportData.years =
-yearTotals;
-
-
-
-
-
-
-setText(
-"totalFunds",
-peso(totalFunds)
-);
-
-
-
-
-
-
-setText(
-"firstYear",
-peso(yearTotals["First Year"])
-);
-
-
-
-
-
-
-setText(
-"secondYear",
-peso(yearTotals["Second Year"])
-);
-
-
-
-
-
-
-setText(
-"thirdYear",
-peso(yearTotals["Third Year"])
-);
-
-
-
-
-
-
-setText(
-"fourthYear",
-peso(yearTotals["Fourth Year"])
-);
-
-
-
-
-
-
-
-updateProgress(
-yearTotals
-);
-
-
-
-createCollectionChart(
-yearTotals
-);
-
-
-
-updateBalance();
-
-
-
-hideLoader();
-
-
-
-
-}
-
-
-
-);
-
-
-
-}
 // =================================
-// LOAD PROJECTS + EXPENSE MONITORING
+// LOAD PROJECTS + BUDGET MONITORING
+// PROJECT TRANSPARENCY SYSTEM
 // =================================
 
 
 function loadProjects(){
 
 
+    const projectQuery = query(
 
-const projectQuery = query(
+        collection(
+            db,
+            "projects"
+        ),
 
-collection(
-db,
-"projects"
-),
+        orderBy(
+            "createdAt",
+            "desc"
+        )
 
-orderBy(
-"createdAt",
-"desc"
-)
+    );
 
-);
 
 
 
 
+    onSnapshot(
 
+        projectQuery,
 
-onSnapshot(
+        async(projectSnapshot)=>{
 
-projectQuery,
 
-async(projectSnapshot)=>{
 
+            const table =
 
+            document.getElementById(
+                "projectTable"
+            );
 
-const table =
 
-document.getElementById(
-"projectTable"
-);
 
 
 
+            if(table){
 
+                table.innerHTML="";
 
-if(table){
+            }
 
-table.innerHTML="";
 
-}
 
 
 
 
+            // =========================
+            // LOAD EXPENSES
+            // =========================
 
 
-// ================================
-// GET ALL EXPENSES
-// ================================
+            const expenseSnapshot =
 
+            await getDocs(
 
-const expenseSnapshot =
+                collection(
+                    db,
+                    "expenses"
+                )
 
-await getDocs(
+            );
 
-collection(
-db,
-"expenses"
-)
 
-);
 
 
 
+            projectExpenses = {};
 
 
-projectExpenses = {};
 
 
 
 
 
 
-expenseSnapshot.forEach(
-(expenseDoc)=>{
+            expenseSnapshot.forEach(
+                (expenseDoc)=>{
 
 
+                    const expense =
 
-const expense =
+                    expenseDoc.data();
 
-expenseDoc.data();
 
 
 
+                    const projectName =
 
+                    expense.project;
 
-const projectName =
 
-expense.project;
 
 
 
 
+                    if(
+                        !projectExpenses[projectName]
+                    ){
 
 
-if(!projectExpenses[projectName]){
+                        projectExpenses[projectName]=0;
 
 
+                    }
 
-projectExpenses[projectName]=0;
 
 
 
-}
 
 
 
+                    projectExpenses[projectName]
 
+                    +=
 
+                    Number(
+                        expense.amount || 0
+                    );
 
 
-projectExpenses[projectName]
 
-+=
 
-Number(
-expense.amount || 0
-);
+                }
 
+            );
 
 
-});
 
 
 
@@ -720,51 +835,48 @@ expense.amount || 0
 
 
 
+            reportData.projects=[];
 
-reportData.projects=[];
 
 
 
 
 
 
+            projectSnapshot.forEach(
+                (projectDoc)=>{
 
-// ================================
-// DISPLAY PROJECTS
-// ================================
 
+                    const data =
 
-projectSnapshot.forEach(
-(projectDoc)=>{
+                    projectDoc.data();
 
 
 
-const data =
 
-projectDoc.data();
 
 
 
 
+                    const name =
 
+                    data.name ||
 
+                    "Unnamed Project";
 
-const name =
 
-data.name ||
 
-"Unnamed Project";
 
 
 
 
 
+                    const budget =
 
-const budget =
+                    Number(
+                        data.budget || 0
+                    );
 
-Number(
-data.budget || 0
-);
 
 
 
@@ -772,250 +884,310 @@ data.budget || 0
 
 
 
-const spent =
+                    const spent =
 
-projectExpenses[name]
+                    projectExpenses[name]
 
-||
+                    ||
 
-0;
+                    0;
 
 
 
 
 
 
-const remaining =
 
-budget - spent;
 
+                    const remaining =
 
+                    budget - spent;
 
 
 
 
 
 
-// IMPORTANT
-// READ REAL STATUS FROM FIRESTORE
 
 
-const status =
+                    // =====================
+                    // IMPORTANT STATUS FIX
+                    // =====================
 
-data.status ||
 
-"Planning";
+                    let status =
 
+                    data.status;
 
 
 
+                    if(!status){
 
+                        status = "Planning";
 
+                    }
 
 
 
-reportData.projects.push({
 
 
-name,
 
 
-budget,
+                    const projectData = {
 
 
-spent,
+                        name,
 
 
-status,
+                        budget,
 
 
-description:
+                        spent,
 
-data.description || "",
 
+                        remaining,
 
-remaining
 
+                        status,
 
-});
 
+                        description:
 
+                        data.description || ""
 
 
+                    };
 
 
 
 
 
 
-if(table){
 
 
+                    reportData.projects.push(
+                        projectData
+                    );
 
-table.innerHTML += `
 
 
-<tr>
 
 
 
-<td>
 
 
-<strong>
 
-${name}
+                    if(table){
 
-</strong>
 
 
+                        table.innerHTML += `
 
-<br><br>
 
 
-${statusBadge(status)}
+                        <tr>
 
 
 
-</td>
+                        <td>
 
 
 
+                        <strong>
 
+                        ${name}
 
+                        </strong>
 
 
-<td>
 
+                        <br><br>
 
 
-<strong>
-Allocated Budget:
-</strong>
 
+                        ${statusBadge(status)}
 
-<br>
 
 
-${peso(budget)}
+                        </td>
 
 
 
-<br><br>
 
 
 
-<strong>
-Actual Expenses:
-</strong>
 
 
-<br>
+                        <td>
 
 
-${peso(spent)}
 
+                        <strong>
 
+                        Allocated Budget
 
-<br><br>
+                        </strong>
 
 
+                        <br>
 
-${financialStatus(
-budget,
-spent
-)}
 
+                        ${peso(budget)}
 
 
-</td>
 
 
 
+                        <br><br>
 
 
 
 
-<td>
 
+                        <strong>
 
-${data.description || 
+                        Actual Expenses
 
-"No project description."
+                        </strong>
 
-}
 
+                        <br>
 
 
-</td>
+                        ${peso(spent)}
 
 
 
 
-</tr>
 
 
-`;
 
+                        <br><br>
 
 
-}
 
 
 
+                        ${financialStatus(
 
+                            budget,
 
+                            spent
 
+                        )}
 
-});
 
 
 
 
+                        </td>
 
 
 
 
 
-if(projectSnapshot.empty && table){
 
 
 
-table.innerHTML = `
 
+                        <td>
 
-<tr>
 
-<td colspan="3">
 
-No projects available.
+                        ${
+                            data.description ||
 
-</td>
+                            "No project description."
+                        }
 
-</tr>
 
 
-`;
+                        </td>
 
 
 
-}
 
 
 
 
+                        </tr>
 
 
 
-updateBudgetChart();
+                        `;
 
 
 
-}
+                    }
 
 
 
-);
+
+
+
+
+                }
+
+            );
+
+
+
+
+
+
+
+
+
+            if(
+                projectSnapshot.empty
+                &&
+                table
+            ){
+
+
+
+                table.innerHTML = `
+
+
+
+                <tr>
+
+
+                <td colspan="3">
+
+
+                No projects available.
+
+
+                </td>
+
+
+                </tr>
+
+
+
+                `;
+
+
+
+            }
+
+
+
+
+
+
+
+            updateBudgetChart();
+
+
+
+
+        }
+
+
+
+    );
 
 
 
@@ -1031,344 +1203,401 @@ updateBudgetChart();
 
 // =================================
 // LOAD EXPENSE TRANSPARENCY
+// RECEIPT MONITORING
 // =================================
+
 
 
 function loadExpenses(){
 
 
 
-const expenseQuery = query(
+    const expenseQuery = query(
 
-collection(
-db,
-"expenses"
-),
+        collection(
+            db,
+            "expenses"
+        ),
 
-orderBy(
-"createdAt",
-"desc"
-)
 
-);
+        orderBy(
+            "createdAt",
+            "desc"
+        )
 
 
+    );
 
 
 
 
 
-onSnapshot(
 
-expenseQuery,
 
-(snapshot)=>{
 
+    onSnapshot(
 
+        expenseQuery,
 
+        (snapshot)=>{
 
 
-const container =
 
-document.getElementById(
-"expensePreview"
-);
 
 
+            const container =
 
+            document.getElementById(
+                "expensePreview"
+            );
 
 
 
-if(!container)return;
 
 
 
 
+            if(!container)
 
+            return;
 
 
-container.innerHTML="";
 
 
 
 
 
 
+            container.innerHTML="";
 
-let totalExpenses = 0;
 
 
 
 
 
+            let totalExpenses = 0;
 
 
 
-snapshot.forEach(
-(expenseDoc)=>{
 
 
 
-const data =
 
-expenseDoc.data();
 
 
+            snapshot.forEach(
+                (expenseDoc)=>{
 
 
 
-const amount =
+                    const data =
 
-Number(
-data.amount || 0
-);
+                    expenseDoc.data();
 
 
 
 
 
-totalExpenses += amount;
 
 
+                    const amount =
 
+                    Number(
+                        data.amount || 0
+                    );
 
 
 
 
 
 
-let receipt="";
 
 
+                    totalExpenses += amount;
 
 
 
 
-if(data.receipt){
 
 
 
-receipt = `
 
 
-<div class="receipt-box">
+                    let receiptHTML = "";
 
 
-<img
 
-src="${data.receipt}"
 
-class="receipt-image"
 
-alt="Receipt"
 
 
 
->
+                    if(data.receipt){
 
 
 
+                        receiptHTML = `
 
-<br>
 
 
-<a
+                        <div class="receipt-box">
 
-href="${data.receipt}"
 
-target="_blank"
 
-class="view-btn"
+                        <img
 
->
+                        src="${data.receipt}"
 
-🧾 View Official Receipt
+                        class="receipt-image"
 
-</a>
+                        alt="Official Receipt"
 
 
-</div>
+                        >
 
 
 
-`;
+
+
+                        <br>
+
+
+
+                        <a
+
+                        href="${data.receipt}"
+
+                        target="_blank"
+
+                        class="view-btn"
+
+                        >
+
+                        🧾 View Receipt
+
+                        </a>
+
+
+
+                        </div>
+
+
+
+                        `;
+
+
+
+                    }
+
+                    else{
+
+
+
+                        receiptHTML = `
+
+
+                        <p>
+
+
+                        📄 No receipt uploaded.
+
+
+                        </p>
+
+
+                        `;
+
+
+
+                    }
+
+
+
+
+
+
+
+
+
+                    container.innerHTML += `
+
+
+
+                    <div class="expense-card">
+
+
+
+                    <h3>
+
+
+                    💸 ${data.project || "Unknown Project"}
+
+
+                    </h3>
+
+
+
+
+
+                    <p>
+
+
+                    <strong>
+
+                    Amount:
+
+                    </strong>
+
+
+                    ${peso(amount)}
+
+
+
+                    </p>
+
+
+
+
+
+
+
+
+                    <p>
+
+
+                    ${
+
+                    data.description ||
+
+                    "No description provided."
+
+                    }
+
+
+                    </p>
+
+
+
+
+
+
+
+                    ${receiptHTML}
+
+
+
+
+
+                    </div>
+
+
+
+                    `;
+
+
+
+
+                }
+
+            );
+
+
+
+
+
+
+
+
+
+            if(snapshot.empty){
+
+
+
+                container.innerHTML = `
+
+
+                <p>
+
+
+                No expense records available.
+
+
+                </p>
+
+
+                `;
+
+
+
+            }
+
+
+
+
+
+
+
+
+            window.currentExpenses =
+
+            totalExpenses;
+
+
+
+
+
+
+
+            reportData.expenses =
+
+            totalExpenses;
+
+
+
+
+
+
+
+
+            setText(
+
+                "totalExpenses",
+
+                peso(totalExpenses)
+
+            );
+
+
+
+
+
+
+
+            updateBalance();
+
+
+
+
+
+
+
+            updateBudgetChart();
+
+
+
+
+
+
+        }
+
+
+
+    );
 
 
 
 }
 
-else{
-
-
-
-receipt = `
-
-
-<p>
-
-📄 No receipt attached.
-
-</p>
-
-
-
-`;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-container.innerHTML += `
-
-
-<div class="expense-card">
-
-
-<h3>
-
-💸 ${data.project || "Unknown Project"}
-
-</h3>
-
-
-
-<p>
-
-<strong>
-Amount:
-</strong>
-
-
-${peso(amount)}
-
-</p>
-
-
-
-
-
-<p>
-
-${data.description || 
-"No description provided."
-}
-
-</p>
-
-
-
-
-${receipt}
-
-
-
-</div>
-
-
-
-`;
-
-
-
-
-});
-
-
-
-
-
-
-
-
-
-if(snapshot.empty){
-
-
-
-container.innerHTML = `
-
-
-<p>
-
-No expense records available.
-
-</p>
-
-
-`;
-
-
-
-}
-
-
-
-
-
-
-
-
-window.currentExpenses =
-
-totalExpenses;
-
-
-
-
-
-
-reportData.expenses =
-
-totalExpenses;
-
-
-
-
-
-
-
-
-setText(
-
-"totalExpenses",
-
-peso(totalExpenses)
-
-);
-
-
-
-
-
-
-
-updateBalance();
-
-
-
-updateBudgetChart();
-
-
-
-
-
-}
-
-
-
-);
-
-
-
-}
 // =================================
 // ANNOUNCEMENT BOARD
 // =================================
@@ -1377,39 +1606,40 @@ updateBudgetChart();
 function loadAnnouncements(){
 
 
+    const container =
 
-const container =
+    document.getElementById(
+        "announcementContainer"
+    );
 
-document.getElementById(
-"announcementContainer"
-);
 
 
 
+    if(!container)
 
+    return;
 
-if(!container)return;
 
 
 
 
 
 
+    const q = query(
 
+        collection(
+            db,
+            "announcements"
+        ),
 
-const q = query(
 
-collection(
-db,
-"announcements"
-),
+        orderBy(
+            "createdAt",
+            "desc"
+        )
 
-orderBy(
-"createdAt",
-"desc"
-)
 
-);
+    );
 
 
 
@@ -1418,43 +1648,43 @@ orderBy(
 
 
 
-onSnapshot(
 
-q,
+    onSnapshot(
 
-(snapshot)=>{
+        q,
 
+        (snapshot)=>{
 
 
-if(snapshot.empty){
 
+            if(snapshot.empty){
 
 
-container.innerHTML = `
 
+                container.innerHTML = `
 
-<div class="empty-state">
 
+                <div class="empty-state">
 
-<p>
 
-📢 No announcements yet.
+                <p>
 
-</p>
+                📢 No announcements yet.
 
+                </p>
 
-</div>
 
+                </div>
 
-`;
 
+                `;
 
 
-return;
 
+                return;
 
 
-}
+            }
 
 
 
@@ -1462,7 +1692,7 @@ return;
 
 
 
-container.innerHTML="";
+            container.innerHTML="";
 
 
 
@@ -1470,14 +1700,14 @@ container.innerHTML="";
 
 
 
-snapshot.forEach(
-(docSnap)=>{
+            snapshot.forEach(
+                (docSnap)=>{
 
 
+                    const data =
 
-const data =
+                    docSnap.data();
 
-docSnap.data();
 
 
 
@@ -1485,71 +1715,95 @@ docSnap.data();
 
 
 
+                    container.innerHTML += `
 
-container.innerHTML += `
 
+                    <div class="announcement-card">
 
-<div class="announcement-card">
 
 
-<h3>
+                    <h3>
 
-📢 ${data.title || 
-"Announcement"
-}
 
-</h3>
+                    📢 ${
 
+                    data.title ||
 
+                    "Announcement"
 
+                    }
 
 
-<p>
+                    </h3>
 
-${data.message || ""}
 
-</p>
 
 
 
 
 
-<small>
 
-Posted by:
+                    <p>
 
-${data.createdBy ||
 
-data.user ||
+                    ${
 
-"Administrator"
-}
+                    data.message ||
 
+                    ""
 
-</small>
+                    }
 
 
+                    </p>
 
 
 
-</div>
 
 
 
-`;
 
 
+                    <small>
 
-});
 
+                    Posted by:
 
+                    ${
 
+                    data.createdBy ||
 
-}
+                    data.user ||
 
+                    "Administrator"
 
+                    }
 
-);
+
+
+                    </small>
+
+
+
+                    </div>
+
+
+
+                    `;
+
+
+
+                }
+
+            );
+
+
+
+        }
+
+
+
+    );
 
 
 
@@ -1565,6 +1819,7 @@ data.user ||
 
 // =================================
 // BALANCE COMPUTATION
+// WITH ABONADO DETECTION
 // =================================
 
 
@@ -1572,21 +1827,17 @@ function updateBalance(){
 
 
 
-const balance =
+    const balance =
 
-window.totalFunds -
+    Number(
+        window.totalFunds || 0
+    )
 
-window.currentExpenses;
+    -
 
-
-
-
-
-
-
-reportData.remaining =
-
-balance;
+    Number(
+        window.currentExpenses || 0
+    );
 
 
 
@@ -1594,14 +1845,9 @@ balance;
 
 
 
+    reportData.remaining =
 
-setText(
-
-"remainingBalance",
-
-peso(balance)
-
-);
+    balance;
 
 
 
@@ -1609,17 +1855,98 @@ peso(balance)
 
 
 
+    const balanceElement =
 
-// OPTIONAL ADMIN COMPATIBILITY
+    document.getElementById(
+        "remainingBalance"
+    );
 
 
-setText(
 
-"currentBalance",
 
-peso(balance)
 
-);
+
+
+
+    if(balanceElement){
+
+
+
+        if(balance < 0){
+
+
+
+            balanceElement.innerHTML = `
+
+
+
+            🔴 Abonado
+
+            <br>
+
+            ${peso(
+                Math.abs(balance)
+            )}
+
+
+
+            `;
+
+
+
+            balanceElement.classList.add(
+                "danger-status"
+            );
+
+
+
+        }
+
+        else{
+
+
+
+            balanceElement.innerHTML = `
+
+
+
+            🟢 Remaining
+
+            <br>
+
+            ${peso(balance)}
+
+
+
+            `;
+
+
+
+            balanceElement.classList.remove(
+                "danger-status"
+            );
+
+
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+    setText(
+
+        "currentBalance",
+
+        peso(balance)
+
+    );
 
 
 
@@ -1634,7 +1961,7 @@ peso(balance)
 
 
 // =================================
-// YEAR PROGRESS BAR
+// YEAR COLLECTION PROGRESS
 // =================================
 
 
@@ -1642,121 +1969,133 @@ function updateProgress(data){
 
 
 
-const max = Math.max(
+    const max = Math.max(
 
-data["First Year"],
 
-data["Second Year"],
+        data["First Year"],
 
-data["Third Year"],
 
-data["Fourth Year"]
+        data["Second Year"],
 
-);
 
+        data["Third Year"],
 
 
+        data["Fourth Year"]
 
 
 
+    );
 
-if(max===0)return;
 
 
 
 
 
 
+    if(max === 0)
 
-const progressData = {
+    return;
 
 
 
-firstProgress:
 
-data["First Year"],
 
 
 
-secondProgress:
 
-data["Second Year"],
+    const progressData = {
 
 
 
-thirdProgress:
+        firstProgress:
 
-data["Third Year"],
+        data["First Year"],
 
 
 
-fourthProgress:
 
-data["Fourth Year"]
+        secondProgress:
 
+        data["Second Year"],
 
 
-};
 
 
+        thirdProgress:
 
+        data["Third Year"],
 
 
 
 
+        fourthProgress:
 
+        data["Fourth Year"]
 
-Object.entries(progressData)
 
-.forEach(
 
-([id,value])=>{
+    };
 
 
 
 
 
-const element =
 
-document.getElementById(id);
 
 
 
+    Object.entries(progressData)
 
+    .forEach(
 
+        ([id,value])=>{
 
 
-if(element){
 
 
 
-element.style.width =
+            const bar =
 
-(
+            document.getElementById(id);
 
-value /
 
-max *
 
-100
 
-)
 
-+
 
-"%";
+            if(bar){
 
 
 
-}
+                bar.style.width =
 
 
+                (
 
+                    value /
 
+                    max *
 
-}
+                    100
 
-);
+                )
+
+                +
+
+                "%";
+
+
+
+            }
+
+
+
+        }
+
+
+
+    );
 
 
 
@@ -1771,7 +2110,7 @@ max *
 
 
 // =================================
-// COLLECTION ANALYTICS CHART
+// COLLECTION CHART
 // =================================
 
 
@@ -1779,102 +2118,113 @@ function createCollectionChart(data){
 
 
 
-const canvas =
+    const canvas =
 
-document.getElementById(
-"collectionChart"
-);
+    document.getElementById(
+        "collectionChart"
+    );
 
 
 
 
 
-if(!canvas)return;
 
 
+    if(!canvas)
 
+    return;
 
 
 
 
-if(collectionChart){
 
 
 
-collectionChart.destroy();
+    if(collectionChart){
 
 
 
-}
+        collectionChart.destroy();
 
 
 
+    }
 
 
 
 
 
-collectionChart =
 
-new Chart(
 
-canvas,
 
-{
+    collectionChart =
 
+    new Chart(
 
-type:"bar",
+        canvas,
 
+        {
 
 
 
-data:{
+        type:"bar",
 
 
-labels:Object.keys(data),
 
 
+        data:{
 
 
-datasets:[{
+            labels:
 
+            Object.keys(data),
 
-label:
 
-"Total Collections",
 
 
+            datasets:[{
 
-data:
 
-Object.values(data)
+                label:
 
+                "Collected Funds",
 
 
-}]
 
+                data:
 
+                Object.values(data)
 
-},
 
 
+            }]
 
 
-options:{
 
+        },
 
 
-responsive:true
 
 
 
-}
 
 
+        options:{
 
-}
 
-);
+            responsive:true
+
+
+
+        }
+
+
+
+        }
+
+
+
+    );
 
 
 
@@ -1889,7 +2239,8 @@ responsive:true
 
 
 // =================================
-// BUDGET STATUS CHART
+// BUDGET MONITORING CHART
+// SHOW REAL EXPENSES
 // =================================
 
 
@@ -1897,19 +2248,11 @@ function updateBudgetChart(){
 
 
 
-const canvas =
+    const canvas =
 
-document.getElementById(
-"budgetChart"
-);
-
-
-
-
-
-
-
-if(!canvas)return;
+    document.getElementById(
+        "budgetChart"
+    );
 
 
 
@@ -1917,258 +2260,167 @@ if(!canvas)return;
 
 
 
+    if(!canvas)
 
-if(budgetChart){
+    return;
 
 
 
-budgetChart.destroy();
+
+
+
+
+
+    if(budgetChart){
+
+
+        budgetChart.destroy();
+
+
+    }
+
+
+
+
+
+
+
+
+
+    const remaining =
+
+    window.totalFunds -
+
+    window.currentExpenses;
+
+
+
+
+
+
+
+    budgetChart =
+
+    new Chart(
+
+        canvas,
+
+        {
+
+
+
+        type:"doughnut",
+
+
+
+
+
+        data:{
+
+
+
+            labels:[
+
+
+            "Expenses",
+
+
+            remaining < 0
+
+            ?
+
+            "Abonado"
+
+            :
+
+            "Remaining"
+
+
+
+            ],
+
+
+
+
+
+
+            datasets:[{
+
+
+                data:[
+
+
+                window.currentExpenses,
+
+
+                Math.abs(
+                    remaining
+                )
+
+
+                ]
+
+
+
+            }]
+
+
+
+        },
+
+
+
+
+
+
+
+
+        options:{
+
+
+            responsive:true
+
+
+
+        }
+
+
+
+
+
+        }
+
+
+
+    );
 
 
 
 }
-
-
-
-
-
-
-
-
-const remaining =
-
-Math.max(
-
-window.totalFunds -
-
-window.currentExpenses,
-
-0
-
-);
-
-
-
-
-
-
-
-
-budgetChart =
-
-new Chart(
-
-canvas,
-
-{
-
-
-type:"doughnut",
-
-
-
-
-
-data:{
-
-
-
-labels:[
-
-
-"Expenses",
-
-
-"Available Funds"
-
-
-],
-
-
-
-
-
-datasets:[{
-
-
-data:[
-
-
-
-window.currentExpenses,
-
-
-
-remaining
-
-
-
-]
-
-
-
-}]
-
-
-
-},
-
-
-
-
-options:{
-
-
-
-responsive:true
-
-
-
-}
-
-
-
-}
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// =================================
-// SEARCH PROJECT / EXPENSE DATA
-// =================================
-
-
-function enableSearch(){
-
-
-
-const search =
-
-document.getElementById(
-"searchRecord"
-);
-
-
-
-
-
-
-
-if(!search)return;
-
-
-
-
-
-
-
-search.addEventListener(
-"input",
-()=>{
-
-
-
-const keyword =
-
-search.value
-
-.toLowerCase();
-
-
-
-
-
-
-
-
-document
-
-.querySelectorAll(
-"#projectTable tr, #transactionTable tr"
-)
-
-.forEach(
-(row)=>{
-
-
-
-
-
-row.style.display =
-
-row.innerText
-
-.toLowerCase()
-
-.includes(keyword)
-
-?
-
-""
-
-:
-
-"none";
-
-
-
-
-
-}
-
-);
-
-
-
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-
-
 
 // =================================
 // PDF TREASURY REPORT
+// PROJECT TRANSPARENCY VERSION
 // =================================
 
 
 function generatePDF(){
 
 
+    const button =
 
-const button =
+    document.getElementById(
+        "generateReport"
+    );
 
-document.getElementById(
-"generateReport"
-);
 
 
 
 
+    if(!button)
 
+    return;
 
-if(!button)return;
 
 
 
@@ -2176,352 +2428,56 @@ if(!button)return;
 
 
 
+    button.onclick = ()=>{
 
-button.onclick = ()=>{
-
-
-
-const {
-
-jsPDF
-
-}=window.jspdf;
-
-
-
-
-
-
-
-const pdf =
-
-new jsPDF();
-
-
-
-
-
-
-
-let y=20;
-
-
-
-
-
-
-
-
-pdf.setFontSize(18);
-
-
-
-pdf.text(
-
-"DALUBWIKAAN TREASURY REPORT",
-
-20,
-
-y
-
-);
-
-
-
-
-
-
-y+=15;
-
-
-
-
-
-
-
-pdf.setFontSize(12);
-
-
-
-
-
-
-pdf.text(
-
-"Academic Year 2026-2027",
-
-20,
-
-y
-
-);
-
-
-
-
-
-
-
-y+=15;
-
-
-
-
-
-
-
-
-pdf.text(
-
-"Generated: "
-
-+
-
-new Date()
-
-.toLocaleDateString(),
-
-20,
-
-y
-
-);
-
-
-
-
-
-
-y+=20;
-
-
-
-
-
-
-
-pdf.text(
-
-"Financial Summary",
-
-20,
-
-y
-
-);
-
-
-
-
-
-
-
-y+=10;
-
-
-
-
-
-
-
-
-pdf.text(
-
-"Total Funds: "
-
-+
-
-peso(reportData.funds),
-
-20,
-
-y
-
-);
-
-
-
-
-
-
-y+=10;
-
-
-
-
-
-
-
-
-pdf.text(
-
-"Total Expenses: "
-
-+
-
-peso(reportData.expenses),
-
-20,
-
-y
-
-);
-
-
-
-
-
-
-y+=10;
-
-
-
-
-
-
-
-
-pdf.text(
-
-"Remaining Balance: "
-
-+
-
-peso(reportData.remaining),
-
-20,
-
-y
-
-);
-
-
-
-
-
-
-
-y+=20;
-
-
-
-
-
-
-
-pdf.text(
-
-"Project Transparency",
-
-20,
-
-y
-
-);
-
-
-
-
-
-
-
-y+=10;
-
-
-
-
-
-
-
-
-reportData.projects.forEach(
-(project)=>{
-
-
-
-
-
-pdf.text(
-
-`${project.name}
-
-Status: ${project.status}
-
-Budget: ${peso(project.budget)}
-
-Spent: ${peso(project.spent)}`,
-
-20,
-
-y
-
-);
-
-
-
-
-
-y+=20;
-
-
-
-
-
-});
-
-
-
-
-
-
-
-
-pdf.save(
-
-"Dalubwikaan_Transparency_Report.pdf"
-
-);
-
-
-
-};
-
-
-
-}
-// ===============================
-// PDF TREASURY REPORT
-// ===============================
-
-const reportButton = document.getElementById("generateReport");
-
-
-if(reportButton){
-
-    reportButton.onclick = ()=>{
 
 
         const {
+
             jsPDF
+
         } = window.jspdf;
 
 
 
-        const pdf = new jsPDF();
+
+
+
+        const pdf =
+
+        new jsPDF();
+
+
+
+
+
 
 
         let y = 20;
 
 
 
+
+
+
+
         pdf.setFontSize(18);
 
 
+
         pdf.text(
+
             "DALUBWIKAAN TREASURY REPORT",
+
             20,
+
             y
+
         );
+
+
+
+
 
 
 
@@ -2529,14 +2485,31 @@ if(reportButton){
 
 
 
+
+
+
+
         pdf.setFontSize(12);
 
 
+
+
+
+
+
         pdf.text(
+
             "Academic Year 2026-2027",
+
             20,
+
             y
+
         );
+
+
+
+
 
 
 
@@ -2544,11 +2517,29 @@ if(reportButton){
 
 
 
+
+
+
+
         pdf.text(
-            "Generated: " + new Date().toLocaleDateString(),
+
+            "Generated: "
+
+            +
+
+            new Date()
+
+            .toLocaleDateString(),
+
             20,
+
             y
+
         );
+
+
+
+
 
 
 
@@ -2556,11 +2547,23 @@ if(reportButton){
 
 
 
+
+
+
+
         pdf.text(
-            "Financial Summary",
+
+            "FINANCIAL SUMMARY",
+
             20,
+
             y
+
         );
+
+
+
+
 
 
 
@@ -2568,11 +2571,30 @@ if(reportButton){
 
 
 
+
+
+
+
+
         pdf.text(
-            "Total Funds: " + peso(reportData.funds),
+
+            "Total Funds: "
+
+            +
+
+            peso(
+                reportData.funds
+            ),
+
             20,
+
             y
+
         );
+
+
+
+
 
 
 
@@ -2580,11 +2602,30 @@ if(reportButton){
 
 
 
+
+
+
+
         pdf.text(
-            "Total Expenses: " + peso(reportData.expenses),
+
+            "Total Expenses: "
+
+            +
+
+            peso(
+                reportData.expenses
+            ),
+
             20,
+
             y
+
         );
+
+
+
+
+
 
 
 
@@ -2592,11 +2633,29 @@ if(reportButton){
 
 
 
+
+
+
+
         pdf.text(
-            "Remaining Balance: " + peso(reportData.remaining),
+
+            "Balance: "
+
+            +
+
+            peso(
+                reportData.remaining
+            ),
+
             20,
+
             y
+
         );
+
+
+
+
 
 
 
@@ -2604,11 +2663,23 @@ if(reportButton){
 
 
 
+
+
+
+
         pdf.text(
-            "Project Transparency Report",
+
+            "PROJECT TRANSPARENCY",
+
             20,
+
             y
+
         );
+
+
+
+
 
 
 
@@ -2616,40 +2687,94 @@ if(reportButton){
 
 
 
-        reportData.projects.forEach(project=>{
-
-
-            pdf.text(
-
-                `${project.name || "Unnamed"} - ${peso(project.budget)} - Status: ${project.status || "Planning"}`,
-
-                20,
-
-                y
-
-            );
-
-
-            y += 10;
 
 
 
-            if(y > 270){
 
-                pdf.addPage();
 
-                y = 20;
+        reportData.projects
+
+        .forEach(
+
+            (project)=>{
+
+
+
+
+
+                pdf.text(
+
+`
+${project.name}
+
+Status:
+${project.status}
+
+Budget:
+${peso(project.budget)}
+
+Spent:
+${peso(project.spent)}
+
+Balance:
+${peso(project.remaining)}
+`,
+
+                    20,
+
+                    y
+
+                );
+
+
+
+
+
+
+
+                y += 35;
+
+
+
+
+
+
+
+
+                if(y > 270){
+
+
+                    pdf.addPage();
+
+
+                    y = 20;
+
+
+                }
+
+
+
+
+
 
             }
 
+        );
 
-        });
+
+
+
+
 
 
 
         pdf.save(
+
             "Dalubwikaan_Treasury_Report.pdf"
+
         );
+
+
 
 
     };
@@ -2662,35 +2787,180 @@ if(reportButton){
 
 
 
-// ===============================
-// LOADER SYSTEM
-// ===============================
+
+
+
+// =================================
+// SEARCH SYSTEM
+// =================================
+
+
+function enableSearch(){
+
+
+
+    const search =
+
+    document.getElementById(
+        "searchRecord"
+    );
+
+
+
+
+
+
+    if(!search)
+
+    return;
+
+
+
+
+
+
+
+
+    search.addEventListener(
+
+        "input",
+
+        ()=>{
+
+
+
+
+
+            const keyword =
+
+            search.value
+
+            .toLowerCase();
+
+
+
+
+
+
+
+
+            document
+
+            .querySelectorAll(
+
+                "#projectTable tr, #transactionTable tr"
+
+            )
+
+            .forEach(
+
+                (row)=>{
+
+
+
+
+
+                    row.style.display =
+
+
+                    row.innerText
+
+                    .toLowerCase()
+
+                    .includes(keyword)
+
+
+                    ?
+
+
+                    ""
+
+
+                    :
+
+
+                    "none";
+
+
+
+
+
+
+                }
+
+            );
+
+
+
+
+
+
+
+        }
+
+
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =================================
+// LOADER
+// =================================
 
 
 function hideLoader(){
 
 
+
     const loader =
-    document.getElementById("loader");
+
+    document.getElementById(
+        "loader"
+    );
+
+
+
+
 
 
 
     if(loader){
 
 
+
         loader.style.opacity="0";
+
+
+
+
+
 
 
         setTimeout(()=>{
 
 
+
             loader.style.display="none";
+
 
 
         },500);
 
 
+
+
     }
+
 
 
 }
@@ -2701,29 +2971,56 @@ function hideLoader(){
 
 
 
-// ===============================
+
+
+// =================================
 // DARK / LIGHT MODE
-// ===============================
+// =================================
 
 
-const themeButton =
-document.getElementById("themeToggle");
+function initializeTheme(){
 
 
 
-if(themeButton){
+    const button =
+
+    document.getElementById(
+        "themeToggle"
+    );
+
+
+
+
+
 
 
     const savedTheme =
-    localStorage.getItem("theme") || "light";
+
+    localStorage.getItem(
+        "theme"
+    );
+
+
+
+
+
 
 
 
     if(savedTheme==="dark"){
 
-        document.body.classList.add("dark");
 
-        themeButton.textContent="☀";
+
+        document.body.classList.add(
+            "dark"
+        );
+
+
+
+        if(button)
+
+        button.textContent="☀";
+
 
 
     }
@@ -2732,34 +3029,90 @@ if(themeButton){
 
 
 
-    themeButton.onclick=()=>{
-
-
-        document.body.classList.toggle("dark");
 
 
 
-        const dark =
-        document.body.classList.contains("dark");
+
+    if(button){
 
 
 
-        localStorage.setItem(
-
-            "theme",
-
-            dark ? "dark" : "light"
-
-        );
+        button.onclick = ()=>{
 
 
 
-        themeButton.textContent =
-        dark ? "☀" : "🌙";
+
+
+            document.body.classList.toggle(
+                "dark"
+            );
 
 
 
-    };
+
+
+
+
+            const dark =
+
+            document.body.classList.contains(
+                "dark"
+            );
+
+
+
+
+
+
+
+
+            localStorage.setItem(
+
+                "theme",
+
+                dark
+
+                ?
+
+                "dark"
+
+                :
+
+                "light"
+
+            );
+
+
+
+
+
+
+
+            button.textContent =
+
+            dark
+
+            ?
+
+            "☀"
+
+            :
+
+            "🌙";
+
+
+
+
+
+
+
+        };
+
+
+
+
+    }
+
 
 
 }
@@ -2769,36 +3122,65 @@ if(themeButton){
 
 
 
-// ===============================
+
+
+
+// =================================
 // INITIALIZATION
-// ===============================
+// =================================
 
 
 window.addEventListener(
+
 "load",
+
 ()=>{
+
 
 
     loadCollections();
 
 
+
     loadProjects();
 
 
+
     loadExpenses();
+
 
 
     loadAnnouncements();
 
 
 
+
+    generatePDF();
+
+
+
+    enableSearch();
+
+
+
+    initializeTheme();
+
+
+
+
+
+
     setTimeout(()=>{
+
 
 
         hideLoader();
 
 
+
     },800);
+
+
 
 
 
@@ -2811,17 +3193,22 @@ window.addEventListener(
 
 
 
-// ===============================
-// AUTO REFRESH
-// ===============================
+
+// =================================
+// AUTO SYNC CHECK
+// =================================
 
 
 setInterval(()=>{
 
 
+
     console.log(
-        "Dalubwikaan Dashboard Sync..."
+
+        "Dalubwikaan Treasury Dashboard Sync..."
+
     );
+
 
 
 },30000);
@@ -2833,44 +3220,61 @@ setInterval(()=>{
 
 
 
-// ===============================
-// ERROR HANDLING
-// ===============================
+
+// =================================
+// GLOBAL ERROR HANDLING
+// =================================
 
 
 window.addEventListener(
+
 "error",
+
 (event)=>{
 
 
     console.error(
 
         "Dashboard Error:",
+
         event.error
 
     );
 
 
-});
+}
+
+);
+
+
+
+
 
 
 
 
 
 window.addEventListener(
+
 "unhandledrejection",
+
 (event)=>{
 
 
     console.error(
 
-        "Unhandled Promise:",
+        "Promise Error:",
+
         event.reason
 
     );
 
 
-});
+}
+
+);
+
+
 
 
 
@@ -2882,15 +3286,26 @@ console.log(`
 
 ========================================
 
-DALUBWIKAAN TREASURY DASHBOARD v4.0
+DALUBWIKAAN TREASURY DASHBOARD v5.0
 
-✓ Firebase Realtime Sync
+✓ Firebase Real-Time Sync
+
+✓ Project Status Monitoring
+
+✓ Ongoing / Completed / Planning
+
+✓ Budget Transparency
+
+✓ Expense Tracking
+
+✓ Abonado Detection
+
+✓ Receipt Monitoring
+
 ✓ Announcement Board
-✓ Project Transparency
-✓ Expense Monitoring
-✓ Receipt Preview
-✓ Financial Analytics
-✓ PDF Treasury Report
+
+✓ PDF Transparency Report
+
 ✓ Dark Mode
 
 SYSTEM READY
