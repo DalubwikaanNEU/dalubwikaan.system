@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>
-Dalubwikaan Treasury Dashboard
+Dalubwikaan Treasury Transparency Portal
 </title>
 
 
@@ -20,10 +20,13 @@ Dalubwikaan Treasury Dashboard
 </head>
 
 
+
 <body>
 
 
 <div class="dashboard">
+
+
 
 
 
@@ -38,7 +41,7 @@ Dalubwikaan Treasury Dashboard
 
 
 <p>
-Treasury Portal
+Treasury Transparency Portal
 </p>
 
 
@@ -48,27 +51,44 @@ Treasury Portal
 
 
 <a class="active" href="index.html">
+
 🏠 Dashboard
+
 </a>
+
 
 
 <a href="#collections">
+
 💰 Collections
+
 </a>
+
+
 
 
 <a href="#reports">
+
 📊 Reports
+
 </a>
 
 
-<a href="#projects">
+
+
+<a href="projects.html">
+
 🏗 Projects
+
 </a>
 
 
-<a href="admin.html">
-⚙ Admin Panel
+
+
+<a href="login.html">
+
+🔐 Admin Login
+
 </a>
 
 
@@ -88,11 +108,15 @@ Treasury Portal
 
 <!-- MAIN CONTENT -->
 
+
 <main class="main">
 
 
 
+
+
 <header>
+
 
 
 <div>
@@ -104,10 +128,13 @@ Treasury Dashboard
 
 
 <p>
+
 Financial Transparency Portal
 <br>
 Academic Year 2026-2027
+
 </p>
+
 
 
 </div>
@@ -115,8 +142,11 @@ Academic Year 2026-2027
 
 
 
+
 <button id="themeToggle">
+
 🌙
+
 </button>
 
 
@@ -133,6 +163,7 @@ Academic Year 2026-2027
 
 <!-- SUMMARY CARDS -->
 
+
 <section class="cards">
 
 
@@ -145,12 +176,14 @@ Total Funds
 
 
 <h2 id="totalFunds">
+
 ₱0
+
 </h2>
 
 
 <span>
-Total Collections
+Total Collected Contributions
 </span>
 
 
@@ -161,21 +194,23 @@ Total Collections
 
 
 
+
 <div class="card">
 
-
 <h3>
-Total Members
+Registered Members
 </h3>
 
 
 <h2 id="totalMembers">
+
 0
+
 </h2>
 
 
 <span>
-Registered Members
+Dalubwikaan Members
 </span>
 
 
@@ -186,21 +221,25 @@ Registered Members
 
 
 
+
+
 <div class="card">
 
 
 <h3>
-Expenses
+Total Expenses
 </h3>
 
 
 <h2 id="totalExpenses">
+
 ₱0
+
 </h2>
 
 
 <span>
-Project Allocation
+Approved Projects
 </span>
 
 
@@ -211,21 +250,25 @@ Project Allocation
 
 
 
+
+
 <div class="card">
 
 
 <h3>
-Remaining Balance
+Available Balance
 </h3>
 
 
 <h2 id="remainingBalance">
+
 ₱0
+
 </h2>
 
 
 <span>
-Available Funds
+Remaining Treasury Funds
 </span>
 
 
@@ -251,8 +294,9 @@ Available Funds
 
 
 <h2>
-💰 Collection Breakdown
+💰 Collection Breakdown Per Year Level
 </h2>
+
 
 
 
@@ -260,8 +304,9 @@ Available Funds
 
 
 
-<div class="year">
 
+
+<div class="year">
 
 <h3>
 First Year
@@ -275,20 +320,21 @@ First Year
 
 <div class="progress">
 
-<span id="firstProgress">
-</span>
+<span id="firstProgress"></span>
 
 </div>
 
 
 </div>
+
+
+
 
 
 
 
 
 <div class="year">
-
 
 <h3>
 Second Year
@@ -302,13 +348,13 @@ Second Year
 
 <div class="progress">
 
-<span id="secondProgress">
-</span>
+<span id="secondProgress"></span>
 
 </div>
 
 
 </div>
+
 
 
 
@@ -317,7 +363,6 @@ Second Year
 
 
 <div class="year">
-
 
 <h3>
 Third Year
@@ -331,13 +376,13 @@ Third Year
 
 <div class="progress">
 
-<span id="thirdProgress">
-</span>
+<span id="thirdProgress"></span>
 
 </div>
 
 
 </div>
+
 
 
 
@@ -346,7 +391,6 @@ Third Year
 
 
 <div class="year">
-
 
 <h3>
 Fourth Year
@@ -360,8 +404,7 @@ Fourth Year
 
 <div class="progress">
 
-<span id="fourthProgress">
-</span>
+<span id="fourthProgress"></span>
 
 </div>
 
@@ -371,7 +414,9 @@ Fourth Year
 
 
 
+
 </div>
+
 
 
 </section>
@@ -384,15 +429,16 @@ Fourth Year
 
 
 
-<!-- FINANCIAL ANALYTICS -->
+<!-- REPORT ANALYTICS -->
 
 
 <section class="panel" id="reports">
 
 
 <h2>
-📊 Financial Analytics
+📊 Financial Analytics Report
 </h2>
+
 
 
 
@@ -407,7 +453,10 @@ Fourth Year
 
 
 
+
 <br>
+
+
 
 
 
@@ -421,6 +470,7 @@ Fourth Year
 
 
 
+
 </section>
 
 
@@ -431,15 +481,16 @@ Fourth Year
 
 
 
-<!-- COLLECTION HISTORY -->
+<!-- COLLECTION RECORDS -->
 
 
 <section class="panel">
 
 
 <h2>
-📋 Recent Collections
+📋 Collection History
 </h2>
+
 
 
 
@@ -450,6 +501,7 @@ Fourth Year
 
 
 <tr>
+
 
 <th>
 Date
@@ -478,6 +530,7 @@ Status
 
 
 
+
 <tbody id="transactionTable">
 
 
@@ -499,14 +552,14 @@ Status
 
 
 
-<!-- PROJECTS -->
+<!-- PROJECT SUMMARY -->
 
 
-<section class="panel" id="projects">
+<section class="panel">
 
 
 <h2>
-🏗 Recent Projects & Budget Allocation
+🏗 Project Budget Allocation
 </h2>
 
 
@@ -539,7 +592,9 @@ Description
 </tr>
 
 
+
 </thead>
+
 
 
 
@@ -554,6 +609,20 @@ Description
 
 
 
+
+<br>
+
+
+
+<a href="projects.html" class="view-btn">
+
+View Complete Project Reports →
+
+</a>
+
+
+
+
 </section>
 
 
@@ -564,7 +633,52 @@ Description
 
 
 
-<!-- TRANSPARENCY MESSAGE -->
+<!-- RECEIPT TRANSPARENCY -->
+
+
+<section class="panel">
+
+
+<h2>
+🧾 Expense Transparency
+</h2>
+
+
+
+<p>
+
+All organization expenses are documented with
+supporting receipts for accountability and proper
+financial monitoring.
+
+</p>
+
+
+
+<br>
+
+
+
+<a href="projects.html" class="view-btn">
+
+View Expense Records & Receipts
+
+</a>
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- STATEMENT -->
 
 
 <section class="panel">
@@ -576,11 +690,13 @@ Description
 
 
 
+
 <p>
 
-Ang Dalubwikaan Treasury Portal ay ginawa upang
-itaguyod ang transparency at accountability sa
-pangongolekta at paggamit ng pondo ng organisasyon.
+Ang Dalubwikaan Treasury Transparency Portal ay
+naglalayong ipakita ang malinaw na pangangasiwa ng
+pondo ng organisasyon. Layunin nitong palakasin ang
+tiwala, pananagutan, at pagiging bukas sa bawat miyembro.
 
 </p>
 
@@ -613,6 +729,7 @@ pangongolekta at paggamit ng pondo ng organisasyon.
 
 
 
+
 </main>
 
 
@@ -622,19 +739,25 @@ pangongolekta at paggamit ng pondo ng organisasyon.
 
 
 
-<!-- CHART JS -->
+
+
+
+
+<!-- CHART LIBRARY -->
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
 
 
-<!-- FIREBASE DASHBOARD -->
+
+<!-- FIREBASE DASHBOARD SCRIPT -->
 
 <script type="module" src="js/dashboard.js"></script>
 
 
 
 </body>
+
 
 </html>
