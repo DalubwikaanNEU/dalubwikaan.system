@@ -1,7 +1,7 @@
 // ========================================
 // DALUBWIKAAN TREASURY MANAGEMENT SYSTEM
-// ADMIN PANEL v7.0
-// CLEAN + POLISHED VERSION
+// ADMIN PANEL v8.0
+// CLEAN + POLISHED + RECEIPT READY
 // ========================================
 
 
@@ -63,7 +63,6 @@ from
 
 
 
-
 // ========================================
 // GLOBAL VARIABLES
 // ========================================
@@ -74,6 +73,7 @@ const auth = getAuth();
 
 
 let currentUser = null;
+
 
 
 let selectedReceiptFile = null;
@@ -90,7 +90,7 @@ let expenseCache = [];
 
 
 // ========================================
-// DOM HELPERS
+// DOM HELPER FUNCTIONS
 // ========================================
 
 
@@ -100,14 +100,13 @@ function getValue(id){
     document.getElementById(id);
 
 
-    return element
-    ?
-    element.value.trim()
-    :
-    "";
+    if(!element)
+    return "";
+
+
+    return element.value.trim();
 
 }
-
 
 
 
@@ -127,7 +126,6 @@ function setText(id,value){
     }
 
 }
-
 
 
 
@@ -161,11 +159,11 @@ function peso(value){
 
 
 
-
 function notify(message,type="info"){
 
+
     console.log(
-        `[${type}]`,
+        `${type.toUpperCase()}:`,
         message
     );
 
@@ -180,18 +178,42 @@ function notify(message,type="info"){
 
 
 
-
-function formatDate(date){
-
-    if(!date)
-    return "N/A";
+function formatDate(value){
 
 
-    return new Date(date)
+    if(!value)
+    return "No Date";
 
-    .toLocaleDateString(
-        "en-PH"
-    );
+
+    try{
+
+
+        return new Date(value)
+
+        .toLocaleDateString(
+            "en-PH",
+            {
+
+                year:"numeric",
+
+                month:"long",
+
+                day:"numeric"
+
+            }
+
+        );
+
+
+    }
+
+
+    catch{
+
+        return "Invalid Date";
+
+    }
+
 
 }
 
@@ -210,30 +232,36 @@ function formatDate(date){
 
 function hideLoader(){
 
+
     const loader =
+
     document.getElementById(
         "loader"
     );
 
 
+
     if(loader){
+
 
         loader.style.opacity="0";
 
 
+
         setTimeout(()=>{
+
 
             loader.style.display="none";
 
 
         },300);
 
+
+
     }
 
+
 }
-
-
-
 
 
 
@@ -254,6 +282,7 @@ window.addEventListener(
 
 
     },800);
+
 
 
 });
@@ -298,7 +327,8 @@ async(user)=>{
     try{
 
 
-        const adminSnap =
+        const adminSnapshot =
+
 
         await getDoc(
 
@@ -320,13 +350,17 @@ async(user)=>{
 
 
 
-        if(!adminSnap.exists()){
+        if(!adminSnapshot.exists()){
 
 
             notify(
-                "Unauthorized access.",
-                "error"
+
+            "Unauthorized admin access.",
+
+            "error"
+
             );
+
 
 
             await signOut(auth);
@@ -347,7 +381,9 @@ async(user)=>{
 
 
 
-        currentUser=user;
+
+        currentUser = user;
+
 
 
 
@@ -369,8 +405,11 @@ async(user)=>{
 
         if(emailDisplay){
 
+
             emailDisplay.textContent =
+
             user.email;
+
 
         }
 
@@ -393,18 +432,27 @@ async(user)=>{
 
 
         console.error(
-            "Authentication Error:",
+
+            "AUTH ERROR:",
+
             error
+
         );
+
 
 
         notify(
+
             "Authentication failed.",
+
             "error"
+
         );
 
 
+
     }
+
 
 
 
@@ -419,7 +467,7 @@ async(user)=>{
 
 
 // ========================================
-// LOGOUT
+// LOGOUT SYSTEM
 // ========================================
 
 
@@ -433,21 +481,31 @@ document.getElementById(
 
 
 
+
+
 if(logoutButton){
 
 
-logoutButton.onclick = async()=>{
+
+    logoutButton.addEventListener(
+
+    "click",
+
+    async()=>{
 
 
-    await signOut(auth);
+        await signOut(auth);
 
 
 
-    window.location.href =
-    "login.html";
+        window.location.href =
+        "login.html";
 
 
-};
+    }
+
+
+    );
 
 
 }
@@ -461,7 +519,7 @@ logoutButton.onclick = async()=>{
 
 
 // ========================================
-// DASHBOARD START
+// START DASHBOARD
 // ========================================
 
 
@@ -469,59 +527,136 @@ async function initializeDashboard(){
 
 
 
-    console.log(
-        "Starting Dalubwikaan Treasury..."
-    );
+    try{
+
+
+        console.log(
+            "Loading Dalubwikaan Treasury..."
+        );
 
 
 
 
 
-    await Promise.all([
+
+
+        await Promise.all([
+
+
+            loadProjects(),
+
+
+            loadExpenses(),
+
+
+            loadRecords(),
+
+
+            loadAnnouncements(),
+
+
+            loadSummary()
 
 
 
-        loadProjects(),
-
-
-        loadExpenses(),
-
-
-        loadRecords(),
-
-
-        loadAnnouncements(),
-
-
-        loadSummary()
-
-
-
-    ]);
+        ]);
 
 
 
 
 
-    console.log(
 
-    `
 
-    ==================================
 
-    DALUBWIKAAN TREASURY ADMIN v7.0
+        console.log(`
 
-    SYSTEM ONLINE
+=================================
 
-    ==================================
+DALUBWIKAAN TREASURY ADMIN v8.0
 
-    `
+SYSTEM ONLINE
 
-    );
+=================================
 
+        `);
+
+
+
+    }
+
+
+
+    catch(error){
+
+
+
+        console.error(
+
+            "Dashboard Initialization Error:",
+
+            error
+
+        );
+
+
+
+    }
 
 
 }
+
+
+
+
+
+
+
+
+
+// ========================================
+// SAFE FIREBASE ERROR HANDLER
+// ========================================
+
+
+window.addEventListener(
+
+"error",
+
+(event)=>{
+
+
+    console.error(
+
+        "ADMIN PANEL ERROR:",
+
+        event.error
+
+    );
+
+
+});
+
+
+
+
+
+window.addEventListener(
+
+"unhandledrejection",
+
+(event)=>{
+
+
+    console.error(
+
+        "PROMISE ERROR:",
+
+        event.reason
+
+    );
+
+
+});
 // ========================================
 // COLLECTION MANAGEMENT
 // ========================================
@@ -540,6 +675,7 @@ document.getElementById(
 if(collectionForm){
 
 
+
 collectionForm.addEventListener(
 
 "submit",
@@ -556,7 +692,6 @@ e.preventDefault();
 try{
 
 
-
 const year =
 
 getValue(
@@ -570,9 +705,11 @@ getValue(
 const amount =
 
 Number(
-    getValue(
-        "amount"
-    )
+
+getValue(
+    "amount"
+)
+
 );
 
 
@@ -584,7 +721,6 @@ const date =
 getValue(
     "date"
 );
-
 
 
 
@@ -612,7 +748,6 @@ return;
 
 
 
-
 if(
 
 isNaN(amount)
@@ -624,12 +759,10 @@ amount <= 0
 ){
 
 
-
 notify(
-    "Please enter a valid amount.",
+    "Enter valid collection amount.",
     "warning"
 );
-
 
 
 return;
@@ -643,20 +776,15 @@ return;
 
 
 
-
-
 await addDoc(
-
-
 
 collection(
 
-    db,
+db,
 
-    "collections"
+"collections"
 
 ),
-
 
 {
 
@@ -670,11 +798,7 @@ amount,
 date,
 
 
-
-type:
-
-"Collection",
-
+type:"Collection",
 
 
 createdAt:
@@ -682,14 +806,10 @@ createdAt:
 serverTimestamp()
 
 
-
 }
 
 
-
 );
-
-
 
 
 
@@ -698,11 +818,8 @@ serverTimestamp()
 
 
 notify(
-
-"Collection saved successfully."
-
+    "Collection saved successfully."
 );
-
 
 
 
@@ -714,12 +831,9 @@ collectionForm.reset();
 
 
 
-
-
 await loadRecords();
 
 await loadSummary();
-
 
 
 
@@ -768,13 +882,8 @@ notify(
 
 
 
-
-
-
-
 // ========================================
 // PROJECT MANAGEMENT
-// PROJECT STATUS SYSTEM
 // ========================================
 
 
@@ -783,7 +892,6 @@ const projectForm =
 document.getElementById(
     "projectForm"
 );
-
 
 
 
@@ -809,6 +917,7 @@ e.preventDefault();
 
 
 
+
 try{
 
 
@@ -818,8 +927,6 @@ const name =
 getValue(
     "projectName"
 );
-
-
 
 
 
@@ -839,9 +946,6 @@ getValue(
 
 
 
-
-
-
 const description =
 
 getValue(
@@ -851,13 +955,6 @@ getValue(
 
 
 
-
-
-
-
-
-// STATUS SELECTOR
-// Planning Default
 
 const status =
 
@@ -880,15 +977,13 @@ getValue(
 if(!name){
 
 
-
 notify(
 
-"Project name is required.",
+"Project name required.",
 
 "warning"
 
 );
-
 
 
 return;
@@ -915,7 +1010,6 @@ budget <= 0
 ){
 
 
-
 notify(
 
 "Invalid project budget.",
@@ -923,7 +1017,6 @@ notify(
 "warning"
 
 );
-
 
 
 return;
@@ -938,21 +1031,15 @@ return;
 
 
 
-
-
 await addDoc(
-
-
 
 collection(
 
-    db,
+db,
 
-    "projects"
+"projects"
 
 ),
-
-
 
 {
 
@@ -966,14 +1053,11 @@ budget,
 description,
 
 
-
 status,
 
 
 
-type:
-
-"Project",
+type:"Project",
 
 
 
@@ -982,15 +1066,10 @@ createdAt:
 serverTimestamp()
 
 
-
 }
 
 
-
 );
-
-
-
 
 
 
@@ -1000,11 +1079,9 @@ serverTimestamp()
 
 notify(
 
-"Project successfully created."
+"Project created successfully."
 
 );
-
-
 
 
 
@@ -1019,12 +1096,9 @@ projectForm.reset();
 
 
 
-
 await loadProjects();
 
 await loadRecords();
-
-
 
 
 
@@ -1048,7 +1122,7 @@ error
 
 notify(
 
-"Unable to create project.",
+"Failed creating project.",
 
 "error"
 
@@ -1060,13 +1134,10 @@ notify(
 
 
 
-
 });
 
 
 }
-
-
 
 
 
@@ -1092,21 +1163,17 @@ switch(status){
 case "Completed":
 
 
-
 return `
 
 
-<span class="project-status completed">
-
+<span class="status completed">
 
 🟢 Completed
-
 
 </span>
 
 
 `;
-
 
 
 
@@ -1115,21 +1182,17 @@ return `
 case "Ongoing":
 
 
-
 return `
 
 
-<span class="project-status ongoing">
-
+<span class="status ongoing">
 
 🔵 Ongoing
-
 
 </span>
 
 
 `;
-
 
 
 
@@ -1139,15 +1202,12 @@ return `
 default:
 
 
-
 return `
 
 
-<span class="project-status planning">
-
+<span class="status planning">
 
 🟡 Planning
-
 
 </span>
 
@@ -1170,15 +1230,12 @@ return `
 
 
 
-
-
-
 // ========================================
-// CALCULATE PROJECT FINANCIAL STATUS
+// PROJECT FINANCIAL STATUS
 // ========================================
 
 
-function financialBadge(
+function financialStatus(
 
 budget,
 
@@ -1198,28 +1255,21 @@ budget - spent;
 
 
 
-
 if(remaining < 0){
-
 
 
 return `
 
 
+<p class="danger-status">
 
-<span class="danger-status">
-
-
-🔴 Abonado:
+🔴 Over Budget:
 
 ${peso(
 Math.abs(remaining)
 )}
 
-
-
-</span>
-
+</p>
 
 
 `;
@@ -1227,9 +1277,6 @@ Math.abs(remaining)
 
 
 }
-
-
-
 
 
 
@@ -1238,18 +1285,13 @@ Math.abs(remaining)
 return `
 
 
-
-<span class="success-status">
-
+<p class="success-status">
 
 🟢 Remaining:
 
 ${peso(remaining)}
 
-
-
-</span>
-
+</p>
 
 
 `;
@@ -1266,14 +1308,12 @@ ${peso(remaining)}
 
 
 
-
-
 // ========================================
-// PROJECT PROGRESS
+// PROJECT PROGRESS BAR
 // ========================================
 
 
-function calculateProgress(
+function projectProgress(
 
 budget,
 
@@ -1292,9 +1332,11 @@ return 0;
 
 
 
+
 let progress =
 
 (spent / budget) * 100;
+
 
 
 
@@ -1311,7 +1353,7 @@ progress = 100;
 
 
 
-return progress.toFixed(0);
+return Math.round(progress);
 
 
 
@@ -1326,55 +1368,480 @@ return progress.toFixed(0);
 
 
 // ========================================
-// UPDATE PROJECT STATUS AUTOMATICALLY
+// LOAD PROJECTS
+// PROJECT TRANSPARENCY DASHBOARD
 // ========================================
 
 
-function autoProjectStatus(
+async function loadProjects(){
 
-status,
+
+
+const table =
+
+document.getElementById(
+    "projectTable"
+);
+
+
+
+
+
+
+if(table){
+
+    table.innerHTML="";
+
+}
+
+
+
+
+
+
+
+try{
+
+
+
+const projectsSnapshot =
+
+
+await getDocs(
+
+query(
+
+collection(
+
+db,
+
+"projects"
+
+),
+
+orderBy(
+
+"createdAt",
+
+"desc"
+
+)
+
+)
+
+);
+
+
+
+
+
+
+
+const expensesSnapshot =
+
+
+await getDocs(
+
+collection(
+
+db,
+
+"expenses"
+
+)
+
+);
+
+
+
+
+
+
+
+
+let expenseMap = {};
+
+
+
+
+
+
+
+expensesSnapshot.forEach(docSnap=>{
+
+
+
+const expense =
+
+docSnap.data();
+
+
+
+
+
+
+if(!expenseMap[expense.project]){
+
+
+expenseMap[expense.project]=0;
+
+
+}
+
+
+
+
+
+
+expenseMap[expense.project]
+
++=
+
+Number(
+
+expense.amount || 0
+
+);
+
+
+
+});
+
+
+
+
+
+
+
+
+
+projectCache=[];
+
+
+
+
+
+
+
+
+
+projectsSnapshot.forEach(docSnap=>{
+
+
+
+const project =
+
+docSnap.data();
+
+
+
+
+
+
+
+
+const budget =
+
+Number(
+
+project.budget || 0
+
+);
+
+
+
+
+
+
+
+const spent =
+
+expenseMap[project.name]
+
+||
+
+0;
+
+
+
+
+
+
+
+
+const progress =
+
+projectProgress(
+
+budget,
+
+spent
+
+);
+
+
+
+
+
+
+
+projectCache.push({
+
+...project,
+
+spent,
 
 progress
 
-){
 
-
-
-// HINDI BABAGUHIN ANG ADMIN STATUS
-// Manual pa rin ang Completed
-
-
-if(status)
-
-return status;
+});
 
 
 
 
 
-if(progress >= 100)
-
-return "Completed";
 
 
 
-
-
-if(progress > 0)
-
-return "Ongoing";
+if(table){
 
 
 
+table.innerHTML += `
 
 
-return "Planning";
+
+<tr>
+
+
+
+<td>
+
+
+<strong>
+
+${project.name}
+
+</strong>
+
+
+<br>
+
+
+${projectStatusBadge(
+
+project.status || "Planning"
+
+)}
+
+
+
+</td>
+
+
+
+
+
+
+
+<td>
+
+
+<p>
+
+Allocated:
+
+<strong>
+
+${peso(budget)}
+
+</strong>
+
+</p>
+
+
+
+<p>
+
+Spent:
+
+<strong>
+
+${peso(spent)}
+
+</strong>
+
+</p>
+
+
+
+${financialStatus(
+
+budget,
+
+spent
+
+)}
+
+
+
+
+
+<div class="progress-container">
+
+
+
+<div class="progress-bar">
+
+
+<div
+
+class="progress-fill"
+
+style="width:${progress}%">
+
+</div>
+
+
+</div>
+
+
+
+<small>
+
+Budget Used:
+
+${progress}%
+
+</small>
+
+
+
+</div>
+
+
+
+
+</td>
+
+
+
+
+
+
+
+<td>
+
+
+${
+
+project.description
+
+||
+
+"No description available."
+
+}
+
+
+
+</td>
+
+
+
+
+
+</tr>
+
+
+
+`;
+
+
+
+}
+
+
+
+
+});
+
+
+
+
+
+
+
+
+
+if(projectsSnapshot.empty && table){
+
+
+
+table.innerHTML=`
+
+
+
+<tr>
+
+<td colspan="3">
+
+No projects available.
+
+</td>
+
+</tr>
+
+
+
+`;
+
+
+
+}
+
+
+
+
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"Project Loading Error:",
+
+error
+
+);
+
+
+
+notify(
+
+"Unable to load projects.",
+
+"error"
+
+);
+
+
+
+}
+
 
 
 }
 // ========================================
 // EXPENSE MANAGEMENT
-// ENHANCED RECEIPT SYSTEM
+// RECEIPT SYSTEM v8.0
 // ========================================
 
 
@@ -1386,13 +1853,11 @@ document.getElementById(
 
 
 
-
 const receiptInput =
 
 document.getElementById(
     "receiptFile"
 );
-
 
 
 
@@ -1411,7 +1876,7 @@ document.getElementById(
 
 
 // ========================================
-// RECEIPT PREVIEW HANDLER
+// RECEIPT FILE SELECT
 // ========================================
 
 
@@ -1435,7 +1900,6 @@ receiptInput.files[0];
 
 
 
-
 if(!file)
 
 return;
@@ -1446,22 +1910,19 @@ return;
 
 
 
-
-// IMAGE CHECK
+// CHECK IMAGE
 
 
 if(
 
-!file.type.startsWith(
-    "image/"
-)
+!file.type.startsWith("image/")
 
 ){
 
 
 notify(
 
-"Receipt must be an image.",
+"Receipt must be an image file.",
 
 "warning"
 
@@ -1484,8 +1945,8 @@ return;
 
 
 
+// CHECK SIZE
 
-// SIZE CHECK
 
 if(
 
@@ -1496,10 +1957,9 @@ file.size >
 ){
 
 
-
 notify(
 
-"Maximum receipt size is 5MB.",
+"Receipt must be below 5MB.",
 
 "warning"
 
@@ -1520,15 +1980,14 @@ return;
 
 
 
-selectedReceiptFile=file;
+
+selectedReceiptFile = file;
 
 
 
 
 
-
-
-showReceiptPreview(file);
+renderReceiptPreview(file);
 
 
 
@@ -1550,11 +2009,11 @@ showReceiptPreview(file);
 
 
 // ========================================
-// RECEIPT PREVIEW UI
+// RECEIPT PREVIEW DESIGN
 // ========================================
 
 
-function showReceiptPreview(file){
+function renderReceiptPreview(file){
 
 
 
@@ -1578,6 +2037,7 @@ URL.createObjectURL(file);
 
 
 
+
 receiptPreview.innerHTML = `
 
 
@@ -1586,9 +2046,11 @@ receiptPreview.innerHTML = `
 
 
 
-<div class="receipt-title">
+<div class="receipt-preview-header">
+
 
 🧾 Receipt Preview
+
 
 </div>
 
@@ -1596,6 +2058,9 @@ receiptPreview.innerHTML = `
 
 
 
+
+
+<div class="receipt-image-wrapper">
 
 
 <img
@@ -1607,16 +2072,27 @@ class="receipt-preview-image"
 >
 
 
+</div>
 
 
-<div class="receipt-info">
+
+
+
+
+
+<div class="receipt-file-info">
+
 
 
 <p>
 
 <strong>
-File:
+
+Filename:
+
 </strong>
+
+<br>
 
 ${file.name}
 
@@ -1624,29 +2100,33 @@ ${file.name}
 
 
 
+
+
+
 <p>
 
 <strong>
+
 Size:
+
 </strong>
 
-${
+<br>
 
-(
+${(
+
 file.size / 1024
 
-)
-
-.toFixed(1)
-
-}
+).toFixed(1)}
 
 KB
 
 </p>
 
 
+
 </div>
+
 
 
 
@@ -1658,12 +2138,12 @@ KB
 
 type="button"
 
-class="remove-receipt"
-
 id="removeReceipt"
 
+class="remove-receipt"
 
 >
+
 
 ❌ Remove Receipt
 
@@ -1686,10 +2166,13 @@ id="removeReceipt"
 
 
 
+
 document
 
 .getElementById(
-    "removeReceipt"
+
+"removeReceipt"
+
 )
 
 ?.addEventListener(
@@ -1699,11 +2182,11 @@ document
 ()=>{
 
 
-receiptInput.value="";
-
 
 selectedReceiptFile=null;
 
+
+receiptInput.value="";
 
 
 receiptPreview.innerHTML="";
@@ -1717,9 +2200,6 @@ receiptPreview.innerHTML="";
 
 
 }
-
-
-
 
 
 
@@ -1753,17 +2233,16 @@ e.preventDefault();
 
 
 
-
 try{
-
-
 
 
 
 const project =
 
 getValue(
-    "expenseProject"
+
+"expenseProject"
+
 );
 
 
@@ -1777,7 +2256,9 @@ const amount =
 Number(
 
 getValue(
-    "expenseAmount"
+
+"expenseAmount"
+
 )
 
 );
@@ -1791,7 +2272,9 @@ getValue(
 const description =
 
 getValue(
-    "expenseDescription"
+
+"expenseDescription"
+
 );
 
 
@@ -1809,7 +2292,7 @@ if(!project){
 
 notify(
 
-"Expense project is required.",
+"Please select project.",
 
 "warning"
 
@@ -1821,8 +2304,6 @@ return;
 
 
 }
-
-
 
 
 
@@ -1866,7 +2347,9 @@ return;
 
 
 
-let receiptURL = "";
+
+let receiptURL="";
+
 
 
 
@@ -1877,21 +2360,34 @@ let receiptURL = "";
 
 
 // =================================
-// UPLOAD RECEIPT TO STORAGE
+// UPLOAD RECEIPT
 // =================================
-
 
 
 if(selectedReceiptFile){
 
 
 
-const storageRef =
+const cleanName =
+
+selectedReceiptFile.name
+
+.replace(
+
+/[^a-zA-Z0-9.]/g,
+
+"_"
+
+);
 
 
-ref(
 
-storage,
+
+
+
+
+const storagePath =
+
 
 "receipts/" +
 
@@ -1899,13 +2395,26 @@ Date.now()
 
 +
 
-"-"
+"_"
 
 +
 
-selectedReceiptFile.name
+cleanName;
 
 
+
+
+
+
+
+
+const storageRef =
+
+ref(
+
+storage,
+
+storagePath
 
 );
 
@@ -1922,7 +2431,6 @@ storageRef,
 selectedReceiptFile
 
 );
-
 
 
 
@@ -1952,16 +2460,12 @@ storageRef
 
 
 
-
 // =================================
 // SAVE EXPENSE DATA
 // =================================
 
 
-
 await addDoc(
-
-
 
 collection(
 
@@ -1970,9 +2474,6 @@ db,
 "expenses"
 
 ),
-
-
-
 
 {
 
@@ -1993,18 +2494,15 @@ receiptURL,
 
 
 
-
 status:
 
 "Approved",
 
 
 
-
 type:
 
 "Expense",
-
 
 
 
@@ -2017,9 +2515,7 @@ serverTimestamp()
 }
 
 
-
 );
-
 
 
 
@@ -2030,11 +2526,9 @@ serverTimestamp()
 
 notify(
 
-"Expense recorded successfully."
+"Expense saved successfully."
 
 );
-
-
 
 
 
@@ -2083,9 +2577,6 @@ await loadSummary();
 
 
 
-
-
-
 }
 
 
@@ -2131,10 +2622,9 @@ notify(
 
 
 
-
-
 // ========================================
-// LOAD EXPENSE TRANSPARENCY
+// LOAD EXPENSES
+// RECEIPT TRANSPARENCY VIEW
 // ========================================
 
 
@@ -2145,550 +2635,11 @@ async function loadExpenses(){
 const container =
 
 document.getElementById(
-    "expensePreview"
-);
 
-
-
-
-
-
-if(!container)
-
-return;
-
-
-
-
-
-
-
-
-
-try{
-
-
-
-const snap =
-
-await getDocs(
-
-
-
-query(
-
-collection(
-
-db,
-
-"expenses"
-
-),
-
-
-
-orderBy(
-
-"createdAt",
-
-"desc"
-
-)
-
-
-
-)
-
-
+"expensePreview"
 
 );
 
-
-
-
-
-
-
-
-expenseCache=[];
-
-
-
-
-
-
-
-if(snap.empty){
-
-
-
-container.innerHTML = `
-
-
-
-<div class="empty-state">
-
-
-🧾 No expenses recorded yet.
-
-
-</div>
-
-
-
-`;
-
-
-
-return;
-
-
-}
-
-
-
-
-
-
-
-
-container.innerHTML="";
-
-
-
-
-
-
-
-
-
-snap.forEach((docSnap)=>{
-
-
-
-const data =
-
-docSnap.data();
-
-
-
-
-
-
-
-expenseCache.push(data);
-
-
-
-
-
-
-
-
-const receiptHTML =
-
-
-
-data.receipt
-
-?
-
-`
-
-
-<a
-
-href="${data.receipt}"
-
-target="_blank"
-
-class="receipt-btn"
-
-
->
-
-🧾 Open Official Receipt
-
-
-</a>
-
-
-`
-
-
-
-:
-
-`
-
-
-<span class="no-receipt">
-
-
-⚠ No Receipt Uploaded
-
-
-</span>
-
-
-`;
-
-
-
-
-
-
-
-
-
-container.innerHTML += `
-
-
-
-<div class="expense-card">
-
-
-
-<div class="expense-header">
-
-
-<h3>
-
-💸 ${data.project || "Unknown Project"}
-
-</h3>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="expense-details">
-
-
-
-<p>
-
-<strong>
-
-Amount:
-
-</strong>
-
-
-${peso(data.amount)}
-
-
-</p>
-
-
-
-
-
-
-
-
-<p>
-
-${
-
-data.description ||
-
-"No description."
-
-}
-
-
-</p>
-
-
-
-
-
-
-
-<div class="receipt-area">
-
-
-${receiptHTML}
-
-
-</div>
-
-
-
-
-
-</div>
-
-
-
-
-
-
-</div>
-
-
-
-`;
-
-
-
-
-
-
-
-});
-
-
-
-
-
-}
-
-
-
-catch(error){
-
-
-
-console.error(
-
-"Expense Loading Error:",
-
-error
-
-);
-
-
-
-}
-
-
-
-}
-// ========================================
-// ANNOUNCEMENT MANAGEMENT
-// ========================================
-
-
-const announcementForm =
-
-document.getElementById(
-    "announcementForm"
-);
-
-
-
-
-
-if(announcementForm){
-
-
-
-announcementForm.addEventListener(
-
-"submit",
-
-async(e)=>{
-
-
-e.preventDefault();
-
-
-
-
-
-try{
-
-
-
-const title =
-
-getValue(
-    "announcementTitle"
-);
-
-
-
-
-
-const message =
-
-getValue(
-    "announcementMessage"
-);
-
-
-
-
-
-
-
-
-if(!title || !message){
-
-
-
-notify(
-
-"Complete announcement details.",
-
-"warning"
-
-);
-
-
-
-return;
-
-
-}
-
-
-
-
-
-
-
-
-await addDoc(
-
-
-
-collection(
-
-db,
-
-"announcements"
-
-),
-
-
-
-{
-
-
-title,
-
-
-message,
-
-
-
-createdBy:
-
-currentUser?.email ||
-
-"Administrator",
-
-
-
-createdAt:
-
-serverTimestamp()
-
-
-
-}
-
-
-
-);
-
-
-
-
-
-
-
-
-notify(
-
-"Announcement posted."
-
-);
-
-
-
-
-
-
-
-
-announcementForm.reset();
-
-
-
-await loadAnnouncements();
-
-
-
-
-
-}
-
-
-
-catch(error){
-
-
-
-console.error(
-
-"Announcement Error:",
-
-error
-
-);
-
-
-
-notify(
-
-"Failed posting announcement.",
-
-"error"
-
-);
-
-
-
-}
-
-
-
-});
-
-
-}
-
-
-
-
-
-
-
-
-
-// ========================================
-// LOAD ANNOUNCEMENTS
-// ========================================
-
-
-async function loadAnnouncements(){
-
-
-
-const container =
-
-document.getElementById(
-    "announcementContainer"
-);
 
 
 
@@ -2722,10 +2673,9 @@ collection(
 
 db,
 
-"announcements"
+"expenses"
 
 ),
-
 
 
 orderBy(
@@ -2735,8 +2685,6 @@ orderBy(
 "desc"
 
 )
-
-
 
 )
 
@@ -2750,17 +2698,30 @@ orderBy(
 
 
 
+
+expenseCache=[];
+
+
+
+
+
+
+
+
+
 if(snapshot.empty){
 
 
 
-container.innerHTML = `
+container.innerHTML=`
 
 
 
 <div class="empty-state">
 
-📢 No announcements yet.
+
+🧾 No expenses recorded.
+
 
 </div>
 
@@ -2781,8 +2742,8 @@ return;
 
 
 
-
 container.innerHTML="";
+
 
 
 
@@ -2795,11 +2756,502 @@ snapshot.forEach(docSnap=>{
 
 
 
-const data =
+const expense =
 
 docSnap.data();
 
 
+
+
+
+expenseCache.push(expense);
+
+
+
+
+
+
+
+
+
+container.innerHTML += `
+
+
+
+<div class="expense-card">
+
+
+
+
+
+<div class="expense-header">
+
+
+<h3>
+
+🧾 ${expense.project || "Unknown Project"}
+
+</h3>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="expense-content">
+
+
+
+<div class="expense-info">
+
+
+
+<p>
+
+<strong>
+
+Amount
+
+</strong>
+
+<br>
+
+${peso(expense.amount)}
+
+</p>
+
+
+
+
+
+
+
+<p>
+
+<strong>
+
+Purpose
+
+</strong>
+
+<br>
+
+${
+
+expense.description ||
+
+"No description provided."
+
+}
+
+</p>
+
+
+
+
+
+
+
+<p>
+
+<strong>
+
+Status
+
+</strong>
+
+<br>
+
+
+<span class="status completed">
+
+✔ Approved
+
+</span>
+
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div class="receipt-box">
+
+
+
+${
+expense.receipt
+
+?
+
+
+`
+
+<img
+
+src="${expense.receipt}"
+
+class="receipt-thumbnail"
+
+>
+
+
+<a
+
+href="${expense.receipt}"
+
+target="_blank"
+
+class="receipt-btn"
+
+>
+
+
+🧾 View Full Receipt
+
+
+</a>
+
+
+`
+
+:
+
+
+`
+
+<span class="no-receipt">
+
+
+⚠ No Receipt Uploaded
+
+
+</span>
+
+
+`
+
+
+
+}
+
+
+
+</div>
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+</div>
+
+
+
+`;
+
+
+
+});
+
+
+
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"Expense Load Error:",
+
+error
+
+);
+
+
+
+}
+
+
+
+}
+// ========================================
+// ANNOUNCEMENT MANAGEMENT
+// ========================================
+
+
+const announcementForm =
+document.getElementById(
+    "announcementForm"
+);
+
+
+
+if(announcementForm){
+
+
+announcementForm.addEventListener(
+
+"submit",
+
+async(e)=>{
+
+
+e.preventDefault();
+
+
+
+try{
+
+
+const title =
+getValue(
+    "announcementTitle"
+);
+
+
+
+const message =
+getValue(
+    "announcementMessage"
+);
+
+
+
+
+
+if(!title || !message){
+
+
+notify(
+    "Please complete announcement details.",
+    "warning"
+);
+
+
+return;
+
+
+}
+
+
+
+
+
+
+await addDoc(
+
+collection(
+    db,
+    "announcements"
+),
+
+
+{
+
+
+title,
+
+
+message,
+
+
+createdBy:
+
+currentUser?.email ||
+
+"Administrator",
+
+
+
+createdAt:
+
+serverTimestamp()
+
+
+
+}
+
+
+
+);
+
+
+
+
+
+notify(
+    "Announcement posted successfully."
+);
+
+
+
+announcementForm.reset();
+
+
+
+await loadAnnouncements();
+
+
+
+}
+
+
+
+catch(error){
+
+
+console.error(
+    "Announcement Error:",
+    error
+);
+
+
+notify(
+    "Failed posting announcement.",
+    "error"
+);
+
+
+}
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+// ========================================
+// LOAD ANNOUNCEMENTS
+// ========================================
+
+
+async function loadAnnouncements(){
+
+
+
+const container =
+
+document.getElementById(
+    "announcementContainer"
+);
+
+
+
+if(!container)
+
+return;
+
+
+
+
+
+
+try{
+
+
+const snapshot =
+
+await getDocs(
+
+query(
+
+collection(
+    db,
+    "announcements"
+),
+
+
+orderBy(
+    "createdAt",
+    "desc"
+)
+
+
+)
+
+
+);
+
+
+
+
+
+
+
+if(snapshot.empty){
+
+
+container.innerHTML = `
+
+
+<div class="empty-state">
+
+📢 No announcements yet.
+
+</div>
+
+
+`;
+
+return;
+
+
+}
+
+
+
+
+
+container.innerHTML = "";
+
+
+
+
+
+
+snapshot.forEach((docSnap)=>{
+
+
+const data =
+docSnap.data();
 
 
 
@@ -2827,6 +3279,7 @@ ${data.message || ""}
 
 
 
+
 <small>
 
 Posted by:
@@ -2850,7 +3303,6 @@ ${data.createdBy || "Admin"}
 
 
 
-
 }
 
 
@@ -2858,10 +3310,9 @@ ${data.createdBy || "Admin"}
 catch(error){
 
 
-
 console.error(
 
-"Announcement Load Error:",
+"Announcement Loading Error:",
 
 error
 
@@ -2900,9 +3351,6 @@ document.getElementById(
 
 
 
-
-
-
 if(!table)
 
 return;
@@ -2911,22 +3359,14 @@ return;
 
 
 
-
-
-
 try{
 
 
-
-table.innerHTML="";
-
+table.innerHTML = "";
 
 
 
-
-
-let records=[];
-
+let records = [];
 
 
 
@@ -2937,11 +3377,8 @@ const collections =
 await getDocs(
 
 collection(
-
-db,
-
-"collections"
-
+    db,
+    "collections"
 )
 
 );
@@ -2956,11 +3393,8 @@ const projects =
 await getDocs(
 
 collection(
-
-db,
-
-"projects"
-
+    db,
+    "projects"
 )
 
 );
@@ -2975,15 +3409,11 @@ const expenses =
 await getDocs(
 
 collection(
-
-db,
-
-"expenses"
-
+    db,
+    "expenses"
 )
 
 );
-
 
 
 
@@ -3001,14 +3431,17 @@ docSnap.data();
 
 records.push({
 
+
 type:"Collection",
+
 
 details:data.year,
 
+
 amount:data.amount
 
-});
 
+});
 
 
 });
@@ -3030,18 +3463,20 @@ docSnap.data();
 
 records.push({
 
+
 type:"Project",
+
 
 details:data.name,
 
+
 amount:data.budget
 
-});
-
-
 
 });
 
+
+});
 
 
 
@@ -3059,19 +3494,20 @@ docSnap.data();
 
 records.push({
 
+
 type:"Expense",
+
 
 details:data.project,
 
+
 amount:data.amount
 
-});
-
-
 
 });
 
 
+});
 
 
 
@@ -3079,12 +3515,11 @@ amount:data.amount
 
 
 
-if(records.length===0){
+
+if(records.length === 0){
 
 
-
-table.innerHTML=`
-
+table.innerHTML = `
 
 
 <tr>
@@ -3098,9 +3533,7 @@ No records available.
 </tr>
 
 
-
 `;
-
 
 
 return;
@@ -3114,18 +3547,13 @@ return;
 
 
 
-
-
 records.forEach(record=>{
-
 
 
 table.innerHTML += `
 
 
-
 <tr>
-
 
 
 <td>
@@ -3133,7 +3561,6 @@ table.innerHTML += `
 ${record.type}
 
 </td>
-
 
 
 
@@ -3157,7 +3584,11 @@ ${peso(record.amount)}
 
 <td>
 
+<span class="verified">
+
 ✔ Verified
+
+</span>
 
 </td>
 
@@ -3166,13 +3597,10 @@ ${peso(record.amount)}
 </tr>
 
 
-
 `;
 
 
-
 });
-
 
 
 
@@ -3183,7 +3611,6 @@ ${peso(record.amount)}
 
 
 catch(error){
-
 
 
 console.error(
@@ -3210,8 +3637,6 @@ error
 
 
 
-
-
 // ========================================
 // FINANCIAL SUMMARY
 // ========================================
@@ -3224,17 +3649,13 @@ async function loadSummary(){
 try{
 
 
-
 const collectionSnap =
 
 await getDocs(
 
 collection(
-
-db,
-
-"collections"
-
+    db,
+    "collections"
 )
 
 );
@@ -3248,11 +3669,8 @@ const expenseSnap =
 await getDocs(
 
 collection(
-
-db,
-
-"expenses"
-
+    db,
+    "expenses"
 )
 
 );
@@ -3263,11 +3681,9 @@ db,
 
 
 
+let funds = 0;
 
-let funds=0;
-
-let expenses=0;
-
+let expenses = 0;
 
 
 
@@ -3276,7 +3692,6 @@ let expenses=0;
 
 
 collectionSnap.forEach(docSnap=>{
-
 
 
 funds +=
@@ -3300,7 +3715,6 @@ docSnap.data().amount || 0
 expenseSnap.forEach(docSnap=>{
 
 
-
 expenses +=
 
 Number(
@@ -3320,12 +3734,9 @@ docSnap.data().amount || 0
 
 
 
-
 const balance =
 
 funds - expenses;
-
-
 
 
 
@@ -3343,8 +3754,6 @@ peso(funds)
 
 
 
-
-
 setText(
 
 "totalExpenses",
@@ -3352,8 +3761,6 @@ setText(
 peso(expenses)
 
 );
-
-
 
 
 
@@ -3371,7 +3778,7 @@ peso(balance)
 
 
 
-// PUBLIC DASHBOARD IDS
+// OLD DASHBOARD COMPATIBILITY
 
 
 setText(
@@ -3381,9 +3788,6 @@ setText(
 peso(funds)
 
 );
-
-
-
 
 
 
@@ -3399,6 +3803,7 @@ peso(balance)
 
 
 
+
 }
 
 
@@ -3406,10 +3811,9 @@ peso(balance)
 catch(error){
 
 
-
 console.error(
 
-"Summary Error:",
+"Financial Summary Error:",
 
 error
 
@@ -3431,10 +3835,8 @@ error
 
 
 
-
-
 // ========================================
-// DELETE RECORD
+// DELETE RECORD SYSTEM
 // ========================================
 
 
@@ -3450,11 +3852,11 @@ id
 
 
 
-const confirmDelete =
+const confirmation =
 
 confirm(
 
-"Delete this record?"
+"Are you sure you want to delete this record?"
 
 );
 
@@ -3463,11 +3865,9 @@ confirm(
 
 
 
-
-if(!confirmDelete)
+if(!confirmation)
 
 return;
-
 
 
 
@@ -3478,10 +3878,7 @@ return;
 try{
 
 
-
 await deleteDoc(
-
-
 
 doc(
 
@@ -3493,11 +3890,7 @@ id
 
 )
 
-
-
 );
-
-
 
 
 
@@ -3506,7 +3899,7 @@ id
 
 notify(
 
-"Deleted successfully."
+"Record deleted successfully."
 
 );
 
@@ -3542,7 +3935,7 @@ error
 
 notify(
 
-"Delete failed.",
+"Failed deleting record.",
 
 "error"
 
@@ -3566,9 +3959,8 @@ notify(
 
 
 
-
 // ========================================
-// SEARCH SYSTEM
+// SEARCH RECORD SYSTEM
 // ========================================
 
 
@@ -3577,7 +3969,6 @@ const searchInput =
 document.getElementById(
     "searchRecord"
 );
-
 
 
 
@@ -3595,16 +3986,11 @@ searchInput.addEventListener(
 ()=>{
 
 
-
-
-
 const keyword =
 
 searchInput.value
 
 .toLowerCase();
-
-
 
 
 
@@ -3634,9 +4020,7 @@ row.innerText
 
 
 
-
 row.style.display =
-
 
 text.includes(keyword)
 
@@ -3650,11 +4034,7 @@ text.includes(keyword)
 
 
 
-
-
 });
-
-
 
 
 
@@ -3702,9 +4082,7 @@ localStorage.getItem(
 
 
 
-
-if(savedTheme==="dark"){
-
+if(savedTheme === "dark"){
 
 
 document.body.classList.add(
@@ -3717,8 +4095,6 @@ themeButton.textContent="☀";
 
 
 }
-
-
 
 
 
@@ -3739,8 +4115,7 @@ document.body.classList.toggle(
 
 
 
-
-const dark =
+const darkMode =
 
 document.body.classList.contains(
     "dark"
@@ -3752,12 +4127,19 @@ document.body.classList.contains(
 
 
 
-
 localStorage.setItem(
 
 "theme",
 
-dark ? "dark" : "light"
+darkMode
+
+?
+
+"dark"
+
+:
+
+"light"
 
 );
 
@@ -3766,9 +4148,10 @@ dark ? "dark" : "light"
 
 
 
+
 themeButton.textContent =
 
-dark
+darkMode
 
 ?
 
@@ -3808,7 +4191,7 @@ initializeDashboard();
 
 console.log(
 
-"Dalubwikaan Treasury Sync..."
+"Dalubwikaan Treasury Auto Sync Running..."
 
 );
 
@@ -3824,10 +4207,8 @@ console.log(
 
 
 
-
-
 // ========================================
-// ERROR HANDLING
+// GLOBAL ERROR HANDLING
 // ========================================
 
 
@@ -3840,7 +4221,7 @@ window.addEventListener(
 
 console.error(
 
-"Dashboard Error:",
+"Admin Panel Error:",
 
 event.error
 
@@ -3856,7 +4237,6 @@ event.error
 
 
 
-
 window.addEventListener(
 
 "unhandledrejection",
@@ -3864,10 +4244,9 @@ window.addEventListener(
 (event)=>{
 
 
-
 console.error(
 
-"Promise Error:",
+"Unhandled Promise Error:",
 
 event.reason
 
@@ -3903,23 +4282,25 @@ DALUBWIKAAN TREASURY ADMIN v7.0
 
 ✓ Firestore CRUD
 
-✓ Project Status System
+✓ Collection Management
 
-✓ Budget Monitoring
+✓ Project Monitoring
 
-✓ Expense Tracking
+✓ Budget Tracking
 
-✓ Receipt Preview
+✓ Expense Management
 
-✓ Receipt Upload
+✓ Receipt Upload System
+
+✓ Receipt Preview Fix
 
 ✓ Announcement Board
 
-✓ Financial Summary
-
 ✓ Search System
 
-✓ Dark Mode
+✓ Financial Summary
+
+✓ Dark / Light Mode
 
 
 SYSTEM READY 🚀
