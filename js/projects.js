@@ -1,20 +1,18 @@
 // =================================
 // DALUBWIKAAN PROJECT TRANSPARENCY
 // VERSION 2.0
-// PROJECT STATUS + BUDGET MONITORING
+// PROJECT STATUS + BUDGET PROGRESS
 // =================================
 
 
-import {db} from "./firebase.js";
+import { db } from "./firebase.js";
 
 
 import {
 
 collection,
 onSnapshot,
-getDocs,
-query,
-orderBy
+getDocs
 
 }
 
@@ -31,8 +29,6 @@ const container =
 document.getElementById(
 "projectContainer"
 );
-
-
 
 
 
@@ -57,14 +53,7 @@ Number(value || 0)
 
 
 
-
-// =================================
-// STATUS BADGE
-// =================================
-
-
 function statusBadge(status){
-
 
 
 if(status === "Completed"){
@@ -86,7 +75,7 @@ return `
 
 
 
-else if(status === "Ongoing"){
+if(status === "Ongoing"){
 
 
 return `
@@ -128,94 +117,7 @@ return `
 
 
 
-// =================================
-// FINANCIAL STATUS
-// =================================
-
-
-function budgetStatus(
-budget,
-spent
-){
-
-
-
-const remaining =
-
-budget - spent;
-
-
-
-
-
-
-
-if(remaining < 0){
-
-
-return `
-
-
-<div class="danger-status">
-
-
-🔴 Abonado:
-
-${peso(
-Math.abs(remaining)
-)}
-
-
-
-</div>
-
-
-`;
-
-
-
-}
-
-
-
-
-
-
-return `
-
-
-<div class="success-status">
-
-
-🟢 Remaining:
-
-${peso(remaining)}
-
-
-
-</div>
-
-
-`;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// =================================
-// LOAD PROJECTS
-// =================================
-
-
-function loadProjects(){
+async function loadProjects(){
 
 
 
@@ -225,44 +127,6 @@ if(!container)return;
 
 
 
-
-const projectQuery = query(
-
-collection(
-db,
-"projects"
-),
-
-orderBy(
-"createdAt",
-"desc"
-)
-
-);
-
-
-
-
-
-
-
-onSnapshot(
-
-projectQuery,
-
-async(projectSnapshot)=>{
-
-
-
-container.innerHTML="";
-
-
-
-
-
-
-
-// GET EXPENSES
 
 const expenseSnapshot =
 
@@ -279,23 +143,16 @@ db,
 
 
 
-
-
 let expenses = {};
 
 
 
 
 
-
-expenseSnapshot.forEach(
-(doc)=>{
+expenseSnapshot.forEach(doc=>{
 
 
-const data =
-doc.data();
-
-
+const data = doc.data();
 
 
 
@@ -306,7 +163,6 @@ expenses[data.project]=0;
 
 
 }
-
 
 
 
@@ -332,34 +188,18 @@ data.amount || 0
 
 
 
-if(projectSnapshot.empty){
+onSnapshot(
+
+collection(
+db,
+"projects"
+),
+
+(snapshot)=>{
 
 
 
-container.innerHTML = `
-
-
-<div class="empty-state">
-
-
-<p>
-
-📂 No projects available.
-
-</p>
-
-
-</div>
-
-
-`;
-
-
-
-return;
-
-
-}
+container.innerHTML="";
 
 
 
@@ -367,15 +207,11 @@ return;
 
 
 
-
-projectSnapshot.forEach(
-(doc)=>{
+snapshot.forEach((doc)=>{
 
 
 
-const project =
-doc.data();
-
+const project = doc.data();
 
 
 
@@ -393,17 +229,52 @@ project.budget || 0
 
 
 
-
 const spent =
 
-expenses[
-project.name
-]
+expenses[project.name]
 
 ||
 
 0;
 
+
+
+
+
+
+
+let percentage =
+
+(budget === 0)
+
+?
+
+0
+
+:
+
+(spent / budget) * 100;
+
+
+
+
+
+
+
+if(percentage > 100){
+
+percentage = 100;
+
+}
+
+
+
+
+
+
+const remaining =
+
+budget - spent;
 
 
 
@@ -421,6 +292,63 @@ project.status ||
 
 
 
+
+
+
+let financial;
+
+
+
+if(remaining < 0){
+
+
+
+financial = `
+
+<p class="danger-status">
+
+🔴 Abonado:
+
+${peso(
+Math.abs(remaining)
+)}
+
+</p>
+
+`;
+
+
+
+}
+
+else{
+
+
+
+financial = `
+
+<p class="success-status">
+
+🟢 Remaining:
+
+${peso(remaining)}
+
+</p>
+
+`;
+
+
+
+}
+
+
+
+
+
+
+
+
+
 const card =
 
 document.createElement(
@@ -429,10 +357,8 @@ document.createElement(
 
 
 
+card.className=
 
-
-
-card.className =
 "project-card";
 
 
@@ -444,31 +370,25 @@ card.className =
 card.innerHTML = `
 
 
-
-<div class="project-header">
-
-
 <h2>
 
-🏗 ${project.name || "Unnamed Project"}
+${project.name}
 
 </h2>
+
+
 
 
 
 ${statusBadge(status)}
 
 
-</div>
 
 
 
 
 
-
-
-<div class="project-info">
-
+<div class="budget-info">
 
 
 <p>
@@ -476,7 +396,6 @@ ${statusBadge(status)}
 <strong>
 Allocated Budget:
 </strong>
-
 
 <br>
 
@@ -488,13 +407,11 @@ ${peso(budget)}
 
 
 
-
 <p>
 
 <strong>
 Actual Expenses:
 </strong>
-
 
 <br>
 
@@ -506,11 +423,7 @@ ${peso(spent)}
 
 
 
-${budgetStatus(
-budget,
-spent
-)}
-
+${financial}
 
 
 </div>
@@ -519,23 +432,57 @@ spent
 
 
 
-
-
-<div class="project-description">
 
 
 <p>
 
 ${project.description ||
 
-"No project description provided."
-}
+"No project description available."
 
+}
 
 </p>
 
 
+
+
+
+
+
+
+<div class="progress-container">
+
+
+<div class="progress-bar">
+
+
+<div 
+
+class="progress-fill"
+
+style="width:${percentage}%">
+
 </div>
+
+
+</div>
+
+
+
+
+<small>
+
+Budget Utilization:
+
+${percentage.toFixed(0)}%
+
+</small>
+
+
+</div>
+
+
 
 
 
@@ -548,8 +495,9 @@ ${project.description ||
 
 
 
-
 container.appendChild(card);
+
+
 
 
 
@@ -557,6 +505,25 @@ container.appendChild(card);
 
 
 
+
+
+if(snapshot.empty){
+
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+No projects available.
+
+</div>
+
+`;
+
+
+
+}
 
 
 
@@ -577,31 +544,4 @@ container.appendChild(card);
 
 
 
-
 loadProjects();
-
-
-
-
-
-console.log(`
-
-================================
-
-DALUBWIKAAN PROJECT REPORT v2.0
-
-✓ Firebase Sync
-
-✓ Project Status Tracking
-
-✓ Budget Monitoring
-
-✓ Expense Calculation
-
-✓ Abonado Detection
-
-✓ Transparency Ready
-
-================================
-
-`);
