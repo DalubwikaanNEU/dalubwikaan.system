@@ -962,3 +962,127 @@ transform:rotate(360deg);
 
 
 }
+/* =========================
+DARK MODE
+========================= */
+
+
+body.dark-mode{
+
+background:#121212;
+
+color:white;
+
+}
+
+
+
+/* sidebar */
+
+body.dark-mode .sidebar{
+
+background:#1e1e1e;
+
+color:white;
+
+}
+
+
+
+
+
+body.dark-mode .main{
+
+background:#121212;
+
+}
+
+
+
+
+
+/* cards */
+
+body.dark-mode .card{
+
+background:#1f1f1f;
+
+color:white;
+
+}
+
+
+
+
+
+body.dark-mode .panel{
+
+background:#1f1f1f;
+
+color:white;
+
+}
+
+
+
+
+
+body.dark-mode table{
+
+color:white;
+
+}
+
+
+
+
+
+body.dark-mode th{
+
+background:#2b2b2b;
+
+}
+
+
+
+
+
+body.dark-mode td{
+
+border-color:#444;
+
+}
+
+
+
+
+
+body.dark-mode .year{
+
+background:#1f1f1f;
+
+color:white;
+
+}
+
+
+
+
+
+body.dark-mode p,
+body.dark-mode span{
+
+color:#ddd;
+
+}
+
+
+
+
+/* charts background */
+
+body.dark-mode .chart-container{
+
+background:#1f1f1f;
+
+}
