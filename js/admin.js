@@ -1,13 +1,11 @@
 // =================================
 // DALUBWIKAAN ADMIN PANEL
 // FIREBASE CRUD + AUTH + STORAGE
-// ADVANCED TREASURY MANAGEMENT
+// COMPLETE TREASURY MANAGEMENT SYSTEM
 // =================================
 
 
-
 import {db, storage} from "./firebase.js";
-
 
 
 import {
@@ -29,15 +27,11 @@ from
 
 
 
-
-
 import {
-
 
 ref,
 uploadBytes,
 getDownloadURL
-
 
 }
 
@@ -47,15 +41,11 @@ from
 
 
 
-
-
 import {
-
 
 getAuth,
 onAuthStateChanged,
 signOut
-
 
 }
 
@@ -67,9 +57,7 @@ from
 
 
 
-
 const auth=getAuth();
-
 
 
 let currentUser=null;
@@ -79,12 +67,40 @@ let currentUser=null;
 
 
 
+// ===============================
+// LOADER
+// ===============================
+
+window.onload=()=>{
+
+
+setTimeout(()=>{
+
+
+let loader=document.getElementById("loader");
+
+
+if(loader){
+
+loader.style.display="none";
+
+}
+
+
+},800);
+
+
+};
 
 
 
-// =================================
-// AUTHENTICATION
-// =================================
+
+
+
+
+// ===============================
+// AUTH
+// ===============================
 
 
 onAuthStateChanged(auth,(user)=>{
@@ -94,7 +110,6 @@ if(!user){
 
 
 window.location.href="login.html";
-
 
 return;
 
@@ -106,14 +121,13 @@ currentUser=user;
 
 
 
-let emailBox=
+let email=
 document.getElementById("adminEmail");
 
 
+if(email){
 
-if(emailBox){
-
-emailBox.innerHTML=user.email;
+email.innerHTML=user.email;
 
 }
 
@@ -126,20 +140,17 @@ emailBox.innerHTML=user.email;
 
 
 
-
-
-// =================================
+// ===============================
 // LOGOUT
-// =================================
+// ===============================
 
 
-const logout=
+let logout=
 document.getElementById("logout");
 
 
 
 if(logout){
-
 
 
 logout.onclick=async()=>{
@@ -164,53 +175,35 @@ window.location.href="login.html";
 
 
 
-// =================================
+// ===============================
 // HELPERS
-// =================================
-
+// ===============================
 
 
 function peso(value){
 
 
-return "₱"+Number(value || 0).toLocaleString();
+return "₱"+Number(value||0).toLocaleString();
 
 
 }
 
 
 
+function value(id){
 
 
-
-
-function notify(message,type="success"){
-
-
-
-alert(message);
-
+return document.getElementById(id)?.value.trim() || "";
 
 }
 
 
 
 
+function notify(msg){
 
 
-
-
-
-function getValue(id){
-
-
-
-let element=
-document.getElementById(id);
-
-
-return element ? element.value.trim() : "";
-
+alert(msg);
 
 
 }
@@ -222,18 +215,12 @@ return element ? element.value.trim() : "";
 
 
 
-
-// =================================
-// AUDIT SYSTEM
-// =================================
-
+// ===============================
+// AUDIT TRAIL
+// ===============================
 
 
 async function createAudit(action,details){
-
-
-
-try{
 
 
 await addDoc(
@@ -263,19 +250,6 @@ serverTimestamp()
 
 }
 
-
-);
-
-
-
-}
-
-catch(error){
-
-
-console.log(
-"Audit error:",
-error
 );
 
 
@@ -283,23 +257,18 @@ error
 
 
 
-}
 
 
 
 
 
 
+// ===============================
+// COLLECTION ADD
+// ===============================
 
 
-
-// =================================
-// ADD COLLECTION
-// =================================
-
-
-
-const collectionForm=
+let collectionForm=
 document.getElementById("collectionForm");
 
 
@@ -307,29 +276,12 @@ document.getElementById("collectionForm");
 if(collectionForm){
 
 
-
 collectionForm.addEventListener(
-
 "submit",
-
 async(e)=>{
 
 
 e.preventDefault();
-
-
-
-let button=
-collectionForm.querySelector("button");
-
-
-
-button.disabled=true;
-
-button.innerHTML="Saving...";
-
-
-
 
 
 try{
@@ -338,14 +290,13 @@ try{
 let data={
 
 
-
-year:getValue("yearLevel"),
-
-
-amount:Number(getValue("amount")),
+year:value("yearLevel"),
 
 
-date:getValue("date"),
+amount:Number(value("amount")),
+
+
+date:value("date"),
 
 
 type:"Collection",
@@ -354,27 +305,7 @@ type:"Collection",
 createdAt:serverTimestamp()
 
 
-
 };
-
-
-
-
-if(!data.year || !data.amount){
-
-
-notify(
-"Please complete all fields",
-"error"
-);
-
-
-return;
-
-
-}
-
-
 
 
 
@@ -390,23 +321,19 @@ data
 
 
 
-
-
 await createAudit(
 
 "Added Collection",
 
-`${data.year} - ${peso(data.amount)}`
+`${data.year} ${peso(data.amount)}`
 
 );
 
 
 
 
-
-
 notify(
-"Collection Added Successfully!"
+"Collection Added!"
 );
 
 
@@ -414,33 +341,23 @@ notify(
 collectionForm.reset();
 
 
-await loadRecords();
+refresh();
+
 
 
 }
 
 
+catch(err){
 
-catch(error){
-
-
-console.error(error);
-
+console.log(err);
 
 notify(
-"Saving failed"
+"Collection failed"
 );
 
 
 }
-
-
-
-
-
-button.disabled=false;
-
-button.innerHTML="Save Collection";
 
 
 
@@ -457,13 +374,12 @@ button.innerHTML="Save Collection";
 
 
 
-// =================================
-// ADD PROJECT
-// =================================
+// ===============================
+// PROJECT ADD
+// ===============================
 
 
-
-const projectForm=
+let projectForm=
 document.getElementById("projectForm");
 
 
@@ -471,11 +387,8 @@ document.getElementById("projectForm");
 if(projectForm){
 
 
-
 projectForm.addEventListener(
-
 "submit",
-
 async(e)=>{
 
 
@@ -489,14 +402,13 @@ try{
 let data={
 
 
-
-name:getValue("projectName"),
-
-
-budget:Number(getValue("projectBudget")),
+name:value("projectName"),
 
 
-description:getValue("description"),
+budget:Number(value("projectBudget")),
+
+
+description:value("description"),
 
 
 status:"Planned",
@@ -508,12 +420,7 @@ type:"Project",
 createdAt:serverTimestamp()
 
 
-
 };
-
-
-
-
 
 
 
@@ -527,19 +434,13 @@ data
 
 
 
-
-
-
-
 await createAudit(
 
 "Added Project",
 
-`${data.name} ${peso(data.budget)}`
+data.name
 
 );
-
-
 
 
 
@@ -553,8 +454,7 @@ notify(
 projectForm.reset();
 
 
-
-loadRecords();
+refresh();
 
 
 
@@ -566,11 +466,6 @@ catch(error){
 
 
 console.log(error);
-
-
-notify(
-"Project failed"
-);
 
 
 }
@@ -590,13 +485,12 @@ notify(
 
 
 
-// =================================
-// EXPENSE + RECEIPT
-// =================================
+// ===============================
+// EXPENSE ADD
+// ===============================
 
 
-
-const expenseForm=
+let expenseForm=
 document.getElementById("expenseForm");
 
 
@@ -604,32 +498,24 @@ document.getElementById("expenseForm");
 if(expenseForm){
 
 
-
 expenseForm.addEventListener(
-
 "submit",
-
 async(e)=>{
 
 
 e.preventDefault();
 
 
-
 try{
-
 
 
 let file=
 document.getElementById("receiptFile")
-?.files[0];
+.files[0];
 
 
 
-let receiptURL="";
-
-
-
+let receipt="";
 
 
 
@@ -637,25 +523,7 @@ if(file){
 
 
 
-if(file.size > 5000000){
-
-
-notify(
-"Maximum file size is 5MB"
-);
-
-
-return;
-
-
-}
-
-
-
-
-
-
-let fileRef=
+let location=
 ref(
 
 storage,
@@ -668,7 +536,7 @@ storage,
 
 await uploadBytes(
 
-fileRef,
+location,
 
 file
 
@@ -676,9 +544,8 @@ file
 
 
 
-receiptURL=
-await getDownloadURL(fileRef);
-
+receipt=
+await getDownloadURL(location);
 
 
 }
@@ -691,17 +558,16 @@ await getDownloadURL(fileRef);
 let data={
 
 
-
-project:getValue("expenseProject"),
-
-
-amount:Number(getValue("expenseAmount")),
+project:value("expenseProject"),
 
 
-description:getValue("expenseDescription"),
+amount:Number(value("expenseAmount")),
 
 
-receipt:receiptURL,
+description:value("expenseDescription"),
+
+
+receipt,
 
 
 status:"Approved",
@@ -717,10 +583,7 @@ type:"Expense",
 createdAt:serverTimestamp()
 
 
-
 };
-
-
 
 
 
@@ -736,9 +599,6 @@ data
 
 
 
-
-
-
 await createAudit(
 
 "Added Expense",
@@ -750,10 +610,8 @@ await createAudit(
 
 
 
-
-
 notify(
-"Expense Added!"
+"Expense Saved!"
 );
 
 
@@ -761,7 +619,7 @@ notify(
 expenseForm.reset();
 
 
-loadRecords();
+refresh();
 
 
 
@@ -769,13 +627,10 @@ loadRecords();
 
 
 
-
-
 catch(error){
 
 
-
-console.error(error);
+console.log(error);
 
 
 notify(
@@ -800,10 +655,60 @@ notify(
 
 
 
-// =================================
-// LOAD RECORDS
-// =================================
+// ===============================
+// RECEIPT PREVIEW
+// ===============================
 
+
+let receiptFile=
+document.getElementById("receiptFile");
+
+
+if(receiptFile){
+
+
+receiptFile.onchange=()=>{
+
+
+let file=
+receiptFile.files[0];
+
+
+let preview=
+document.getElementById("receiptPreview");
+
+
+
+if(file && preview){
+
+
+preview.innerHTML=
+`
+<img src="${URL.createObjectURL(file)}"
+width="200"
+style="border-radius:15px;margin-top:15px;">
+`;
+
+
+}
+
+
+};
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// LOAD RECORDS
+// ===============================
 
 
 async function loadRecords(){
@@ -819,32 +724,22 @@ if(!table)return;
 
 
 
-
-
 table.innerHTML="";
 
 
 
-let records=[];
+let all=[];
 
 
 
 let sources=[
 
-{
-name:"collections",
-type:"Collection"
-},
 
-{
-name:"projects",
-type:"Project"
-},
+["collections","Collection"],
 
-{
-name:"expenses",
-type:"Expense"
-}
+["projects","Project"],
+
+["expenses","Expense"]
 
 
 ];
@@ -852,62 +747,51 @@ type:"Expense"
 
 
 
-
-for(let source of sources){
-
+for(let s of sources){
 
 
-let snapshot=
+let snap=
 await getDocs(
 
-collection(db,source.name)
+collection(db,s[0])
 
 );
 
 
 
-
-snapshot.forEach(item=>{
-
-
-let data=item.data();
+snap.forEach(item=>{
 
 
+let d=item.data();
 
-records.push({
 
+
+all.push({
 
 id:item.id,
 
+collection:s[0],
 
-collection:source.name,
-
-
-type:source.type,
-
+type:s[1],
 
 title:
-data.name ||
-data.year ||
-data.project,
+d.name ||
+d.year ||
+d.project,
 
 
 details:
-data.description ||
-data.date,
+d.description ||
+d.date,
 
 
-amount:data.amount,
+amount:d.amount,
 
 
-receipt:data.receipt,
-
-
-created:data.createdAt
+receipt:d.receipt
 
 
 });
-
 
 
 });
@@ -920,137 +804,97 @@ created:data.createdAt
 
 
 
-
-records.reverse();
-
-
-
-
-
-updateCounters(records);
+updateStats(all);
 
 
 
 
 
 
+if(all.length===0){
 
-if(records.length===0){
 
-
-table.innerHTML=`
-
+table.innerHTML=
+`
 <tr>
-
 <td colspan="4">
-
 No records available.
-
 </td>
-
 </tr>
-
 `;
 
 return;
 
-
 }
 
 
 
 
 
+all.reverse();
 
 
-records.forEach(record=>{
+
+all.forEach(r=>{
 
 
-table.innerHTML+=`
+table.innerHTML+=
+
+
+`
 
 <tr>
 
 
-<td>
-
-${record.type}
-
-</td>
-
-
+<td>${r.type}</td>
 
 
 <td>
 
-
-<b>${record.title}</b>
-
+<b>${r.title}</b>
 
 <br>
 
+${r.details}
 
-<small>${record.details}</small>
 
-
-${
-record.receipt ?
+${r.receipt ?
 
 `
-
 <br>
-
-<a href="${record.receipt}" target="_blank">
-
+<a href="${r.receipt}" target="_blank">
 🧾 Receipt
-
 </a>
-
 `
 
-:""
-
-}
-
+:""}
 
 </td>
 
 
 
-
-
 <td>
 
-${peso(record.amount)}
+${peso(r.amount)}
 
 </td>
 
 
 
-
 <td>
 
-
-<button
-
-class="delete-btn"
-
-onclick="deleteRecord('${record.collection}','${record.id}')">
-
+<button onclick="deleteRecord('${r.collection}','${r.id}')">
 
 🗑 Delete
 
-
 </button>
-
 
 </td>
 
 
 </tr>
 
-
 `;
-
 
 
 });
@@ -1067,32 +911,168 @@ onclick="deleteRecord('${record.collection}','${record.id}')">
 
 
 
-// =================================
-// ADMIN COUNTERS
-// =================================
+// ===============================
+// STATS
+// ===============================
+
+
+function updateStats(records){
 
 
 
-function updateCounters(records){
+let collectionCount=0;
+
+let projectCount=0;
+
+let expenseCount=0;
 
 
 
-let total=
-document.getElementById("recordCount");
+
+records.forEach(r=>{
+
+
+if(r.type=="Collection")
+
+collectionCount++;
+
+
+if(r.type=="Project")
+
+projectCount++;
+
+
+if(r.type=="Expense")
+
+expenseCount++;
+
+
+});
 
 
 
-if(total){
 
-
-total.innerHTML=
+document.getElementById("recordCount").innerHTML=
 records.length;
 
 
+document.getElementById("collectionCount").innerHTML=
+collectionCount;
+
+
+document.getElementById("projectCount").innerHTML=
+projectCount;
+
+
+document.getElementById("expenseCount").innerHTML=
+expenseCount;
+
+
+
+loadAudit();
+
+
 }
 
 
 
+
+
+
+
+
+
+// ===============================
+// AUDIT VIEW
+// ===============================
+
+
+async function loadAudit(){
+
+
+
+let box=
+document.getElementById("auditContainer");
+
+
+
+if(!box)return;
+
+
+
+box.innerHTML="";
+
+
+
+let snap=
+await getDocs(
+
+collection(db,"audit")
+
+);
+
+
+
+let logs=[];
+
+
+
+snap.forEach(d=>{
+
+
+logs.push(d.data());
+
+
+});
+
+
+
+logs.reverse();
+
+
+
+logs.forEach(log=>{
+
+
+box.innerHTML+=
+
+
+`
+
+<div class="panel">
+
+
+<b>
+${log.action}
+</b>
+
+
+<p>
+${log.details}
+</p>
+
+
+<small>
+${log.user}
+<br>
+${log.date}
+</small>
+
+
+</div>
+
+
+`;
+
+
+});
+
+
+
+document.getElementById("auditCount").innerHTML=
+logs.length;
+
+
 }
 
 
@@ -1103,15 +1083,13 @@ records.length;
 
 
 
-// =================================
+// ===============================
 // DELETE
-// =================================
-
+// ===============================
 
 
 window.deleteRecord=
-async function(collectionName,id){
-
+async function(c,id){
 
 
 if(!confirm(
@@ -1122,27 +1100,11 @@ return;
 
 
 
-
-try{
-
-
-
 await deleteDoc(
 
-doc(
-
-db,
-
-collectionName,
-
-id
-
-)
+doc(db,c,id)
 
 );
-
-
-
 
 
 
@@ -1150,41 +1112,19 @@ await createAudit(
 
 "Deleted Record",
 
-collectionName+" "+id
+c+" "+id
 
 );
-
-
-
 
 
 
 notify(
-"Deleted Successfully"
+"Deleted!"
 );
 
 
 
-loadRecords();
-
-
-
-}
-
-
-
-catch(error){
-
-
-console.log(error);
-
-
-notify(
-"Delete failed"
-);
-
-
-}
+refresh();
 
 
 
@@ -1198,13 +1138,12 @@ notify(
 
 
 
-// =================================
-// SEARCH FUNCTION
-// =================================
+// ===============================
+// SEARCH
+// ===============================
 
 
-
-const search=
+let search=
 document.getElementById("searchRecord");
 
 
@@ -1213,31 +1152,23 @@ if(search){
 
 
 
-search.addEventListener(
-
-"keyup",
-
-()=>{
+search.onkeyup=()=>{
 
 
-let value=
+let text=
 search.value.toLowerCase();
 
 
 
-document
-.querySelectorAll("#records tr")
+document.querySelectorAll("#records tr")
 .forEach(row=>{
 
 
 row.style.display=
-
-row.innerText
-.toLowerCase()
-.includes(value)
+row.innerText.toLowerCase()
+.includes(text)
 
 ?
-
 ""
 
 :
@@ -1245,11 +1176,11 @@ row.innerText
 "none";
 
 
-
 });
 
 
-});
+
+};
 
 
 }
@@ -1262,9 +1193,26 @@ row.innerText
 
 
 
-// =================================
-// START
-// =================================
+// ===============================
+// REFRESH SYSTEM
+// ===============================
 
 
-loadRecords();
+async function refresh(){
+
+
+await loadRecords();
+
+
+await loadAudit();
+
+
+}
+
+
+
+
+
+
+
+refresh();
