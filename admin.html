@@ -13,9 +13,7 @@ Dalubwikaan Treasury Admin Portal
 </title>
 
 
-
 <link rel="stylesheet" href="css/style.css">
-
 
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,10 +27,10 @@ Dalubwikaan Treasury Admin Portal
 </head>
 
 
-
 <body>
 
 
+<!-- LOADING SCREEN -->
 
 <div id="loader">
 
@@ -41,15 +39,11 @@ Dalubwikaan Treasury Admin Portal
 
 
 <p>
-
 Loading Treasury Management System...
-
 </p>
 
 
 </div>
-
-
 
 
 
@@ -59,37 +53,28 @@ Loading Treasury Management System...
 
 
 
+<!-- SIDEBAR -->
 
 
 <aside class="sidebar">
-
 
 
 <div class="sidebar-header">
 
 
 <h2>
-
 📚 Dalubwikaan
-
 </h2>
 
 
-
 <p>
-
 Treasury Administrator
-
 </p>
 
 
-
 <small>
-
 Academic Year 2026-2027
-
 </small>
-
 
 
 </div>
@@ -98,12 +83,7 @@ Academic Year 2026-2027
 
 
 
-
-
-
-
 <nav>
-
 
 
 <a href="index.html">
@@ -111,7 +91,6 @@ Academic Year 2026-2027
 🏠 Transparency Portal
 
 </a>
-
 
 
 
@@ -138,7 +117,17 @@ Academic Year 2026-2027
 
 <a href="#projectsSection">
 
-🏗 Project Management
+🏗 Projects
+
+</a>
+
+
+
+
+
+<a href="#expenseSection">
+
+💸 Expenses
 
 </a>
 
@@ -158,7 +147,7 @@ Academic Year 2026-2027
 
 <a href="#summarySection">
 
-📊 Financial Summary
+📊 Summary
 
 </a>
 
@@ -174,9 +163,7 @@ Academic Year 2026-2027
 
 
 
-
 </nav>
-
 
 
 </aside>
@@ -187,8 +174,7 @@ Academic Year 2026-2027
 
 
 
-
-
+<!-- MAIN CONTENT -->
 
 
 <main class="main">
@@ -197,40 +183,28 @@ Academic Year 2026-2027
 
 
 
-
 <header>
-
 
 
 <div>
 
 
-
 <h1>
-
 Dalubwikaan Treasury Management
-
 </h1>
-
 
 
 
 <p>
 
-
 Manage collections, expenses,
 projects, and transparency.
 
-
-
 <br>
-
 
 Academic Year 2026-2027
 
-
 </p>
-
 
 
 </div>
@@ -238,21 +212,11 @@ Academic Year 2026-2027
 
 
 
-
-
-<button
-
-id="themeToggle"
-
->
-
+<button id="themeToggle">
 
 🌙
 
-
 </button>
-
-
 
 
 
@@ -266,31 +230,26 @@ id="themeToggle"
 
 
 
+<!-- PROFILE -->
+
+
 <section class="panel profile-panel">
 
 
-
 <h2>
-
 👤 Administrator Profile
-
 </h2>
-
 
 
 
 <div class="profile-info">
 
 
-
 <p>
 
 <strong>
-
 Account:
-
 </strong>
-
 
 <span id="adminEmail">
 
@@ -298,7 +257,6 @@ Loading...
 
 </span>
 
-
 </p>
 
 
@@ -307,57 +265,40 @@ Loading...
 <p>
 
 <strong>
-
 Role:
-
 </strong>
-
 
 Treasury Administrator
 
-
 </p>
-
-
 
 
 
 <p>
 
 <strong>
-
 Organization:
-
 </strong>
-
 
 Dalubwikaan
 
-
 </p>
-
-
 
 
 
 <p>
 
 <strong>
-
 System:
-
 </strong>
 
-
 Financial Transparency Portal
-
 
 </p>
 
 
 
 </div>
-
 
 
 
@@ -369,6 +310,9 @@ Financial Transparency Portal
 
 
 
+
+
+<!-- DASHBOARD CARDS -->
 
 
 <section class="cards">
@@ -379,24 +323,19 @@ Financial Transparency Portal
 
 
 <h3>
-
 📋 Total Records
-
 </h3>
 
 
-<h2 id="recordCount">
+<h2 id="totalRecords">
 
 0
 
 </h2>
 
 
-
 <span>
-
-All Financial Entries
-
+Financial Entries
 </span>
 
 
@@ -407,30 +346,23 @@ All Financial Entries
 
 
 
-
-
 <div class="card">
 
 
 <h3>
-
 💰 Collections
-
 </h3>
 
 
-<h2 id="collectionCount">
+<h2 id="totalCollections">
 
-0
+₱0.00
 
 </h2>
 
 
-
 <span>
-
 Member Contributions
-
 </span>
 
 
@@ -441,35 +373,27 @@ Member Contributions
 
 
 
-
-
 <div class="card">
 
 
 <h3>
-
 🏗 Projects
-
 </h3>
 
 
-<h2 id="projectCount">
+<h2 id="totalProjects">
 
 0
 
 </h2>
 
 
-
 <span>
-
 Organization Programs
-
 </span>
 
 
 </div>
-
 
 
 
@@ -481,39 +405,40 @@ Organization Programs
 
 
 <h3>
-
 💸 Expenses
-
 </h3>
 
 
-<h2 id="expenseCount">
+<h2 id="totalExpenses">
 
-0
+₱0.00
 
 </h2>
 
 
-
 <span>
-
 Approved Spending
-
 </span>
 
 
 </div>
+
 
 
 
 </section>
-<!-- =========================
-     COLLECTION MANAGEMENT
-========================== -->
+
+
+
+
+
+
+
+
+<!-- COLLECTION SECTION -->
 
 
 <section class="panel">
-
 
 
 <h2>
@@ -525,19 +450,13 @@ Approved Spending
 
 
 
-
 <form id="collectionForm">
 
 
 
-
-
 <label>
-
 Year Level
-
 </label>
-
 
 
 
@@ -545,34 +464,23 @@ Year Level
 
 
 <option value="First Year">
-
 First Year
-
 </option>
 
 
 <option value="Second Year">
-
 Second Year
-
 </option>
-
 
 
 <option value="Third Year">
-
 Third Year
-
 </option>
-
 
 
 <option value="Fourth Year">
-
 Fourth Year
-
 </option>
-
 
 
 </select>
@@ -581,16 +489,9 @@ Fourth Year
 
 
 
-
-
-
-
 <label>
-
 Amount Collected
-
 </label>
-
 
 
 
@@ -612,16 +513,9 @@ required
 
 
 
-
-
-
-
 <label>
-
 Collection Date
-
 </label>
-
 
 
 
@@ -639,14 +533,9 @@ required
 
 
 
-
-
-
 <button type="submit">
 
-
 💾 Save Collection
-
 
 </button>
 
@@ -657,24 +546,13 @@ required
 
 
 
-
 </section>
-
-
-
-
-
-
-
-
-
 <!-- =========================
      EXPENSE MANAGEMENT
 ========================== -->
 
 
-<section class="panel">
-
+<section class="panel" id="expenseSection">
 
 
 <h2>
@@ -685,12 +563,7 @@ required
 
 
 
-
-
 <form id="expenseForm">
-
-
-
 
 
 
@@ -699,7 +572,6 @@ required
 Project / Expense Name
 
 </label>
-
 
 
 
@@ -721,13 +593,11 @@ required
 
 
 
-
 <label>
 
 Expense Amount
 
 </label>
-
 
 
 
@@ -760,7 +630,6 @@ Expense Description
 
 
 
-
 <textarea
 
 id="expenseDescription"
@@ -777,8 +646,6 @@ placeholder="Describe the expense purpose..."
 
 
 
-
-
 <label>
 
 Upload Official Receipt
@@ -787,12 +654,13 @@ Upload Official Receipt
 
 
 
+<!-- FIXED ID MATCH WITH JS -->
 
 <input
 
 type="file"
 
-id="receiptFile"
+id="receipt"
 
 accept="image/*"
 
@@ -804,10 +672,6 @@ accept="image/*"
 
 
 
-
-
-<!-- RECEIPT PREVIEW AREA -->
-
 <div
 
 id="receiptPreview"
@@ -817,19 +681,14 @@ class="receipt-preview"
 >
 
 
-
 <div class="empty-state">
-
 
 🧾 Receipt preview will appear here.
 
-
 </div>
 
 
-
 </div>
-
 
 
 
@@ -840,9 +699,7 @@ class="receipt-preview"
 
 <button type="submit">
 
-
 💾 Save Expense Record
-
 
 </button>
 
@@ -852,6 +709,42 @@ class="receipt-preview"
 
 </form>
 
+
+
+
+
+
+<hr>
+
+
+
+
+
+<h3>
+
+Expense Records
+
+</h3>
+
+
+
+
+
+<!-- FIXED CONTAINER -->
+
+<div id="expenseContainer">
+
+
+
+<div class="empty-state">
+
+No expenses found.
+
+</div>
+
+
+
+</div>
 
 
 
@@ -874,6 +767,7 @@ class="receipt-preview"
 <section class="panel" id="projectsSection">
 
 
+
 <h2>
 
 🏗 Project Transparency Management
@@ -885,8 +779,8 @@ class="receipt-preview"
 
 <p class="panel-description">
 
-Monitor organization projects, allocated budget,
-and implementation status.
+Monitor organization projects,
+budget, and implementation status.
 
 </p>
 
@@ -907,7 +801,6 @@ and implementation status.
 Project Name
 
 </label>
-
 
 
 
@@ -932,12 +825,12 @@ required
 
 
 
+
 <label>
 
 Allocated Budget
 
 </label>
-
 
 
 
@@ -971,7 +864,6 @@ Project Description
 
 
 
-
 <textarea
 
 id="description"
@@ -989,13 +881,12 @@ placeholder="Describe project objectives and activities..."
 
 
 
+
 <label>
 
 Project Status
 
 </label>
-
-
 
 
 
@@ -1038,12 +929,9 @@ Project Status
 
 
 
-
 <button type="submit">
 
-
 🏗 Save Project
-
 
 </button>
 
@@ -1057,7 +945,58 @@ Project Status
 
 
 
+
+
+
+<hr>
+
+
+
+
+
+<h3>
+
+Project List
+
+</h3>
+
+
+
+
+
+
+
+<!-- FIXED CONTAINER FOR JS -->
+
+<div id="projectContainer">
+
+
+
+<div class="empty-state">
+
+No projects found.
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
 </section>
+
+
+
+
+
+
+
+
+
 <!-- =========================
      ANNOUNCEMENT MANAGEMENT
 ========================== -->
@@ -1076,9 +1015,10 @@ Project Status
 
 
 
+
 <p class="panel-description">
 
-Post important updates visible on the
+Post important updates visible on
 Dalubwikaan Transparency Portal.
 
 </p>
@@ -1151,14 +1091,12 @@ required
 
 
 
-
 <button type="submit">
-
 
 📢 Publish Announcement
 
-
 </button>
+
 
 
 
@@ -1178,6 +1116,7 @@ required
 
 
 
+
 <h3>
 
 Latest Announcements
@@ -1189,36 +1128,27 @@ Latest Announcements
 
 
 
-<div id="announcementContainer">
+<!-- FIXED ID MATCH WITH JS -->
+
+<div id="adminAnnouncementContainer">
 
 
 
 <div class="empty-state">
 
-
 📢 No announcements yet.
 
-
 </div>
 
 
 
 </div>
-
 
 
 
 
 
 </section>
-
-
-
-
-
-
-
-
 
 <!-- =========================
      SEARCH RECORDS
@@ -1239,19 +1169,17 @@ Latest Announcements
 
 
 
-
 <input
 
 type="text"
 
-id="searchRecord"
+id="searchInput"
 
 placeholder="Search project, expense, collection..."
 
 autocomplete="off"
 
 >
-
 
 
 
@@ -1267,7 +1195,7 @@ autocomplete="off"
 
 
 <!-- =========================
-     TREASURY RECORD TABLE
+     FINANCIAL RECORDS
 ========================== -->
 
 
@@ -1285,12 +1213,10 @@ autocomplete="off"
 
 
 
-
-
 <p class="panel-description">
 
 Manage all treasury entries.
-You can edit or delete records below.
+Edit or delete records below.
 
 </p>
 
@@ -1300,106 +1226,22 @@ You can edit or delete records below.
 
 
 
-<div class="table-responsive">
+<!-- FIXED CONTAINER FOR JS -->
 
+<div id="recordContainer">
 
 
 
+<div class="empty-state">
 
-<table id="recordsTable">
+No records found.
 
-
-
-<thead>
-
-
-<tr>
-
-
-<th>
-
-Type
-
-</th>
-
-
-
-<th>
-
-Details
-
-</th>
-
-
-
-<th>
-
-Amount
-
-</th>
-
-
-
-<th>
-
-Status
-
-</th>
-
-
-
-<th>
-
-Action
-
-</th>
-
-
-
-</tr>
-
-
-
-</thead>
-
-
-
-
-
-
-<tbody id="records">
-
-
-
-<tr>
-
-
-
-<td colspan="5">
-
-
-No records available.
-
-
-</td>
-
-
-
-</tr>
-
-
-
-</tbody>
-
-
-
-
-</table>
-
+</div>
 
 
 
 </div>
+
 
 
 
@@ -1432,6 +1274,7 @@ style="display:none;"
 
 
 
+
 <div class="receipt-modal-content">
 
 
@@ -1444,11 +1287,15 @@ id="closeEditModal"
 
 class="close-receipt"
 
+type="button"
+
 >
 
 ✖
 
 </button>
+
+
 
 
 
@@ -1484,6 +1331,8 @@ id="editRecordId"
 
 
 
+
+
 <input
 
 type="hidden"
@@ -1491,6 +1340,8 @@ type="hidden"
 id="editCollectionName"
 
 >
+
+
 
 
 
@@ -1515,6 +1366,7 @@ id="editDetails"
 required
 
 >
+
 
 
 
@@ -1547,7 +1399,11 @@ required
 
 
 
-<button type="submit">
+<button
+
+type="submit"
+
+>
 
 💾 Save Changes
 
@@ -1563,7 +1419,9 @@ required
 
 
 
+
 </div>
+
 
 
 </div>
@@ -1596,6 +1454,7 @@ required
 
 
 
+
 <div class="cards">
 
 
@@ -1614,7 +1473,7 @@ required
 
 
 
-<h2 id="totalCollections">
+<h2 id="summaryCollections">
 
 ₱0.00
 
@@ -1624,14 +1483,13 @@ required
 
 <span>
 
-All recorded contributions
+Recorded contributions
 
 </span>
 
 
 
 </div>
-
 
 
 
@@ -1651,7 +1509,7 @@ All recorded contributions
 
 
 
-<h2 id="totalExpenses">
+<h2 id="summaryExpenses">
 
 ₱0.00
 
@@ -1668,7 +1526,6 @@ Approved spending
 
 
 </div>
-
 
 
 
@@ -1698,14 +1555,13 @@ Approved spending
 
 <span>
 
-Remaining treasury funds
+Remaining funds
 
 </span>
 
 
 
 </div>
-
 
 
 
@@ -1753,7 +1609,18 @@ Financial monitoring
 
 
 
+
+
 </section>
+
+
+
+
+
+
+
+
+
 <!-- =========================
      PROJECT STATUS GUIDE
 ========================== -->
@@ -1768,6 +1635,7 @@ Financial monitoring
 📌 Project Status Guide
 
 </h2>
+
 
 
 
@@ -1789,10 +1657,11 @@ Planning
 
 </strong>
 
-
 - Proposed project waiting for implementation.
 
 </p>
+
+
 
 
 
@@ -1808,10 +1677,12 @@ Ongoing
 
 </strong>
 
-
 - Currently being executed.
 
 </p>
+
+
+
 
 
 
@@ -1827,10 +1698,10 @@ Completed
 
 </strong>
 
-
 - Successfully finished project.
 
 </p>
+
 
 
 
@@ -1841,17 +1712,10 @@ Completed
 
 
 
+
 </section>
 
-
-
-
-
-
-
-
-
-<!-- =========================
+     <!-- =========================
      EXPORT SECTION
 ========================== -->
 
@@ -1884,14 +1748,16 @@ for transparency and documentation.
 
 
 
+
 <button
 
 id="exportReport"
 
 class="primary-btn"
 
->
+type="button"
 
+>
 
 📥 Export Treasury Report
 
@@ -1899,6 +1765,43 @@ class="primary-btn"
 </button>
 
 
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- =========================
+     REFRESH DASHBOARD
+========================== -->
+
+
+<section class="panel">
+
+
+
+<button
+
+id="refreshDashboard"
+
+class="primary-btn"
+
+type="button"
+
+>
+
+🔄 Refresh Dashboard
+
+</button>
 
 
 
@@ -1931,6 +1834,7 @@ class="primary-btn"
 
 
 
+
 <small>
 
 Financial Transparency Portal
@@ -1940,6 +1844,7 @@ Financial Transparency Portal
 Academic Year 2026-2027
 
 </small>
+
 
 
 
@@ -1973,11 +1878,15 @@ Academic Year 2026-2027
 
 
 
+<!-- THEME SYSTEM -->
+
 <script src="js/theme.js"></script>
 
 
 
 
+
+<!-- FIREBASE ADMIN SYSTEM -->
 
 <script
 
@@ -1986,6 +1895,8 @@ type="module"
 src="js/admin.js">
 
 </script>
+
+
 
 
 
