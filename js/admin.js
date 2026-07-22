@@ -1,22 +1,116 @@
 // =================================
 // DALUBWIKAAN ADMIN PANEL
-// FIREBASE VERSION
+// FIREBASE + AUTH VERSION
 // =================================
+
 
 
 import { db } from "./firebase.js";
 
 
+
 import {
 
-    collection,
-    addDoc,
-    getDocs,
-    serverTimestamp
+collection,
+addDoc,
+getDocs,
+serverTimestamp
 
 }
 
-from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+from
+
+"https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+
+
+
+import {
+
+
+getAuth,
+onAuthStateChanged,
+signOut
+
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+
+
+
+
+// ===============================
+// AUTHENTICATION CHECK
+// ===============================
+
+
+const auth = getAuth();
+
+
+
+
+onAuthStateChanged(auth,(user)=>{
+
+
+if(!user){
+
+
+window.location.href="login.html";
+
+
+}
+
+
+});
+
+
+
+
+
+
+
+
+
+// ===============================
+// LOGOUT
+// ===============================
+
+
+
+const logoutBtn =
+document.getElementById("logout");
+
+
+
+if(logoutBtn){
+
+
+logoutBtn.addEventListener("click",()=>{
+
+
+signOut(auth)
+
+.then(()=>{
+
+
+window.location.href="login.html";
+
+
+});
+
+
+});
+
+
+}
+
+
+
+
 
 
 
@@ -32,27 +126,44 @@ document
 .addEventListener("submit", async function(e){
 
 
+
 e.preventDefault();
 
 
 
+
+
 let year =
-document.getElementById("yearLevel").value;
+document
+.getElementById("yearLevel")
+.value;
+
+
 
 
 
 let amount =
-Number(document.getElementById("amount").value);
+Number(
+document.getElementById("amount").value
+);
+
+
 
 
 
 let date =
-document.getElementById("date").value;
+document
+.getElementById("date")
+.value;
+
+
+
 
 
 
 
 try{
+
 
 
 await addDoc(
@@ -61,15 +172,22 @@ collection(db,"collections"),
 
 {
 
-year: year,
 
-amount: amount,
+year:year,
 
-date: date,
+
+amount:amount,
+
+
+date:date,
+
 
 type:"Collection",
 
-createdAt: serverTimestamp()
+
+createdAt:
+serverTimestamp()
+
 
 }
 
@@ -78,7 +196,12 @@ createdAt: serverTimestamp()
 
 
 
-alert("Collection Added Successfully!");
+
+
+alert(
+"Collection Added Successfully!"
+);
+
 
 
 
@@ -92,13 +215,20 @@ loadRecords();
 
 }
 
+
+
 catch(error){
+
 
 
 console.error(error);
 
 
-alert("Error saving collection");
+
+alert(
+"Error adding collection"
+);
+
 
 
 }
@@ -125,27 +255,47 @@ document
 .addEventListener("submit", async function(e){
 
 
+
 e.preventDefault();
 
 
 
-let project =
-document.getElementById("projectName").value;
+
+
+
+let name =
+document
+.getElementById("projectName")
+.value;
+
+
 
 
 
 let budget =
-Number(document.getElementById("projectBudget").value);
+Number(
+document
+.getElementById("projectBudget")
+.value
+);
+
+
 
 
 
 let description =
-document.getElementById("description").value;
+document
+.getElementById("description")
+.value;
+
+
+
 
 
 
 
 try{
+
 
 
 await addDoc(
@@ -155,19 +305,20 @@ collection(db,"projects"),
 {
 
 
-name: project,
+name:name,
 
 
-budget: budget,
+budget:budget,
 
 
-description: description,
+description:description,
 
 
 type:"Project",
 
 
-createdAt: serverTimestamp()
+createdAt:
+serverTimestamp()
 
 
 }
@@ -177,7 +328,13 @@ createdAt: serverTimestamp()
 
 
 
-alert("Project Saved Successfully!");
+
+
+alert(
+"Project Added Successfully!"
+);
+
+
 
 
 
@@ -196,10 +353,15 @@ loadRecords();
 catch(error){
 
 
+
 console.error(error);
 
 
-alert("Error saving project");
+
+alert(
+"Error saving project"
+);
+
 
 
 }
@@ -217,7 +379,7 @@ alert("Error saving project");
 
 
 // ===============================
-// LOAD RECORDS FROM FIRESTORE
+// DISPLAY RECORDS
 // ===============================
 
 
@@ -225,8 +387,14 @@ alert("Error saving project");
 async function loadRecords(){
 
 
+
 let table =
 document.getElementById("records");
+
+
+
+if(!table) return;
+
 
 
 
@@ -234,47 +402,71 @@ table.innerHTML="";
 
 
 
-try{
 
 
-// COLLECTIONS
 
-let collectionsSnapshot =
+
+// COLLECTION RECORDS
+
+
+let collectionData =
 await getDocs(
 collection(db,"collections")
 );
 
 
 
-collectionsSnapshot.forEach((doc)=>{
 
 
-let data = doc.data();
+
+collectionData.forEach((doc)=>{
+
+
+let data =
+doc.data();
+
+
 
 
 
 table.innerHTML += `
 
+
 <tr>
 
+
 <td>
-${data.type}
+
+Collection
+
 </td>
 
 
+
 <td>
-${data.year} Collection
+
+${data.year}
+
 <br>
-<small>${data.date}</small>
+
+<small>
+${data.date}
+</small>
+
 </td>
 
 
+
+
 <td>
-₱${data.amount.toLocaleString()}
+
+₱${Number(data.amount).toLocaleString()}
+
 </td>
 
 
 </tr>
+
 
 `;
 
@@ -288,35 +480,50 @@ ${data.year} Collection
 
 
 
-// PROJECTS
+
+// PROJECT RECORDS
 
 
-let projectsSnapshot =
+
+let projectData =
 await getDocs(
 collection(db,"projects")
 );
 
 
 
-projectsSnapshot.forEach((doc)=>{
 
 
-let data = doc.data();
+
+projectData.forEach((doc)=>{
+
+
+let data =
+doc.data();
+
+
 
 
 
 table.innerHTML += `
 
+
 <tr>
 
+
 <td>
-${data.type}
+
+Project
+
 </td>
 
 
+
 <td>
 
-<b>${data.name}</b>
+<b>
+${data.name}
+</b>
 
 <br>
 
@@ -324,15 +531,20 @@ ${data.type}
 ${data.description}
 </small>
 
+
 </td>
 
 
+
 <td>
-₱${data.budget.toLocaleString()}
+
+₱${Number(data.budget).toLocaleString()}
+
 </td>
 
 
 </tr>
+
 
 `;
 
@@ -342,17 +554,6 @@ ${data.description}
 
 
 
-}
-
-
-catch(error){
-
-
-console.error(error);
-
-
-}
-
 
 
 }
@@ -364,7 +565,8 @@ console.error(error);
 
 
 
-// LOAD DATA WHEN PAGE OPENS
+
+// LOAD WHEN OPENING PAGE
 
 
 loadRecords();
