@@ -1,11 +1,10 @@
 // =================================
 // DALUBWIKAAN TREASURY DASHBOARD
-// FIREBASE REAL-TIME VERSION
+// FIREBASE REAL-TIME + ANALYTICS
 // =================================
 
 
 import { db } from "./firebase.js";
-
 
 
 import {
@@ -22,12 +21,27 @@ from
 
 
 
+// CHART VARIABLES
+
+let collectionChart;
+
+let budgetChart;
 
 
 
-// ===============================
+window.totalFunds = 0;
+
+window.currentExpenses = 0;
+
+
+
+
+
+
+
+// =================================
 // LOAD COLLECTIONS REAL TIME
-// ===============================
+// =================================
 
 
 function loadCollections(){
@@ -38,7 +52,6 @@ onSnapshot(
 collection(db,"collections"),
 
 (snapshot)=>{
-
 
 
 let totalFunds = 0;
@@ -62,8 +75,7 @@ let yearTotals = {
 
 
 
-
-let table = 
+let table =
 document.getElementById("transactionTable");
 
 
@@ -82,8 +94,12 @@ let data = doc.data();
 
 
 
+let amount =
+Number(data.amount || 0);
 
-totalFunds += Number(data.amount);
+
+
+totalFunds += amount;
 
 
 
@@ -91,9 +107,14 @@ totalFunds += Number(data.amount);
 
 if(yearTotals[data.year] !== undefined){
 
-yearTotals[data.year] += Number(data.amount);
+
+yearTotals[data.year] += amount;
+
 
 }
+
+
+
 
 
 
@@ -113,7 +134,7 @@ ${data.year}
 
 
 <td>
-₱${Number(data.amount).toLocaleString()}
+₱${amount.toLocaleString()}
 </td>
 
 
@@ -135,6 +156,13 @@ Completed
 
 
 
+window.totalFunds = totalFunds;
+
+
+
+
+
+
 // UPDATE TOTAL FUNDS
 
 
@@ -150,7 +178,7 @@ document
 
 
 
-// UPDATE YEAR LEVELS
+// UPDATE YEAR LEVEL
 
 
 document
@@ -169,13 +197,11 @@ document
 
 
 
-
 document
 .getElementById("thirdYear")
 .innerHTML =
 
 "₱"+yearTotals["Third Year"].toLocaleString();
-
 
 
 
@@ -190,14 +216,17 @@ document
 
 
 
-// UPDATE PROGRESS BAR
+// PROGRESS BAR
 
 
 let max = Math.max(
 
 yearTotals["First Year"],
+
 yearTotals["Second Year"],
+
 yearTotals["Third Year"],
+
 yearTotals["Fourth Year"]
 
 );
@@ -212,7 +241,6 @@ if(max > 0){
 document
 .getElementById("firstProgress")
 .style.width =
-
 (yearTotals["First Year"]/max*100)+"%";
 
 
@@ -220,7 +248,6 @@ document
 document
 .getElementById("secondProgress")
 .style.width =
-
 (yearTotals["Second Year"]/max*100)+"%";
 
 
@@ -228,7 +255,6 @@ document
 document
 .getElementById("thirdProgress")
 .style.width =
-
 (yearTotals["Third Year"]/max*100)+"%";
 
 
@@ -236,7 +262,6 @@ document
 document
 .getElementById("fourthProgress")
 .style.width =
-
 (yearTotals["Fourth Year"]/max*100)+"%";
 
 
@@ -246,7 +271,17 @@ document
 
 
 
-calculateBalance(totalFunds);
+
+
+updateCollectionChart(yearTotals);
+
+
+
+calculateBalance();
+
+
+
+updateBudgetChart();
 
 
 
@@ -266,13 +301,14 @@ calculateBalance(totalFunds);
 
 
 
-// ===============================
+// =================================
 // LOAD PROJECTS REAL TIME
-// ===============================
+// =================================
 
 
 
 function loadProjects(){
+
 
 
 onSnapshot(
@@ -298,6 +334,7 @@ table.innerHTML="";
 
 
 
+
 snapshot.forEach((doc)=>{
 
 
@@ -305,8 +342,13 @@ let data = doc.data();
 
 
 
+let budget =
+Number(data.budget || 0);
 
-expenses += Number(data.budget);
+
+
+expenses += budget;
+
 
 
 
@@ -318,25 +360,19 @@ table.innerHTML += `
 
 
 <td>
-
 ${data.name}
-
 </td>
 
 
 
 <td>
-
-₱${Number(data.budget).toLocaleString()}
-
+₱${budget.toLocaleString()}
 </td>
 
 
 
 <td>
-
 ${data.description}
-
 </td>
 
 
@@ -352,6 +388,12 @@ ${data.description}
 
 
 
+
+window.currentExpenses = expenses;
+
+
+
+
 document
 .getElementById("totalExpenses")
 .innerHTML =
@@ -363,19 +405,16 @@ document
 
 
 
-// SAVE EXPENSE VALUE
-
-window.currentExpenses = expenses;
-
-
-
 calculateBalance();
 
 
 
+updateBudgetChart();
+
 
 
 }
+
 
 
 );
@@ -391,28 +430,20 @@ calculateBalance();
 
 
 
-// ===============================
+// =================================
 // COMPUTE BALANCE
-// ===============================
+// =================================
 
 
-
-function calculateBalance(totalFunds){
-
-
-
-let funds =
-totalFunds || 0;
-
-
-
-let expenses =
-window.currentExpenses || 0;
+function calculateBalance(){
 
 
 
 let remaining =
-funds - expenses;
+
+window.totalFunds -
+
+window.currentExpenses;
 
 
 
@@ -436,13 +467,239 @@ document
 
 
 
-// ===============================
-// MEMBER COUNT
-// ===============================
+// =================================
+// BAR CHART
+// =================================
 
-// Temporary muna
-// papalitan natin kapag may members collection na
 
+
+function updateCollectionChart(data){
+
+
+
+let canvas =
+document.getElementById("collectionChart");
+
+
+
+if(!canvas) return;
+
+
+
+
+
+if(collectionChart){
+
+collectionChart.destroy();
+
+}
+
+
+
+
+
+collectionChart = new Chart(canvas,{
+
+
+type:"bar",
+
+
+
+data:{
+
+
+labels:[
+
+"First Year",
+
+"Second Year",
+
+"Third Year",
+
+"Fourth Year"
+
+],
+
+
+
+datasets:[{
+
+label:"Collected Funds",
+
+
+data:[
+
+data["First Year"],
+
+data["Second Year"],
+
+data["Third Year"],
+
+data["Fourth Year"]
+
+]
+
+
+}]
+
+
+
+},
+
+
+
+options:{
+
+
+responsive:true,
+
+
+plugins:{
+
+
+legend:{
+
+
+display:true
+
+
+}
+
+
+}
+
+
+
+}
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =================================
+// PIE CHART
+// =================================
+
+
+
+function updateBudgetChart(){
+
+
+
+let canvas =
+document.getElementById("budgetChart");
+
+
+
+if(!canvas) return;
+
+
+
+
+
+if(budgetChart){
+
+budgetChart.destroy();
+
+}
+
+
+
+
+
+
+budgetChart = new Chart(canvas,{
+
+
+
+type:"pie",
+
+
+
+data:{
+
+
+labels:[
+
+"Used Budget",
+
+"Remaining Funds"
+
+],
+
+
+
+datasets:[{
+
+
+data:[
+
+
+window.currentExpenses,
+
+
+Math.max(
+
+window.totalFunds -
+window.currentExpenses,
+
+0
+
+)
+
+
+
+]
+
+
+}]
+
+
+},
+
+
+
+options:{
+
+
+responsive:true
+
+
+}
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =================================
+// MEMBERS
+// =================================
+
+
+// Temporary value
 
 document
 .getElementById("totalMembers")
@@ -456,9 +713,10 @@ document
 
 
 
-// START SYSTEM
+// START DASHBOARD
 
 
 loadCollections();
+
 
 loadProjects();
