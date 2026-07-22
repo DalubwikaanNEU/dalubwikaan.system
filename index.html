@@ -20,13 +20,10 @@ Dalubwikaan Treasury Transparency Portal
 </head>
 
 
-
 <body>
 
 
 <div class="dashboard">
-
-
 
 
 
@@ -43,7 +40,6 @@ Dalubwikaan Treasury Transparency Portal
 <p>
 Treasury Transparency Portal
 </p>
-
 
 
 
@@ -104,8 +100,6 @@ Treasury Transparency Portal
 
 
 
-
-
 <!-- MAIN CONTENT -->
 
 
@@ -118,7 +112,6 @@ Treasury Transparency Portal
 <header>
 
 
-
 <div>
 
 
@@ -128,18 +121,13 @@ Treasury Dashboard
 
 
 <p>
-
 Financial Transparency Portal
 <br>
 Academic Year 2026-2027
-
 </p>
 
 
-
 </div>
-
-
 
 
 
@@ -167,7 +155,6 @@ Academic Year 2026-2027
 <section class="cards">
 
 
-
 <div class="card">
 
 <h3>
@@ -188,7 +175,6 @@ Total Collected Contributions
 
 
 </div>
-
 
 
 
@@ -221,8 +207,6 @@ Dalubwikaan Members
 
 
 
-
-
 <div class="card">
 
 
@@ -239,13 +223,11 @@ Total Expenses
 
 
 <span>
-Approved Projects
+Approved Project Expenses
 </span>
 
 
 </div>
-
-
 
 
 
@@ -276,7 +258,6 @@ Remaining Treasury Funds
 
 
 
-
 </section>
 
 
@@ -299,10 +280,7 @@ Remaining Treasury Funds
 
 
 
-
 <div class="year-container">
-
-
 
 
 
@@ -331,9 +309,6 @@ First Year
 
 
 
-
-
-
 <div class="year">
 
 <h3>
@@ -354,8 +329,6 @@ Second Year
 
 
 </div>
-
-
 
 
 
@@ -388,8 +361,6 @@ Third Year
 
 
 
-
-
 <div class="year">
 
 <h3>
@@ -413,10 +384,7 @@ Fourth Year
 
 
 
-
-
 </div>
-
 
 
 </section>
@@ -441,15 +409,23 @@ Fourth Year
 
 
 
+<button id="generateReport">
+
+📄 Generate Treasury Report
+
+</button>
+
+
+
+<br><br>
+
+
 
 <div class="chart-container">
 
-
 <canvas id="collectionChart"></canvas>
 
-
 </div>
-
 
 
 
@@ -459,12 +435,9 @@ Fourth Year
 
 
 
-
 <div class="chart-container">
 
-
 <canvas id="budgetChart"></canvas>
-
 
 </div>
 
@@ -481,7 +454,7 @@ Fourth Year
 
 
 
-<!-- COLLECTION RECORDS -->
+<!-- COLLECTION HISTORY -->
 
 
 <section class="panel">
@@ -499,9 +472,7 @@ Fourth Year
 
 <thead>
 
-
 <tr>
-
 
 <th>
 Date
@@ -592,7 +563,6 @@ Description
 </tr>
 
 
-
 </thead>
 
 
@@ -614,12 +584,12 @@ Description
 
 
 
+
 <a href="projects.html" class="view-btn">
 
 View Complete Project Reports →
 
 </a>
-
 
 
 
@@ -645,11 +615,12 @@ View Complete Project Reports →
 
 
 
+
 <p>
 
-All organization expenses are documented with
-supporting receipts for accountability and proper
-financial monitoring.
+All Dalubwikaan expenses are recorded with
+supporting receipts to maintain transparency,
+accountability, and proper financial management.
 
 </p>
 
@@ -661,10 +632,9 @@ financial monitoring.
 
 <a href="projects.html" class="view-btn">
 
-View Expense Records & Receipts
+View Expense Records & Receipts →
 
 </a>
-
 
 
 
@@ -678,7 +648,7 @@ View Expense Records & Receipts
 
 
 
-<!-- STATEMENT -->
+<!-- ORGANIZATION STATEMENT -->
 
 
 <section class="panel">
@@ -690,13 +660,15 @@ View Expense Records & Receipts
 
 
 
-
 <p>
 
 Ang Dalubwikaan Treasury Transparency Portal ay
-naglalayong ipakita ang malinaw na pangangasiwa ng
-pondo ng organisasyon. Layunin nitong palakasin ang
-tiwala, pananagutan, at pagiging bukas sa bawat miyembro.
+naglalayong ipakita ang malinaw at responsableng
+pamamahala ng pondo ng organisasyon.
+
+Layunin nitong mapanatili ang tiwala ng bawat miyembro
+sa pamamagitan ng bukas na ulat pinansyal,
+maayos na dokumentasyon, at pananagutan.
 
 </p>
 
@@ -749,6 +721,12 @@ tiwala, pananagutan, at pagiging bukas sa bawat miyembro.
 
 
 
+<!-- PDF GENERATOR -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+
+
 
 
 <!-- FIREBASE DASHBOARD SCRIPT -->
@@ -758,6 +736,5 @@ tiwala, pananagutan, at pagiging bukas sa bawat miyembro.
 
 
 </body>
-
 
 </html>
