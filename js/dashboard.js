@@ -1,20 +1,17 @@
 // =================================
 // DALUBWIKAAN TREASURY DASHBOARD
-// FIREBASE LIVE VERSION
+// FIREBASE REAL-TIME VERSION
 // =================================
 
 
-
-import {db} from "./firebase.js";
+import { db } from "./firebase.js";
 
 
 
 import {
 
-
 collection,
-getDocs
-
+onSnapshot
 
 }
 
@@ -28,13 +25,23 @@ from
 
 
 
-async function loadDashboard(){
+// ===============================
+// LOAD COLLECTIONS REAL TIME
+// ===============================
+
+
+function loadCollections(){
+
+
+onSnapshot(
+
+collection(db,"collections"),
+
+(snapshot)=>{
 
 
 
 let totalFunds = 0;
-
-let totalExpenses = 0;
 
 
 
@@ -56,37 +63,69 @@ let yearTotals = {
 
 
 
+let table = 
+document.getElementById("transactionTable");
 
-// GET COLLECTIONS
 
 
-let collectionSnapshot =
-await getDocs(
-collection(db,"collections")
-);
+table.innerHTML="";
 
 
 
 
 
-collectionSnapshot.forEach((doc)=>{
+
+snapshot.forEach((doc)=>{
 
 
 let data = doc.data();
 
 
 
-totalFunds += data.amount;
+
+totalFunds += Number(data.amount);
+
+
 
 
 
 if(yearTotals[data.year] !== undefined){
 
-
-yearTotals[data.year] += data.amount;
-
+yearTotals[data.year] += Number(data.amount);
 
 }
+
+
+
+
+table.innerHTML += `
+
+<tr>
+
+<td>
+${data.date}
+</td>
+
+
+<td>
+${data.year}
+</td>
+
+
+<td>
+₱${Number(data.amount).toLocaleString()}
+</td>
+
+
+<td class="paid">
+Completed
+</td>
+
+
+</tr>
+
+`;
+
 
 
 });
@@ -96,46 +135,218 @@ yearTotals[data.year] += data.amount;
 
 
 
+// UPDATE TOTAL FUNDS
+
+
+document
+.getElementById("totalFunds")
+.innerHTML =
+
+"₱"+totalFunds.toLocaleString();
 
 
 
-// GET PROJECT EXPENSES
 
 
-let projectSnapshot =
-await getDocs(
-collection(db,"projects")
+
+
+// UPDATE YEAR LEVELS
+
+
+document
+.getElementById("firstYear")
+.innerHTML =
+
+"₱"+yearTotals["First Year"].toLocaleString();
+
+
+
+document
+.getElementById("secondYear")
+.innerHTML =
+
+"₱"+yearTotals["Second Year"].toLocaleString();
+
+
+
+
+document
+.getElementById("thirdYear")
+.innerHTML =
+
+"₱"+yearTotals["Third Year"].toLocaleString();
+
+
+
+
+document
+.getElementById("fourthYear")
+.innerHTML =
+
+"₱"+yearTotals["Fourth Year"].toLocaleString();
+
+
+
+
+
+
+// UPDATE PROGRESS BAR
+
+
+let max = Math.max(
+
+yearTotals["First Year"],
+yearTotals["Second Year"],
+yearTotals["Third Year"],
+yearTotals["Fourth Year"]
+
 );
 
 
 
-projectSnapshot.forEach((doc)=>{
+
+if(max > 0){
+
+
+
+document
+.getElementById("firstProgress")
+.style.width =
+
+(yearTotals["First Year"]/max*100)+"%";
+
+
+
+document
+.getElementById("secondProgress")
+.style.width =
+
+(yearTotals["Second Year"]/max*100)+"%";
+
+
+
+document
+.getElementById("thirdProgress")
+.style.width =
+
+(yearTotals["Third Year"]/max*100)+"%";
+
+
+
+document
+.getElementById("fourthProgress")
+.style.width =
+
+(yearTotals["Fourth Year"]/max*100)+"%";
+
+
+
+}
+
+
+
+
+calculateBalance(totalFunds);
+
+
+
+}
+
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// LOAD PROJECTS REAL TIME
+// ===============================
+
+
+
+function loadProjects(){
+
+
+onSnapshot(
+
+collection(db,"projects"),
+
+(snapshot)=>{
+
+
+
+let expenses = 0;
+
+
+
+let table =
+document.getElementById("projectTable");
+
+
+
+table.innerHTML="";
+
+
+
+
+
+snapshot.forEach((doc)=>{
 
 
 let data = doc.data();
 
 
 
-totalExpenses += data.budget;
+
+expenses += Number(data.budget);
+
+
+
+
+
+table.innerHTML += `
+
+<tr>
+
+
+<td>
+
+${data.name}
+
+</td>
+
+
+
+<td>
+
+₱${Number(data.budget).toLocaleString()}
+
+</td>
+
+
+
+<td>
+
+${data.description}
+
+</td>
+
+
+</tr>
+
+`;
 
 
 
 });
-
-
-
-
-
-
-
-// UPDATE CARDS
-
-
-
-document
-.getElementById("totalFunds")
-.innerHTML =
-"₱"+totalFunds.toLocaleString();
 
 
 
@@ -144,7 +355,64 @@ document
 document
 .getElementById("totalExpenses")
 .innerHTML =
-"₱"+totalExpenses.toLocaleString();
+
+"₱"+expenses.toLocaleString();
+
+
+
+
+
+
+// SAVE EXPENSE VALUE
+
+window.currentExpenses = expenses;
+
+
+
+calculateBalance();
+
+
+
+
+
+}
+
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// COMPUTE BALANCE
+// ===============================
+
+
+
+function calculateBalance(totalFunds){
+
+
+
+let funds =
+totalFunds || 0;
+
+
+
+let expenses =
+window.currentExpenses || 0;
+
+
+
+let remaining =
+funds - expenses;
 
 
 
@@ -154,55 +422,7 @@ document
 .getElementById("remainingBalance")
 .innerHTML =
 
-"₱"+
-(totalFunds-totalExpenses)
-.toLocaleString();
-
-
-
-
-
-
-// TEMP MEMBER COUNT
-
-document
-.getElementById("totalMembers")
-.innerHTML =
-"150";
-
-
-
-
-
-
-// UPDATE YEAR LEVEL
-
-
-
-let years =
-document.querySelectorAll(".year p");
-
-
-
-years[0].innerHTML =
-"₱"+yearTotals["First Year"].toLocaleString();
-
-
-
-years[1].innerHTML =
-"₱"+yearTotals["Second Year"].toLocaleString();
-
-
-
-years[2].innerHTML =
-"₱"+yearTotals["Third Year"].toLocaleString();
-
-
-
-years[3].innerHTML =
-"₱"+yearTotals["Fourth Year"].toLocaleString();
-
-
+"₱"+remaining.toLocaleString();
 
 
 
@@ -212,4 +432,33 @@ years[3].innerHTML =
 
 
 
-loadDashboard();
+
+
+
+
+// ===============================
+// MEMBER COUNT
+// ===============================
+
+// Temporary muna
+// papalitan natin kapag may members collection na
+
+
+document
+.getElementById("totalMembers")
+.innerHTML = "150";
+
+
+
+
+
+
+
+
+
+// START SYSTEM
+
+
+loadCollections();
+
+loadProjects();
