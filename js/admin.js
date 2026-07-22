@@ -1,7 +1,8 @@
 // ========================================
 // DALUBWIKAAN TREASURY MANAGEMENT SYSTEM
-// ADMIN PANEL v9.0
+// ADMIN PANEL v9.1
 // EDIT + DELETE RECORD ENABLED
+// CLEAN FIREBASE CRUD VERSION
 // ========================================
 
 
@@ -13,7 +14,6 @@ import {
     db,
     storage
 } from "./firebase.js";
-
 
 
 import {
@@ -63,7 +63,6 @@ from
 
 
 
-
 // ========================================
 // GLOBAL VARIABLES
 // ========================================
@@ -82,19 +81,6 @@ let projectCache = [];
 
 let expenseCache = [];
 
-let currentEdit = {
-
-    collection:null,
-
-    id:null
-
-};
-
-
-
-
-
-
 
 
 
@@ -105,10 +91,8 @@ let currentEdit = {
 
 function getValue(id){
 
-
     const element =
     document.getElementById(id);
-
 
 
     if(!element)
@@ -116,44 +100,31 @@ function getValue(id){
     return "";
 
 
-
     return element.value.trim();
 
-
 }
-
-
-
 
 
 
 
 function setText(id,value){
 
-
     const element =
     document.getElementById(id);
 
 
-
     if(element){
 
-        element.textContent=value;
+        element.textContent = value;
 
     }
-
 
 }
 
 
 
 
-
-
-
-
 function peso(value){
-
 
     return "₱" +
 
@@ -171,11 +142,7 @@ function peso(value){
 
     );
 
-
 }
-
-
-
 
 
 
@@ -184,9 +151,8 @@ function notify(message,type="info"){
 
 
     console.log(
-
-        `[${type}] ${message}`
-
+        `${type.toUpperCase()}:`,
+        message
     );
 
 
@@ -194,50 +160,6 @@ function notify(message,type="info"){
 
 
 }
-
-
-
-
-
-
-
-function formatDate(value){
-
-
-    if(!value)
-
-    return "N/A";
-
-
-
-    try{
-
-
-        return new Date(value)
-
-        .toLocaleDateString(
-            "en-PH"
-        );
-
-
-    }
-
-
-    catch{
-
-
-        return "Invalid Date";
-
-
-    }
-
-
-}
-
-
-
-
-
 
 
 
@@ -251,10 +173,7 @@ function hideLoader(){
 
 
     const loader =
-
-    document.getElementById(
-        "loader"
-    );
+    document.getElementById("loader");
 
 
 
@@ -262,7 +181,6 @@ function hideLoader(){
 
 
         loader.style.opacity="0";
-
 
 
         setTimeout(()=>{
@@ -278,8 +196,6 @@ function hideLoader(){
 
 
 }
-
-
 
 
 
@@ -304,13 +220,8 @@ window.addEventListener(
 
 
 
-
-
-
-
-
 // ========================================
-// AUTHENTICATION SYSTEM
+// AUTH SYSTEM
 // ========================================
 
 
@@ -335,14 +246,10 @@ async(user)=>{
 
 
 
-
-
-
     try{
 
 
         const adminSnapshot =
-
 
         await getDoc(
 
@@ -361,24 +268,20 @@ async(user)=>{
 
 
 
-
-
-
         if(!adminSnapshot.exists()){
 
 
             notify(
 
-                "Unauthorized admin access.",
+            "Unauthorized admin access.",
 
-                "error"
+            "error"
 
             );
 
 
 
             await signOut(auth);
-
 
 
             window.location.href =
@@ -393,14 +296,7 @@ async(user)=>{
 
 
 
-
-
-
-
-        currentUser=user;
-
-
-
+        currentUser = user;
 
 
 
@@ -413,20 +309,12 @@ async(user)=>{
 
 
 
-
-
-
         if(emailDisplay){
-
 
             emailDisplay.textContent =
             user.email;
 
-
         }
-
-
-
 
 
 
@@ -442,23 +330,15 @@ async(user)=>{
     catch(error){
 
 
-
         console.error(
-
-            "Authentication Error:",
-
+            "AUTH ERROR:",
             error
-
         );
 
 
-
         notify(
-
             "Authentication failed.",
-
             "error"
-
         );
 
 
@@ -467,13 +347,6 @@ async(user)=>{
 
 
 });
-
-
-
-
-
-
-
 
 
 
@@ -491,8 +364,6 @@ document.getElementById(
 
 
 
-
-
 if(logoutButton){
 
 
@@ -500,7 +371,6 @@ logoutButton.onclick = async()=>{
 
 
     await signOut(auth);
-
 
 
     window.location.href =
@@ -511,15 +381,6 @@ logoutButton.onclick = async()=>{
 
 
 }
-
-
-
-
-
-
-
-
-
 // ========================================
 // DASHBOARD INITIALIZER
 // ========================================
@@ -532,11 +393,8 @@ async function initializeDashboard(){
 
 
         console.log(
-
-        "Starting Dalubwikaan Treasury System..."
-
+            "Loading Dalubwikaan Treasury..."
         );
-
 
 
 
@@ -545,15 +403,11 @@ async function initializeDashboard(){
 
             loadProjects(),
 
-
             loadExpenses(),
-
 
             loadRecords(),
 
-
             loadAnnouncements(),
-
 
             loadSummary()
 
@@ -563,17 +417,15 @@ async function initializeDashboard(){
 
 
 
-
-
         console.log(`
 
 =================================
 
-DALUBWIKAAN TREASURY ADMIN v9.0
+DALUBWIKAAN TREASURY ADMIN v9.1
 
 SYSTEM ONLINE
 
-EDIT + DELETE ENABLED
+EDIT + DELETE ACTIVE
 
 =================================
 
@@ -601,7 +453,6 @@ EDIT + DELETE ENABLED
 
 
 }
-
 
 
 
@@ -654,6 +505,15 @@ event.reason
 
 
 });
+
+
+
+
+
+
+
+
+
 // ========================================
 // COLLECTION MANAGEMENT
 // ========================================
@@ -667,7 +527,10 @@ document.getElementById(
 
 
 
+
+
 if(collectionForm){
+
 
 
 collectionForm.addEventListener(
@@ -692,6 +555,7 @@ getValue(
 
 
 
+
 const amount =
 
 Number(
@@ -701,6 +565,7 @@ getValue(
 )
 
 );
+
 
 
 
@@ -735,20 +600,12 @@ return;
 
 
 
-if(
-
-isNaN(amount)
-
-||
-
-amount <= 0
-
-){
+if(isNaN(amount) || amount <=0){
 
 
 notify(
 
-"Please enter valid amount.",
+"Invalid collection amount.",
 
 "warning"
 
@@ -805,12 +662,13 @@ serverTimestamp()
 
 
 
-
 notify(
 
 "Collection saved successfully."
 
 );
+
+
 
 
 
@@ -955,7 +813,7 @@ if(!name){
 
 notify(
 
-"Project name is required.",
+"Project name required.",
 
 "warning"
 
@@ -966,7 +824,6 @@ return;
 
 
 }
-
 
 
 
@@ -1017,10 +874,9 @@ serverTimestamp()
 
 
 
-
 notify(
 
-"Project created successfully."
+"Project saved successfully."
 
 );
 
@@ -1080,8 +936,6 @@ notify(
 
 
 
-
-
 // ========================================
 // PROJECT STATUS BADGE
 // ========================================
@@ -1104,10 +958,7 @@ return `
 
 `;
 
-
 }
-
-
 
 
 
@@ -1124,10 +975,7 @@ return `
 
 `;
 
-
 }
-
-
 
 
 
@@ -1174,7 +1022,6 @@ budget - spent;
 
 
 
-
 if(remaining < 0){
 
 
@@ -1193,6 +1040,7 @@ Math.abs(remaining)
 
 
 `;
+
 
 
 }
@@ -1241,7 +1089,6 @@ spent
 ){
 
 
-
 if(!budget)
 
 return 0;
@@ -1281,6 +1128,7 @@ return Math.round(progress);
 async function loadProjects(){
 
 
+
 const table =
 
 document.getElementById(
@@ -1289,9 +1137,11 @@ document.getElementById(
 
 
 
+
 if(table){
 
 table.innerHTML="";
+
 
 }
 
@@ -1302,7 +1152,6 @@ try{
 
 
 const snapshot =
-
 
 await getDocs(
 
@@ -1333,72 +1182,6 @@ orderBy(
 
 
 
-const expenseSnapshot =
-
-
-await getDocs(
-
-collection(
-
-db,
-
-"expenses"
-
-)
-
-);
-
-
-
-
-
-
-let expenseMap={};
-
-
-
-
-
-
-expenseSnapshot.forEach(docSnap=>{
-
-
-const data =
-docSnap.data();
-
-
-
-
-if(!expenseMap[data.project]){
-
-
-expenseMap[data.project]=0;
-
-
-}
-
-
-
-
-expenseMap[data.project]
-
-+=
-
-Number(
-
-data.amount || 0
-
-);
-
-
-
-});
-
-
-
-
-
-
 
 
 projectCache=[];
@@ -1408,55 +1191,10 @@ projectCache=[];
 
 
 
-
-
-
 snapshot.forEach(docSnap=>{
 
 
-const project =
-
-docSnap.data();
-
-
-
-
-
-const budget =
-
-Number(
-
-project.budget || 0
-
-);
-
-
-
-
-
-const spent =
-
-expenseMap[project.name]
-
-||
-
-0;
-
-
-
-
-
-const progress =
-
-projectProgress(
-
-budget,
-
-spent
-
-);
-
-
+const project = docSnap.data();
 
 
 
@@ -1464,17 +1202,9 @@ projectCache.push({
 
 id:docSnap.id,
 
-...project,
-
-spent,
-
-progress
+...project
 
 });
-
-
-
-
 
 
 
@@ -1483,15 +1213,13 @@ progress
 if(table){
 
 
-
-table.innerHTML += `
+table.innerHTML +=`
 
 
 <tr>
 
 
 <td>
-
 
 <strong>
 
@@ -1502,11 +1230,8 @@ ${project.name}
 
 <br>
 
-
 ${projectStatusBadge(
-
 project.status
-
 )}
 
 
@@ -1514,89 +1239,19 @@ project.status
 
 
 
-
-
 <td>
 
-
-Allocated:
-
-${peso(budget)}
-
-<br>
-
-
-Spent:
-
-${peso(spent)}
-
-
-
-<br>
-
-
-${financialStatus(
-
-budget,
-
-spent
-
-)}
-
-
-
-<div class="progress-container">
-
-
-<div class="progress-bar">
-
-
-<div
-
-class="progress-fill"
-
-style="width:${progress}%">
-
-</div>
-
-
-</div>
-
-
-
-<small>
-
-Used:
-
-${progress}%
-
-</small>
-
-
-</div>
-
+${peso(project.budget)}
 
 </td>
 
 
 
-
-
-
 <td>
 
-
-${
-
-project.description ||
-
-"No description"
-
-}
-
+${project.description || "No description"}
 
 </td>
-
 
 
 </tr>
@@ -1607,7 +1262,6 @@ project.description ||
 
 
 }
-
 
 
 
@@ -1616,28 +1270,6 @@ project.description ||
 
 
 
-
-
-
-if(snapshot.empty && table){
-
-
-table.innerHTML=`
-
-<tr>
-
-<td colspan="3">
-
-No projects found.
-
-</td>
-
-</tr>
-
-`;
-
-
-}
 
 
 
@@ -1662,15 +1294,6 @@ error
 
 
 }
-
-
-
-
-
-
-
-
-
 // ========================================
 // EXPENSE MANAGEMENT
 // ========================================
@@ -1706,6 +1329,11 @@ document.getElementById(
 
 
 
+// ========================================
+// RECEIPT UPLOAD PREVIEW
+// ========================================
+
+
 if(receiptInput){
 
 
@@ -1723,12 +1351,9 @@ receiptInput.files[0];
 
 
 
-
 if(!file)
 
 return;
-
-
 
 
 
@@ -1738,7 +1363,7 @@ if(!file.type.startsWith("image/")){
 
 notify(
 
-"Receipt must be image.",
+"Receipt must be an image file.",
 
 "warning"
 
@@ -1757,14 +1382,12 @@ return;
 
 
 
-
-
-if(file.size > 5*1024*1024){
+if(file.size > 5 * 1024 * 1024){
 
 
 notify(
 
-"Maximum size is 5MB.",
+"Receipt must be below 5MB.",
 
 "warning"
 
@@ -1778,7 +1401,6 @@ return;
 
 
 }
-
 
 
 
@@ -1787,40 +1409,11 @@ return;
 selectedReceiptFile=file;
 
 
-renderReceiptPreview(file);
+if(receiptPreview){
 
 
+receiptPreview.innerHTML = `
 
-});
-
-
-}
-
-
-
-
-
-
-
-function renderReceiptPreview(file){
-
-
-
-if(!receiptPreview)
-
-return;
-
-
-
-const url =
-
-URL.createObjectURL(file);
-
-
-
-
-
-receiptPreview.innerHTML=`
 
 <div class="receipt-preview-card">
 
@@ -1832,21 +1425,11 @@ receiptPreview.innerHTML=`
 </h3>
 
 
-<img
-
-src="${url}"
-
-class="receipt-preview-image"
-
->
-
-
 <p>
 
 ${file.name}
 
 </p>
-
 
 
 <button
@@ -1855,21 +1438,17 @@ type="button"
 
 id="removeReceipt"
 
-class="remove-receipt"
-
 >
 
-Remove
+❌ Remove
 
 </button>
 
 
-
 </div>
 
+
 `;
-
-
 
 
 
@@ -1879,18 +1458,24 @@ document
 "removeReceipt"
 )
 
-?.addEventListener(
-
-"click",
-
-()=>{
+.onclick=()=>{
 
 
 selectedReceiptFile=null;
 
+
 receiptInput.value="";
 
+
 receiptPreview.innerHTML="";
+
+
+};
+
+
+
+}
+
 
 
 });
@@ -1929,12 +1514,12 @@ e.preventDefault();
 try{
 
 
-
 const project =
 
 getValue(
 "expenseProject"
 );
+
 
 
 
@@ -1947,6 +1532,7 @@ getValue(
 )
 
 );
+
 
 
 
@@ -1980,8 +1566,6 @@ return;
 
 
 
-
-
 let receiptURL="";
 
 
@@ -1992,7 +1576,7 @@ if(selectedReceiptFile){
 
 
 
-const fileName =
+const filename =
 
 Date.now()
 
@@ -2007,17 +1591,15 @@ selectedReceiptFile.name;
 
 
 
-
 const storageRef =
 
 ref(
 
 storage,
 
-"receipts/"+fileName
+"receipts/" + filename
 
 );
-
 
 
 
@@ -2033,7 +1615,6 @@ selectedReceiptFile
 
 
 
-
 receiptURL =
 
 await getDownloadURL(
@@ -2045,7 +1626,6 @@ storageRef
 
 
 }
-
 
 
 
@@ -2097,6 +1677,7 @@ serverTimestamp()
 
 
 
+
 notify(
 
 "Expense saved successfully."
@@ -2105,15 +1686,20 @@ notify(
 
 
 
+
+
 expenseForm.reset();
+
 
 
 selectedReceiptFile=null;
 
 
+
 if(receiptPreview)
 
 receiptPreview.innerHTML="";
+
 
 
 
@@ -2158,12 +1744,247 @@ notify(
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
 // ========================================
-// LOAD RECORDS WITH EDIT + DELETE BUTTONS
+// LOAD EXPENSES
+// ========================================
+
+
+async function loadExpenses(){
+
+
+
+const container =
+
+document.getElementById(
+    "expensePreview"
+);
+
+
+
+
+if(!container)
+
+return;
+
+
+
+
+
+try{
+
+
+const snapshot =
+
+await getDocs(
+
+query(
+
+collection(
+
+db,
+
+"expenses"
+
+),
+
+orderBy(
+
+"createdAt",
+
+"desc"
+
+)
+
+)
+
+);
+
+
+
+
+
+expenseCache=[];
+
+
+
+container.innerHTML="";
+
+
+
+
+
+
+if(snapshot.empty){
+
+
+container.innerHTML=`
+
+
+<div class="empty-state">
+
+🧾 No expenses recorded.
+
+</div>
+
+
+`;
+
+return;
+
+
+}
+
+
+
+
+
+
+
+snapshot.forEach(docSnap=>{
+
+
+const expense = docSnap.data();
+
+
+
+expenseCache.push({
+
+id:docSnap.id,
+
+...expense
+
+});
+
+
+
+
+container.innerHTML +=`
+
+
+
+<div class="expense-card">
+
+
+<h3>
+
+🧾 ${expense.project}
+
+</h3>
+
+
+
+<p>
+
+Amount:
+
+<strong>
+
+${peso(expense.amount)}
+
+</strong>
+
+</p>
+
+
+
+
+<p>
+
+${expense.description || "No description"}
+
+</p>
+
+
+
+
+${
+expense.receipt
+
+?
+
+`
+
+<img
+
+src="${expense.receipt}"
+
+width="150"
+
+>
+
+
+`
+
+:
+
+"⚠ No receipt"
+
+}
+
+
+
+</div>
+
+
+
+`;
+
+
+
+});
+
+
+
+
+}
+
+
+
+catch(error){
+
+
+console.error(
+
+"Expense Load Error:",
+
+error
+
+);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ========================================
+// LOAD RECORDS WITH EDIT + DELETE
 // ========================================
 
 
 async function loadRecords(){
+
 
 
 const table =
@@ -2184,30 +2005,34 @@ return;
 try{
 
 
-table.innerHTML = "";
+table.innerHTML="";
 
 
 
-let records = [];
+let records=[];
 
 
 
 
-// =========================
-// LOAD COLLECTIONS
-// =========================
 
+
+
+// COLLECTIONS
 
 const collections =
 
 await getDocs(
 
 collection(
-    db,
-    "collections"
+
+db,
+
+"collections"
+
 )
 
 );
+
 
 
 
@@ -2228,9 +2053,7 @@ type:"Collection",
 
 details:data.year,
 
-amount:data.amount,
-
-date:data.date || ""
+amount:data.amount
 
 });
 
@@ -2242,9 +2065,9 @@ date:data.date || ""
 
 
 
-// =========================
-// LOAD PROJECTS
-// =========================
+
+
+// PROJECTS
 
 
 const projects =
@@ -2252,11 +2075,15 @@ const projects =
 await getDocs(
 
 collection(
-    db,
-    "projects"
+
+db,
+
+"projects"
+
 )
 
 );
+
 
 
 
@@ -2277,10 +2104,7 @@ type:"Project",
 
 details:data.name,
 
-amount:data.budget,
-
-date:""
-
+amount:data.budget
 
 });
 
@@ -2292,9 +2116,9 @@ date:""
 
 
 
-// =========================
-// LOAD EXPENSES
-// =========================
+
+
+// EXPENSES
 
 
 const expenses =
@@ -2302,11 +2126,15 @@ const expenses =
 await getDocs(
 
 collection(
-    db,
-    "expenses"
+
+db,
+
+"expenses"
+
 )
 
 );
+
 
 
 
@@ -2327,10 +2155,7 @@ type:"Expense",
 
 details:data.project,
 
-amount:data.amount,
-
-date:""
-
+amount:data.amount
 
 });
 
@@ -2361,7 +2186,6 @@ No records available.
 
 `;
 
-
 return;
 
 
@@ -2372,10 +2196,6 @@ return;
 
 
 
-
-// =========================
-// DISPLAY RECORDS
-// =========================
 
 
 records.forEach(record=>{
@@ -2406,7 +2226,6 @@ ${record.details}
 
 
 
-
 <td>
 
 ${peso(record.amount)}
@@ -2416,37 +2235,24 @@ ${peso(record.amount)}
 
 
 
-
 <td>
 
-<span class="verified">
-
 ✔ Verified
-
-</span>
-
 
 </td>
 
 
 
 
-
-
 <td>
+
 
 
 <button
 
 class="edit-btn"
 
-onclick="editRecord(
-
-'${record.collection}',
-
-'${record.id}'
-
-)"
+onclick="editRecord('${record.collection}','${record.id}')"
 
 >
 
@@ -2457,18 +2263,11 @@ onclick="editRecord(
 
 
 
-
 <button
 
 class="delete-btn"
 
-onclick="deleteRecord(
-
-'${record.collection}',
-
-'${record.id}'
-
-)"
+onclick="deleteRecord('${record.collection}','${record.id}')"
 
 >
 
@@ -2479,7 +2278,6 @@ onclick="deleteRecord(
 
 
 </td>
-
 
 
 </tr>
@@ -2503,77 +2301,48 @@ onclick="deleteRecord(
 catch(error){
 
 
-
 console.error(
 
-"Record Loading Error:",
+"Records Error:",
 
 error
 
 );
 
 
-
-notify(
-
-"Failed loading records.",
-
-"error"
-
-);
-
-
-
 }
 
 
 
 }
-
-
-
-
-
-
-
-
-
 // ========================================
 // DELETE RECORD SYSTEM
 // ========================================
 
 
-window.deleteRecord =
-
-async(
+window.deleteRecord = async function(
 
 collectionName,
 
 id
 
-)=>{
+){
 
 
 
-const confirmation =
+const confirmDelete = confirm(
 
-confirm(
+`⚠️ Delete this ${collectionName} record?
 
-"Delete this record permanently?"
+This action cannot be undone.`
 
 );
 
 
 
-
-
-
-if(!confirmation)
+if(!confirmDelete)
 
 return;
-
-
-
 
 
 
@@ -2599,13 +2368,11 @@ id
 
 
 
-
 notify(
 
 "Record deleted successfully."
 
 );
-
 
 
 
@@ -2622,7 +2389,6 @@ await initializeDashboard();
 catch(error){
 
 
-
 console.error(
 
 "Delete Error:",
@@ -2632,15 +2398,13 @@ error
 );
 
 
-
 notify(
 
-"Delete failed.",
+"Failed deleting record.",
 
 "error"
 
 );
-
 
 
 }
@@ -2662,15 +2426,14 @@ notify(
 // ========================================
 
 
-window.editRecord =
-
-async(
+window.editRecord = async function(
 
 collectionName,
 
 id
 
-)=>{
+){
+
 
 
 try{
@@ -2692,7 +2455,6 @@ id
 
 
 
-
 const snapshot =
 
 await getDoc(
@@ -2700,7 +2462,6 @@ await getDoc(
 recordRef
 
 );
-
 
 
 
@@ -2727,10 +2488,7 @@ return;
 
 
 
-
-const data =
-
-snapshot.data();
+const data = snapshot.data();
 
 
 
@@ -2738,16 +2496,13 @@ snapshot.data();
 
 
 
-let newAmount =
+let newAmount = prompt(
 
-prompt(
-
-"Enter new amount:",
+"💰 Enter new amount:",
 
 data.amount
 
 );
-
 
 
 
@@ -2764,17 +2519,14 @@ return;
 
 
 
-newAmount =
-
-Number(newAmount);
+newAmount = Number(newAmount);
 
 
 
 
 
 
-
-if(isNaN(newAmount) || newAmount<=0){
+if(isNaN(newAmount) || newAmount <=0){
 
 
 notify(
@@ -2799,11 +2551,9 @@ return;
 
 
 
-let newDetails =
+let newDetails = prompt(
 
-prompt(
-
-"Enter new details:",
+"📝 Enter new details:",
 
 data.year ||
 
@@ -2814,6 +2564,7 @@ data.project ||
 ""
 
 );
+
 
 
 
@@ -2831,10 +2582,14 @@ return;
 
 
 
+let updateData = {
 
-let updateData={
 
-amount:newAmount
+amount:newAmount,
+
+
+updatedAt:serverTimestamp()
+
 
 };
 
@@ -2844,9 +2599,6 @@ amount:newAmount
 
 
 
-// UPDATE BASED ON TYPE
-
-
 if(collectionName==="collections"){
 
 
@@ -2854,6 +2606,9 @@ updateData.year = newDetails;
 
 
 }
+
+
+
 
 
 
@@ -2870,6 +2625,8 @@ updateData.name = newDetails;
 
 
 
+
+
 if(collectionName==="expenses"){
 
 
@@ -2878,19 +2635,6 @@ updateData.project = newDetails;
 
 }
 
-
-
-
-
-
-
-
-
-const {updateDoc}=await import(
-
-"https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js"
-
-);
 
 
 
@@ -2913,8 +2657,6 @@ updateData
 
 
 
-
-
 notify(
 
 "Record updated successfully."
@@ -2930,14 +2672,11 @@ await initializeDashboard();
 
 
 
-
-
 }
 
 
 
 catch(error){
-
 
 
 console.error(
@@ -2952,12 +2691,11 @@ error
 
 notify(
 
-"Failed editing record.",
+"Failed updating record.",
 
 "error"
 
 );
-
 
 
 }
@@ -2966,155 +2704,6 @@ notify(
 
 };
 
-// ========================================
-// RECORD ACTION BUTTON STYLE SUPPORT
-// ========================================
-
-
-const style = document.createElement("style");
-
-
-style.innerHTML = `
-
-
-.edit-btn{
-
-
-    background:
-
-    linear-gradient(
-        135deg,
-        #c89b3c,
-        #f1d27a
-    );
-
-
-    color:#3b2415;
-
-
-    border:none;
-
-
-    padding:8px 15px;
-
-
-    border-radius:12px;
-
-
-    cursor:pointer;
-
-
-    font-weight:600;
-
-
-    margin-right:8px;
-
-
-    transition:.3s;
-
-
-}
-
-
-
-
-
-.edit-btn:hover{
-
-
-    transform:translateY(-3px);
-
-
-    box-shadow:
-
-    0 8px 18px rgba(200,155,60,.35);
-
-
-}
-
-
-
-
-
-
-
-.delete-btn{
-
-
-    background:
-
-    linear-gradient(
-        135deg,
-        #b02a37,
-        #dc3545
-    );
-
-
-    color:white;
-
-
-    border:none;
-
-
-    padding:8px 15px;
-
-
-    border-radius:12px;
-
-
-    cursor:pointer;
-
-
-    font-weight:600;
-
-
-    transition:.3s;
-
-
-}
-
-
-
-
-
-.delete-btn:hover{
-
-
-    transform:translateY(-3px);
-
-
-    box-shadow:
-
-    0 8px 18px rgba(176,42,55,.35);
-
-
-}
-
-
-
-
-
-.record-actions{
-
-
-    display:flex;
-
-
-    gap:10px;
-
-
-    flex-wrap:wrap;
-
-
-}
-
-
-
-`;
-
-
-
-document.head.appendChild(style);
 
 
 
@@ -3124,137 +2713,44 @@ document.head.appendChild(style);
 
 
 // ========================================
-// FIX TABLE RESPONSIVENESS
+// FINANCIAL SUMMARY
 // ========================================
 
 
-window.addEventListener(
-
-"resize",
-
-()=>{
-
-
-const table =
-
-document.getElementById(
-    "records"
-);
-
-
-
-
-if(table && window.innerWidth < 700){
-
-
-table.style.fontSize="13px";
-
-
-}
-
-else if(table){
-
-
-table.style.fontSize="15px";
-
-
-}
-
-
-
-}
-
-);
-
-
-
-
-
-
-
-
-
-// ========================================
-// FORCE REFRESH AFTER UPDATE
-// ========================================
-
-
-async function refreshRecords(){
-
-
-await loadRecords();
-
-
-await loadProjects();
-
-
-await loadExpenses();
-
-
-await loadSummary();
-
-
-
-}
-
-
-
-
-
-// ========================================
-// IMPROVED DELETE CONFIRMATION
-// ========================================
-
-
-window.deleteRecord = async function(
-
-collectionName,
-
-id
-
-){
-
-
-
-const answer = confirm(
-
-`
-⚠️ WARNING
-
-This action cannot be undone.
-
-Delete this ${collectionName} record?
-`
-
-);
-
-
-
-
-
-if(!answer)
-
-return;
-
-
-
-
+async function loadSummary(){
 
 
 
 try{
 
 
+const collectionSnap =
 
-await deleteDoc(
+await getDocs(
 
-doc(
+collection(
 
 db,
 
-collectionName,
+"collections"
 
-id
+)
+
+);
+
+
+
+
+
+const expenseSnap =
+
+await getDocs(
+
+collection(
+
+db,
+
+"expenses"
 
 )
 
@@ -3265,10 +2761,73 @@ id
 
 
 
+let totalCollection = 0;
 
-alert(
+let totalExpense = 0;
 
-"✅ Record successfully deleted."
+
+
+
+
+
+collectionSnap.forEach(docSnap=>{
+
+
+totalCollection +=
+
+Number(
+
+docSnap.data().amount || 0
+
+);
+
+
+
+});
+
+
+
+
+
+
+
+
+expenseSnap.forEach(docSnap=>{
+
+
+totalExpense +=
+
+Number(
+
+docSnap.data().amount || 0
+
+);
+
+
+
+});
+
+
+
+
+
+
+
+const balance =
+
+totalCollection - totalExpense;
+
+
+
+
+
+
+
+setText(
+
+"totalCollections",
+
+peso(totalCollection)
 
 );
 
@@ -3277,20 +2836,44 @@ alert(
 
 
 
-await refreshRecords();
+
+setText(
+
+"totalExpenses",
+
+peso(totalExpense)
+
+);
+
+
+
+
+
+
+
+setText(
+
+"currentBalance",
+
+peso(balance)
+
+);
+
+
 
 
 
 
 }
 
-catch(error){
 
+
+catch(error){
 
 
 console.error(
 
-"DELETE FAILED:",
+"Summary Error:",
 
 error
 
@@ -3298,11 +2881,7 @@ error
 
 
 
-alert(
-
-"❌ Unable to delete record."
-
-);
+}
 
 
 
@@ -3310,10 +2889,6 @@ alert(
 
 
 
-};
-
-
-
 
 
 
@@ -3321,47 +2896,58 @@ alert(
 
 
 // ========================================
-// IMPROVED EDIT FUNCTION
+// ANNOUNCEMENTS
 // ========================================
 
 
-window.editRecord = async function(
+async function loadAnnouncements(){
 
-collectionName,
 
-id
 
-){
+const container =
+
+document.getElementById(
+
+"adminAnnouncementContainer"
+
+);
+
+
+
+
+if(!container)
+
+return;
+
 
 
 
 try{
 
 
+const snapshot =
 
-const recordRef =
+await getDocs(
 
-doc(
+query(
+
+collection(
 
 db,
 
-collectionName,
+"announcements"
 
-id
+),
 
-);
+orderBy(
 
+"createdAt",
 
+"desc"
 
+)
 
-
-
-
-const recordSnap =
-
-await getDoc(
-
-recordRef
+)
 
 );
 
@@ -3369,17 +2955,20 @@ recordRef
 
 
 
+if(snapshot.empty){
 
 
-if(!recordSnap.exists()){
+container.innerHTML=
 
+`
 
-alert(
+<div class="empty-state">
 
-"Record does not exist."
+📢 No announcements yet.
 
-);
+</div>
 
+`;
 
 return;
 
@@ -3392,216 +2981,50 @@ return;
 
 
 
-const data =
+container.innerHTML="";
 
-recordSnap.data();
 
 
 
 
+snapshot.forEach(docSnap=>{
 
 
+const data = docSnap.data();
 
 
-let updatedAmount = prompt(
 
-"💰 Update Amount:",
 
-data.amount
+container.innerHTML +=`
 
-);
 
+<div class="announcement-card">
 
 
+<h3>
 
+📢 ${data.title}
 
+</h3>
 
 
-if(updatedAmount===null)
+<p>
 
-return;
+${data.message}
 
+</p>
 
 
+</div>
 
 
+`;
 
 
 
-updatedAmount = Number(updatedAmount);
+});
 
 
-
-
-
-
-
-if(
-
-isNaN(updatedAmount)
-
-||
-
-updatedAmount<=0
-
-){
-
-
-
-alert(
-
-"Invalid amount."
-
-);
-
-
-return;
-
-
-}
-
-
-
-
-
-
-
-
-let updatedName = prompt(
-
-"📝 Update Name / Details:",
-
-data.year ||
-
-data.name ||
-
-data.project ||
-
-""
-
-);
-
-
-
-
-
-
-
-if(updatedName===null)
-
-return;
-
-
-
-
-
-
-
-const {
-
-updateDoc
-
-}=
-
-await import(
-
-"https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js"
-
-);
-
-
-
-
-
-
-
-
-
-let changes={
-
-
-
-amount:updatedAmount
-
-
-
-};
-
-
-
-
-
-
-
-
-
-if(collectionName==="collections"){
-
-
-changes.year = updatedName;
-
-
-}
-
-
-
-
-
-if(collectionName==="projects"){
-
-
-changes.name = updatedName;
-
-
-}
-
-
-
-
-
-if(collectionName==="expenses"){
-
-
-changes.project = updatedName;
-
-
-}
-
-
-
-
-
-
-
-
-
-await updateDoc(
-
-recordRef,
-
-changes
-
-);
-
-
-
-
-
-
-
-alert(
-
-"✅ Record updated successfully."
-
-);
-
-
-
-
-
-
-
-await refreshRecords();
 
 
 
@@ -3612,22 +3035,16 @@ await refreshRecords();
 catch(error){
 
 
-
 console.error(
 
-"EDIT ERROR:",
+"Announcement Error:",
 
 error
 
 );
 
 
-
-alert(
-
-"❌ Failed updating record."
-
-);
+}
 
 
 
@@ -3635,10 +3052,219 @@ alert(
 
 
 
+
+
+
+
+
+
+// ========================================
+// SEARCH RECORDS
+// ========================================
+
+
+const searchInput =
+
+document.getElementById(
+
+"searchRecord"
+
+);
+
+
+
+
+
+if(searchInput){
+
+
+
+searchInput.addEventListener(
+
+"input",
+
+()=>{
+
+
+const keyword =
+
+searchInput.value.toLowerCase();
+
+
+
+
+
+
+
+document
+
+.querySelectorAll(
+
+"#records tr"
+
+)
+
+.forEach(row=>{
+
+
+const text =
+
+row.innerText.toLowerCase();
+
+
+
+
+row.style.display =
+
+text.includes(keyword)
+
+?
+
+""
+
+:
+
+"none";
+
+
+
+});
+
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ========================================
+// DARK / LIGHT MODE
+// ========================================
+
+
+const themeButton =
+
+document.getElementById(
+
+"themeToggle"
+
+);
+
+
+
+
+
+if(themeButton){
+
+
+
+const savedTheme =
+
+localStorage.getItem(
+
+"theme"
+
+);
+
+
+
+
+
+if(savedTheme==="dark"){
+
+
+document.body.classList.add(
+
+"dark"
+
+);
+
+
+themeButton.textContent="☀";
+
+
+}
+
+
+
+
+
+
+
+themeButton.onclick=()=>{
+
+
+document.body.classList.toggle(
+
+"dark"
+
+);
+
+
+
+
+const dark =
+
+document.body.classList.contains(
+
+"dark"
+
+);
+
+
+
+
+localStorage.setItem(
+
+"theme",
+
+dark
+
+?
+
+"dark"
+
+:
+
+"light"
+
+);
+
+
+
+
+themeButton.textContent =
+
+dark
+
+?
+
+"☀"
+
+:
+
+"🌙";
+
+
+
 };
 
 
 
+}
+
+
+
 
 
 
@@ -3646,39 +3272,142 @@ alert(
 
 
 // ========================================
-// FINAL INITIALIZATION CHECK
+// AUTO SYNC
 // ========================================
+
+
+setInterval(()=>{
+
+
+initializeDashboard();
+
+
+
+console.log(
+
+"Dalubwikaan Treasury Auto Sync..."
+
+);
+
+
+
+},30000);
+
+
+
+
+
+
+
+
+
+// ========================================
+// BUTTON STYLE SUPPORT
+// ========================================
+
+
+const actionStyle = document.createElement("style");
+
+
+actionStyle.innerHTML = `
+
+
+.edit-btn{
+
+
+background:#d4af37;
+
+color:#3b2415;
+
+border:none;
+
+padding:8px 14px;
+
+border-radius:10px;
+
+cursor:pointer;
+
+font-weight:bold;
+
+}
+
+
+
+.delete-btn{
+
+
+background:#dc3545;
+
+color:white;
+
+border:none;
+
+padding:8px 14px;
+
+border-radius:10px;
+
+cursor:pointer;
+
+font-weight:bold;
+
+}
+
+
+
+.edit-btn:hover,
+
+.delete-btn:hover{
+
+
+transform:translateY(-2px);
+
+}
+
+
+
+`;
+
+
+
+document.head.appendChild(actionStyle);
+
+
+
+
+
+
+
 
 
 console.log(`
 
+=================================
 
-====================================
+DALUBWIKAAN TREASURY ADMIN v9.1
 
-DALUBWIKAAN TREASURY ADMIN v8.0
+✓ Firebase Authentication
 
-EDIT / DELETE SYSTEM ACTIVE
+✓ Collections
 
-✓ Firebase CRUD
+✓ Projects
 
-✓ Update Records
+✓ Expenses
+
+✓ Receipt Upload
+
+✓ Edit Records
 
 ✓ Delete Records
 
-✓ Receipt System
-
-✓ Expense Monitoring
-
-✓ Budget Tracking
-
-✓ Search
+✓ Search System
 
 ✓ Dark Mode
+
+✓ Financial Summary
 
 
 SYSTEM READY 🚀
 
-====================================
-
+=================================
 
 `);
