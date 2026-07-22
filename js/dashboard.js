@@ -1,10 +1,12 @@
 // =================================
 // DALUBWIKAAN TREASURY DASHBOARD
-// FIREBASE REAL-TIME + ANALYTICS
+// FIREBASE REAL-TIME + ANALYTICS + PDF REPORT
 // =================================
 
 
+
 import { db } from "./firebase.js";
+
 
 
 import {
@@ -21,7 +23,10 @@ from
 
 
 
-// CHART VARIABLES
+// ===============================
+// VARIABLES
+// ===============================
+
 
 let collectionChart;
 
@@ -36,12 +41,31 @@ window.currentExpenses = 0;
 
 
 
+let reportData = {
+
+
+funds:0,
+
+expenses:0,
+
+remaining:0,
+
+years:{}
+
+
+};
 
 
 
-// =================================
-// LOAD COLLECTIONS REAL TIME
-// =================================
+
+
+
+
+
+
+// ===============================
+// LOAD COLLECTIONS
+// ===============================
 
 
 function loadCollections(){
@@ -52,6 +76,7 @@ onSnapshot(
 collection(db,"collections"),
 
 (snapshot)=>{
+
 
 
 let totalFunds = 0;
@@ -75,13 +100,17 @@ let yearTotals = {
 
 
 
+
 let table =
 document.getElementById("transactionTable");
 
 
 
+if(table){
+
 table.innerHTML="";
 
+}
 
 
 
@@ -95,7 +124,7 @@ let data = doc.data();
 
 
 let amount =
-Number(data.amount || 0);
+Number(data.amount);
 
 
 
@@ -105,11 +134,9 @@ totalFunds += amount;
 
 
 
-if(yearTotals[data.year] !== undefined){
+if(yearTotals[data.year]){
 
-
-yearTotals[data.year] += amount;
-
+yearTotals[data.year]+=amount;
 
 }
 
@@ -117,6 +144,8 @@ yearTotals[data.year] += amount;
 
 
 
+
+if(table){
 
 
 table.innerHTML += `
@@ -145,7 +174,10 @@ Completed
 
 </tr>
 
+
 `;
+
+}
 
 
 
@@ -156,14 +188,23 @@ Completed
 
 
 
+
 window.totalFunds = totalFunds;
 
 
 
+reportData.funds = totalFunds;
 
 
 
-// UPDATE TOTAL FUNDS
+reportData.years = yearTotals;
+
+
+
+
+
+
+// UPDATE CARDS
 
 
 document
@@ -177,8 +218,7 @@ document
 
 
 
-
-// UPDATE YEAR LEVEL
+// UPDATE YEAR CARDS
 
 
 document
@@ -186,6 +226,7 @@ document
 .innerHTML =
 
 "₱"+yearTotals["First Year"].toLocaleString();
+
 
 
 
@@ -197,11 +238,13 @@ document
 
 
 
+
 document
 .getElementById("thirdYear")
 .innerHTML =
 
 "₱"+yearTotals["Third Year"].toLocaleString();
+
 
 
 
@@ -216,68 +259,17 @@ document
 
 
 
-// PROGRESS BAR
 
-
-let max = Math.max(
-
-yearTotals["First Year"],
-
-yearTotals["Second Year"],
-
-yearTotals["Third Year"],
-
-yearTotals["Fourth Year"]
-
-);
+updateProgress(yearTotals);
 
 
 
 
-if(max > 0){
+createCollectionChart(yearTotals);
 
 
 
-document
-.getElementById("firstProgress")
-.style.width =
-(yearTotals["First Year"]/max*100)+"%";
-
-
-
-document
-.getElementById("secondProgress")
-.style.width =
-(yearTotals["Second Year"]/max*100)+"%";
-
-
-
-document
-.getElementById("thirdProgress")
-.style.width =
-(yearTotals["Third Year"]/max*100)+"%";
-
-
-
-document
-.getElementById("fourthProgress")
-.style.width =
-(yearTotals["Fourth Year"]/max*100)+"%";
-
-
-
-}
-
-
-
-
-
-
-updateCollectionChart(yearTotals);
-
-
-
-calculateBalance();
+updateBalance();
 
 
 
@@ -301,14 +293,12 @@ updateBudgetChart();
 
 
 
-// =================================
-// LOAD PROJECTS REAL TIME
-// =================================
-
+// ===============================
+// LOAD PROJECT EXPENSES
+// ===============================
 
 
 function loadProjects(){
-
 
 
 onSnapshot(
@@ -328,8 +318,11 @@ document.getElementById("projectTable");
 
 
 
+if(table){
+
 table.innerHTML="";
 
+}
 
 
 
@@ -343,7 +336,7 @@ let data = doc.data();
 
 
 let budget =
-Number(data.budget || 0);
+Number(data.budget);
 
 
 
@@ -354,21 +347,21 @@ expenses += budget;
 
 
 
+if(table){
+
+
 table.innerHTML += `
 
 <tr>
-
 
 <td>
 ${data.name}
 </td>
 
 
-
 <td>
 ₱${budget.toLocaleString()}
 </td>
-
 
 
 <td>
@@ -380,6 +373,7 @@ ${data.description}
 
 `;
 
+}
 
 
 });
@@ -388,8 +382,11 @@ ${data.description}
 
 
 
-
 window.currentExpenses = expenses;
+
+
+
+reportData.expenses = expenses;
 
 
 
@@ -404,9 +401,7 @@ document
 
 
 
-
-calculateBalance();
-
+updateBalance();
 
 
 updateBudgetChart();
@@ -414,7 +409,6 @@ updateBudgetChart();
 
 
 }
-
 
 
 );
@@ -430,30 +424,40 @@ updateBudgetChart();
 
 
 
-// =================================
-// COMPUTE BALANCE
-// =================================
+// ===============================
+// BALANCE CALCULATOR
+// ===============================
 
 
-function calculateBalance(){
+function updateBalance(){
 
 
-
-let remaining =
+let balance =
 
 window.totalFunds -
-
 window.currentExpenses;
 
 
 
+reportData.remaining = balance;
 
 
-document
-.getElementById("remainingBalance")
-.innerHTML =
 
-"₱"+remaining.toLocaleString();
+
+let element =
+document.getElementById("remainingBalance");
+
+
+
+if(element){
+
+
+element.innerHTML =
+
+"₱"+balance.toLocaleString();
+
+
+}
 
 
 
@@ -467,13 +471,83 @@ document
 
 
 
-// =================================
-// BAR CHART
-// =================================
+// ===============================
+// PROGRESS BAR
+// ===============================
+
+
+function updateProgress(data){
 
 
 
-function updateCollectionChart(data){
+let max = Math.max(
+
+data["First Year"],
+
+data["Second Year"],
+
+data["Third Year"],
+
+data["Fourth Year"]
+
+);
+
+
+
+if(max===0) return;
+
+
+
+document
+.getElementById("firstProgress")
+.style.width =
+
+(data["First Year"]/max*100)+"%";
+
+
+
+
+document
+.getElementById("secondProgress")
+.style.width =
+
+(data["Second Year"]/max*100)+"%";
+
+
+
+
+document
+.getElementById("thirdProgress")
+.style.width =
+
+(data["Third Year"]/max*100)+"%";
+
+
+
+
+document
+.getElementById("fourthProgress")
+.style.width =
+
+(data["Fourth Year"]/max*100)+"%";
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// COLLECTION BAR CHART
+// ===============================
+
+
+function createCollectionChart(data){
 
 
 
@@ -483,8 +557,6 @@ document.getElementById("collectionChart");
 
 
 if(!canvas) return;
-
-
 
 
 
@@ -524,6 +596,7 @@ labels:[
 
 datasets:[{
 
+
 label:"Collected Funds",
 
 
@@ -543,7 +616,6 @@ data["Fourth Year"]
 }]
 
 
-
 },
 
 
@@ -551,23 +623,7 @@ data["Fourth Year"]
 options:{
 
 
-responsive:true,
-
-
-plugins:{
-
-
-legend:{
-
-
-display:true
-
-
-}
-
-
-}
-
+responsive:true
 
 
 }
@@ -588,10 +644,9 @@ display:true
 
 
 
-// =================================
-// PIE CHART
-// =================================
-
+// ===============================
+// BUDGET PIE CHART
+// ===============================
 
 
 function updateBudgetChart(){
@@ -607,8 +662,6 @@ if(!canvas) return;
 
 
 
-
-
 if(budgetChart){
 
 budgetChart.destroy();
@@ -618,10 +671,7 @@ budgetChart.destroy();
 
 
 
-
-
 budgetChart = new Chart(canvas,{
-
 
 
 type:"pie",
@@ -633,9 +683,9 @@ data:{
 
 labels:[
 
-"Used Budget",
+"Expenses",
 
-"Remaining Funds"
+"Remaining Balance"
 
 ],
 
@@ -643,23 +693,14 @@ labels:[
 
 datasets:[{
 
-
 data:[
 
-
 window.currentExpenses,
-
 
 Math.max(
-
-window.totalFunds -
-window.currentExpenses,
-
+window.totalFunds-window.currentExpenses,
 0
-
 )
-
-
 
 ]
 
@@ -694,29 +735,224 @@ responsive:true
 
 
 
-// =================================
-// MEMBERS
-// =================================
+// ===============================
+// PDF REPORT GENERATOR
+// ===============================
 
 
-// Temporary value
-
-document
-.getElementById("totalMembers")
-.innerHTML = "150";
+let button =
+document.getElementById("generateReport");
 
 
 
+if(button){
+
+
+button.addEventListener("click",()=>{
+
+
+
+const {
+
+jsPDF
+
+}
+
+=
+window.jspdf;
+
+
+
+let doc =
+new jsPDF();
+
+
+
+
+
+let y=20;
+
+
+
+
+doc.setFontSize(18);
+
+
+doc.text(
+
+"DALUBWIKAAN TREASURY REPORT",
+
+20,
+
+y
+
+);
+
+
+
+
+
+y+=15;
+
+
+
+doc.setFontSize(12);
+
+
+
+doc.text(
+
+"Academic Year 2026-2027",
+
+20,
+
+y
+
+);
+
+
+
+y+=15;
+
+
+
+doc.text(
+
+"Generated: "+
+new Date().toLocaleDateString(),
+
+20,
+
+y
+
+);
+
+
+
+y+=20;
+
+
+
+
+doc.text(
+
+"Total Funds: ₱"+
+reportData.funds.toLocaleString(),
+
+20,
+
+y
+
+);
+
+
+
+y+=10;
+
+
+
+doc.text(
+
+"Expenses: ₱"+
+reportData.expenses.toLocaleString(),
+
+20,
+
+y
+
+);
+
+
+
+y+=10;
+
+
+
+doc.text(
+
+"Remaining: ₱"+
+reportData.remaining.toLocaleString(),
+
+20,
+
+y
+
+);
+
+
+
+y+=20;
+
+
+
+doc.text(
+
+"Collection Breakdown:",
+
+20,
+
+y
+
+);
+
+
+
+y+=10;
+
+
+
+Object.keys(reportData.years)
+.forEach(year=>{
+
+
+doc.text(
+
+year+
+": ₱"+
+reportData.years[year].toLocaleString(),
+
+20,
+
+y
+
+);
+
+
+
+y+=10;
+
+
+});
+
+
+
+
+doc.save(
+
+"Dalubwikaan_Treasury_Report.pdf"
+
+);
+
+
+
+});
+
+
+}
 
 
 
 
 
 
-// START DASHBOARD
+
+
+
+// ===============================
+// START SYSTEM
+// ===============================
 
 
 loadCollections();
-
 
 loadProjects();
