@@ -14,13 +14,9 @@ Dalubwikaan Treasury Admin Portal
 
 
 
-<!-- CSS -->
-
 <link rel="stylesheet" href="css/style.css">
 
 
-
-<!-- GOOGLE FONT -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -34,17 +30,8 @@ Dalubwikaan Treasury Admin Portal
 
 
 
-
-
 <body>
 
-
-
-
-
-<!-- =========================
-     LOADING SCREEN
-========================== -->
 
 
 <div id="loader">
@@ -72,12 +59,6 @@ Loading Treasury Management System...
 
 
 
-
-
-
-<!-- =========================
-     SIDEBAR
-========================== -->
 
 
 <aside class="sidebar">
@@ -208,9 +189,6 @@ Academic Year 2026-2027
 
 
 
-<!-- =========================
-     MAIN CONTENT
-========================== -->
 
 
 <main class="main">
@@ -240,8 +218,8 @@ Dalubwikaan Treasury Management
 <p>
 
 
-Manage collections, expenses, projects,
-and organizational transparency.
+Manage collections, expenses,
+projects, and transparency.
 
 
 
@@ -266,8 +244,6 @@ Academic Year 2026-2027
 
 id="themeToggle"
 
-aria-label="Toggle Theme"
-
 >
 
 
@@ -288,9 +264,6 @@ aria-label="Toggle Theme"
 
 
 
-<!-- =========================
-     ADMIN PROFILE
-========================== -->
 
 
 <section class="panel profile-panel">
@@ -392,9 +365,10 @@ Financial Transparency Portal
 
 
 
-<!-- =========================
-     DASHBOARD STATISTICS
-========================== -->
+
+
+
+
 
 
 <section class="cards">
@@ -533,15 +507,6 @@ Approved Spending
 
 
 </section>
-
-
-
-
-
-
-
-
-
 <!-- =========================
      COLLECTION MANAGEMENT
 ========================== -->
@@ -839,19 +804,28 @@ accept="image/*"
 
 
 
-<!-- RECEIPT PREVIEW -->
 
 
-<div id="receiptPreview"
+<!-- RECEIPT PREVIEW AREA -->
 
-class="receipt-preview">
+<div
+
+id="receiptPreview"
+
+class="receipt-preview"
+
+>
 
 
-<p>
+
+<div class="empty-state">
+
 
 🧾 Receipt preview will appear here.
 
-</p>
+
+</div>
+
 
 
 </div>
@@ -887,8 +861,13 @@ class="receipt-preview">
 
 
 
+
+
+
+
+
 <!-- =========================
-     PROJECT TRANSPARENCY MANAGEMENT
+     PROJECT MANAGEMENT
 ========================== -->
 
 
@@ -907,7 +886,7 @@ class="receipt-preview">
 <p class="panel-description">
 
 Monitor organization projects, allocated budget,
-and implementation status for transparency.
+and implementation status.
 
 </p>
 
@@ -1079,15 +1058,6 @@ Project Status
 
 
 </section>
-
-
-
-
-
-
-
-
-
 <!-- =========================
      ANNOUNCEMENT MANAGEMENT
 ========================== -->
@@ -1219,18 +1189,14 @@ Latest Announcements
 
 
 
-<div id="adminAnnouncementContainer">
+<div id="announcementContainer">
 
 
 
 <div class="empty-state">
 
 
-<p>
-
 📢 No announcements yet.
-
-</p>
 
 
 </div>
@@ -1321,13 +1287,26 @@ autocomplete="off"
 
 
 
+<p class="panel-description">
+
+Manage all treasury entries.
+You can edit or delete records below.
+
+</p>
+
+
+
+
+
+
+
 <div class="table-responsive">
 
 
 
 
 
-<table>
+<table id="recordsTable">
 
 
 
@@ -1363,6 +1342,14 @@ Amount
 
 <th>
 
+Status
+
+</th>
+
+
+
+<th>
+
 Action
 
 </th>
@@ -1388,7 +1375,7 @@ Action
 
 
 
-<td colspan="4">
+<td colspan="5">
 
 
 No records available.
@@ -1419,6 +1406,172 @@ No records available.
 
 
 </section>
+
+
+
+
+
+
+
+
+
+<!-- =========================
+     EDIT RECORD MODAL
+========================== -->
+
+
+<div
+
+id="editModal"
+
+class="receipt-modal"
+
+style="display:none;"
+
+>
+
+
+
+<div class="receipt-modal-content">
+
+
+
+
+
+<button
+
+id="closeEditModal"
+
+class="close-receipt"
+
+>
+
+✖
+
+</button>
+
+
+
+
+
+<h2>
+
+✏️ Edit Record
+
+</h2>
+
+
+
+
+
+
+
+<form id="editRecordForm">
+
+
+
+
+
+<input
+
+type="hidden"
+
+id="editRecordId"
+
+>
+
+
+
+
+
+<input
+
+type="hidden"
+
+id="editCollectionName"
+
+>
+
+
+
+
+
+
+
+<label>
+
+Details
+
+</label>
+
+
+
+<input
+
+type="text"
+
+id="editDetails"
+
+required
+
+>
+
+
+
+
+
+
+
+<label>
+
+Amount
+
+</label>
+
+
+
+<input
+
+type="number"
+
+id="editAmount"
+
+required
+
+>
+
+
+
+
+
+
+
+
+<button type="submit">
+
+💾 Save Changes
+
+</button>
+
+
+
+
+
+</form>
+
+
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
 
 
 
@@ -1601,17 +1754,8 @@ Financial monitoring
 
 
 </section>
-
-
-
-
-
-
-
-
-
 <!-- =========================
-     PROJECT STATUS LEGEND
+     PROJECT STATUS GUIDE
 ========================== -->
 
 
@@ -1829,15 +1973,11 @@ Academic Year 2026-2027
 
 
 
-<!-- Theme System -->
-
 <script src="js/theme.js"></script>
 
 
 
 
-
-<!-- Admin Firebase System -->
 
 <script
 
