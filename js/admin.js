@@ -1,7 +1,7 @@
 // =================================
 // DALUBWIKAAN ADMIN PANEL
 // FIREBASE CRUD + AUTH + STORAGE
-// WITH AUDIT TRAIL SYSTEM
+// ADVANCED TREASURY MANAGEMENT
 // =================================
 
 
@@ -17,7 +17,9 @@ addDoc,
 getDocs,
 deleteDoc,
 doc,
-serverTimestamp
+serverTimestamp,
+query,
+orderBy
 
 }
 
@@ -66,8 +68,6 @@ from
 
 
 
-
-
 const auth=getAuth();
 
 
@@ -82,9 +82,9 @@ let currentUser=null;
 
 
 
-// ===============================
-// AUTH CHECK
-// ===============================
+// =================================
+// AUTHENTICATION
+// =================================
 
 
 onAuthStateChanged(auth,(user)=>{
@@ -105,6 +105,19 @@ return;
 currentUser=user;
 
 
+
+let emailBox=
+document.getElementById("adminEmail");
+
+
+
+if(emailBox){
+
+emailBox.innerHTML=user.email;
+
+}
+
+
 });
 
 
@@ -115,16 +128,18 @@ currentUser=user;
 
 
 
-// ===============================
+// =================================
 // LOGOUT
-// ===============================
+// =================================
 
 
-const logout=document.getElementById("logout");
+const logout=
+document.getElementById("logout");
 
 
 
 if(logout){
+
 
 
 logout.onclick=async()=>{
@@ -149,15 +164,31 @@ window.location.href="login.html";
 
 
 
-// ===============================
-// FORMAT MONEY
-// ===============================
+// =================================
+// HELPERS
+// =================================
+
 
 
 function peso(value){
 
 
-return "₱"+Number(value).toLocaleString();
+return "₱"+Number(value || 0).toLocaleString();
+
+
+}
+
+
+
+
+
+
+
+function notify(message,type="success"){
+
+
+
+alert(message);
 
 
 }
@@ -170,13 +201,39 @@ return "₱"+Number(value).toLocaleString();
 
 
 
-// ===============================
-// AUDIT LOGGER
-// ===============================
+function getValue(id){
+
+
+
+let element=
+document.getElementById(id);
+
+
+return element ? element.value.trim() : "";
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =================================
+// AUDIT SYSTEM
+// =================================
+
 
 
 async function createAudit(action,details){
 
+
+
+try{
 
 
 await addDoc(
@@ -186,10 +243,10 @@ collection(db,"audit"),
 {
 
 
-action:action,
+action,
 
 
-details:details,
+details,
 
 
 user:
@@ -213,6 +270,20 @@ serverTimestamp()
 
 }
 
+catch(error){
+
+
+console.log(
+"Audit error:",
+error
+);
+
+
+}
+
+
+
+}
 
 
 
@@ -221,9 +292,11 @@ serverTimestamp()
 
 
 
-// ===============================
-// COLLECTION ADD
-// ===============================
+
+// =================================
+// ADD COLLECTION
+// =================================
+
 
 
 const collectionForm=
@@ -250,6 +323,7 @@ let button=
 collectionForm.querySelector("button");
 
 
+
 button.disabled=true;
 
 button.innerHTML="Saving...";
@@ -261,30 +335,45 @@ button.innerHTML="Saving...";
 try{
 
 
-
 let data={
 
 
-year:
-yearLevel.value,
+
+year:getValue("yearLevel"),
 
 
-amount:
-Number(amount.value),
+amount:Number(getValue("amount")),
 
 
-date:
-date.value,
+date:getValue("date"),
 
 
 type:"Collection",
 
 
-createdAt:
-serverTimestamp()
+createdAt:serverTimestamp()
+
 
 
 };
+
+
+
+
+if(!data.year || !data.amount){
+
+
+notify(
+"Please complete all fields",
+"error"
+);
+
+
+return;
+
+
+}
+
 
 
 
@@ -307,7 +396,7 @@ await createAudit(
 
 "Added Collection",
 
-`${data.year} collection ₱${data.amount}`
+`${data.year} - ${peso(data.amount)}`
 
 );
 
@@ -316,8 +405,8 @@ await createAudit(
 
 
 
-alert(
-"Collection successfully added!"
+notify(
+"Collection Added Successfully!"
 );
 
 
@@ -325,10 +414,12 @@ alert(
 collectionForm.reset();
 
 
-loadRecords();
+await loadRecords();
 
 
 }
+
+
 
 catch(error){
 
@@ -336,8 +427,8 @@ catch(error){
 console.error(error);
 
 
-alert(
-"Unable to save collection"
+notify(
+"Saving failed"
 );
 
 
@@ -345,9 +436,12 @@ alert(
 
 
 
+
+
 button.disabled=false;
 
 button.innerHTML="Save Collection";
+
 
 
 });
@@ -363,9 +457,9 @@ button.innerHTML="Save Collection";
 
 
 
-// ===============================
-// PROJECT ADD
-// ===============================
+// =================================
+// ADD PROJECT
+// =================================
 
 
 
@@ -389,24 +483,20 @@ e.preventDefault();
 
 
 
-
 try{
-
 
 
 let data={
 
 
-name:
-projectName.value,
+
+name:getValue("projectName"),
 
 
-budget:
-Number(projectBudget.value),
+budget:Number(getValue("projectBudget")),
 
 
-description:
-description.value,
+description:getValue("description"),
 
 
 status:"Planned",
@@ -415,11 +505,13 @@ status:"Planned",
 type:"Project",
 
 
-createdAt:
-serverTimestamp()
+createdAt:serverTimestamp()
+
 
 
 };
+
+
 
 
 
@@ -438,11 +530,12 @@ data
 
 
 
+
 await createAudit(
 
 "Added Project",
 
-`${data.name} - ₱${data.budget}`
+`${data.name} ${peso(data.budget)}`
 
 );
 
@@ -450,8 +543,9 @@ await createAudit(
 
 
 
-alert(
-"Project Added Successfully!"
+
+notify(
+"Project Added!"
 );
 
 
@@ -459,7 +553,9 @@ alert(
 projectForm.reset();
 
 
+
 loadRecords();
+
 
 
 }
@@ -469,11 +565,11 @@ loadRecords();
 catch(error){
 
 
-console.error(error);
+console.log(error);
 
 
-alert(
-"Project saving failed"
+notify(
+"Project failed"
 );
 
 
@@ -494,9 +590,10 @@ alert(
 
 
 
-// ===============================
-// EXPENSE UPLOAD
-// ===============================
+// =================================
+// EXPENSE + RECEIPT
+// =================================
+
 
 
 const expenseForm=
@@ -524,11 +621,13 @@ try{
 
 
 let file=
-receiptFile.files[0];
+document.getElementById("receiptFile")
+?.files[0];
 
 
 
 let receiptURL="";
+
 
 
 
@@ -541,8 +640,8 @@ if(file){
 if(file.size > 5000000){
 
 
-alert(
-"Receipt must be below 5MB"
+notify(
+"Maximum file size is 5MB"
 );
 
 
@@ -550,6 +649,7 @@ return;
 
 
 }
+
 
 
 
@@ -588,25 +688,20 @@ await getDownloadURL(fileRef);
 
 
 
-
 let data={
 
 
 
-project:
-expenseProject.value,
+project:getValue("expenseProject"),
 
 
-amount:
-Number(expenseAmount.value),
+amount:Number(getValue("expenseAmount")),
 
 
-description:
-expenseDescription.value,
+description:getValue("expenseDescription"),
 
 
-receipt:
-receiptURL,
+receipt:receiptURL,
 
 
 status:"Approved",
@@ -619,8 +714,7 @@ new Date().toLocaleDateString(),
 type:"Expense",
 
 
-createdAt:
-serverTimestamp()
+createdAt:serverTimestamp()
 
 
 
@@ -649,7 +743,7 @@ await createAudit(
 
 "Added Expense",
 
-`${data.project} ₱${data.amount}`
+`${data.project} ${peso(data.amount)}`
 
 );
 
@@ -658,9 +752,8 @@ await createAudit(
 
 
 
-
-alert(
-"Expense saved!"
+notify(
+"Expense Added!"
 );
 
 
@@ -671,18 +764,22 @@ expenseForm.reset();
 loadRecords();
 
 
+
 }
+
+
 
 
 
 catch(error){
 
 
+
 console.error(error);
 
 
-alert(
-"Expense upload failed"
+notify(
+"Expense failed"
 );
 
 
@@ -703,9 +800,9 @@ alert(
 
 
 
-// ===============================
+// =================================
 // LOAD RECORDS
-// ===============================
+// =================================
 
 
 
@@ -718,8 +815,8 @@ document.getElementById("records");
 
 
 
-if(!table)
-return;
+if(!table)return;
+
 
 
 
@@ -732,9 +829,7 @@ let records=[];
 
 
 
-
-
-let lists=[
+let sources=[
 
 {
 name:"collections",
@@ -751,21 +846,21 @@ name:"expenses",
 type:"Expense"
 }
 
+
 ];
 
 
 
 
 
-
-for(let list of lists){
+for(let source of sources){
 
 
 
 let snapshot=
 await getDocs(
 
-collection(db,list.name)
+collection(db,source.name)
 
 );
 
@@ -785,10 +880,10 @@ records.push({
 id:item.id,
 
 
-collection:list.name,
+collection:source.name,
 
 
-type:list.type,
+type:source.type,
 
 
 title:
@@ -802,25 +897,37 @@ data.description ||
 data.date,
 
 
-amount:
-data.amount,
+amount:data.amount,
 
 
-receipt:
-data.receipt
+receipt:data.receipt,
 
 
-
-});
-
+created:data.createdAt
 
 
 });
 
+
+
+});
 
 
 }
 
+
+
+
+
+
+
+records.reverse();
+
+
+
+
+
+updateCounters(records);
 
 
 
@@ -861,7 +968,6 @@ records.forEach(record=>{
 
 table.innerHTML+=`
 
-
 <tr>
 
 
@@ -876,14 +982,18 @@ ${record.type}
 
 <td>
 
+
 <b>${record.title}</b>
 
+
 <br>
+
 
 <small>${record.details}</small>
 
 
-${record.receipt ?
+${
+record.receipt ?
 
 `
 
@@ -891,13 +1001,15 @@ ${record.receipt ?
 
 <a href="${record.receipt}" target="_blank">
 
-🧾 View Receipt
+🧾 Receipt
 
 </a>
 
 `
 
-:""}
+:""
+
+}
 
 
 </td>
@@ -911,7 +1023,6 @@ ${record.receipt ?
 ${peso(record.amount)}
 
 </td>
-
 
 
 
@@ -935,7 +1046,6 @@ onclick="deleteRecord('${record.collection}','${record.id}')">
 </td>
 
 
-
 </tr>
 
 
@@ -957,9 +1067,45 @@ onclick="deleteRecord('${record.collection}','${record.id}')">
 
 
 
-// ===============================
+// =================================
+// ADMIN COUNTERS
+// =================================
+
+
+
+function updateCounters(records){
+
+
+
+let total=
+document.getElementById("recordCount");
+
+
+
+if(total){
+
+
+total.innerHTML=
+records.length;
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =================================
 // DELETE
-// ===============================
+// =================================
 
 
 
@@ -968,19 +1114,16 @@ async function(collectionName,id){
 
 
 
-let confirmDelete=
-confirm(
+if(!confirm(
+"Delete this record?"
+))
 
-"Are you sure you want to delete this?"
-
-);
-
-
-
-if(!confirmDelete)
 return;
 
 
+
+
+try{
 
 
 
@@ -1007,7 +1150,7 @@ await createAudit(
 
 "Deleted Record",
 
-collectionName+" : "+id
+collectionName+" "+id
 
 );
 
@@ -1016,13 +1159,32 @@ collectionName+" : "+id
 
 
 
-alert(
-"Record deleted successfully"
+notify(
+"Deleted Successfully"
 );
 
 
 
 loadRecords();
+
+
+
+}
+
+
+
+catch(error){
+
+
+console.log(error);
+
+
+notify(
+"Delete failed"
+);
+
+
+}
 
 
 
@@ -1036,10 +1198,73 @@ loadRecords();
 
 
 
-// ===============================
-// START SYSTEM
-// ===============================
+// =================================
+// SEARCH FUNCTION
+// =================================
 
+
+
+const search=
+document.getElementById("searchRecord");
+
+
+
+if(search){
+
+
+
+search.addEventListener(
+
+"keyup",
+
+()=>{
+
+
+let value=
+search.value.toLowerCase();
+
+
+
+document
+.querySelectorAll("#records tr")
+.forEach(row=>{
+
+
+row.style.display=
+
+row.innerText
+.toLowerCase()
+.includes(value)
+
+?
+
+""
+
+:
+
+"none";
+
+
+
+});
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+// =================================
+// START
+// =================================
 
 
 loadRecords();
