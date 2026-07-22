@@ -1,15 +1,19 @@
 // ========================================
 // DALUBWIKAAN TREASURY MANAGEMENT SYSTEM
-// ADMIN PANEL v3.0
+// ADMIN PANEL v4.0
 // Firebase Authentication
 // Firestore CRUD
-// Firebase Storage
-// Announcement System
-// Receipt Enhancement
+// Storage Receipt System
+// Project Transparency
+// Announcement Management
 // ========================================
 
 
-import { db, storage } from "./firebase.js";
+import { 
+    db, 
+    storage 
+} from "./firebase.js";
+
 
 
 import {
@@ -19,6 +23,7 @@ import {
     getDocs,
     getDoc,
     deleteDoc,
+    updateDoc,
     doc,
     serverTimestamp,
     query,
@@ -26,7 +31,8 @@ import {
 
 }
 
-from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+from 
+"https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 
 
@@ -38,7 +44,8 @@ import {
 
 }
 
-from "https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
+from
+"https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
 
 
 
@@ -50,7 +57,10 @@ import {
 
 }
 
-from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+from
+"https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+
 
 
 
@@ -61,30 +71,10 @@ from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 const auth = getAuth();
 
+
 let currentUser = null;
 
 
-
-// ========================================
-// LOADER
-// ========================================
-
-
-window.addEventListener("load",()=>{
-
-
-    setTimeout(()=>{
-
-
-        document
-        .getElementById("loader")
-        ?.remove();
-
-
-    },800);
-
-
-});
 
 
 
@@ -93,24 +83,85 @@ window.addEventListener("load",()=>{
 // ========================================
 
 
-const value = (id)=>
+const getValue = (id)=>{
 
-document
-.getElementById(id)
-?.value
-.trim() || "";
+    return document
+    .getElementById(id)
+    ?.value
+    .trim() || "";
 
-
-
-const peso = (amount)=>
-
-`₱${Number(amount || 0).toLocaleString()}`;
+};
 
 
 
-const notify = (message)=>
 
-alert(message);
+
+const peso = (amount)=>{
+
+    return "₱" +
+    Number(amount || 0)
+    .toLocaleString(
+        "en-PH",
+        {
+            minimumFractionDigits:2
+        }
+    );
+
+};
+
+
+
+
+
+
+const notify = (message)=>{
+
+    alert(message);
+
+};
+
+
+
+
+
+
+
+
+// ========================================
+// LOADER
+// ========================================
+
+
+window.addEventListener(
+"load",
+()=>{
+
+
+setTimeout(()=>{
+
+
+const loader =
+document.getElementById("loader");
+
+
+if(loader){
+
+loader.remove();
+
+}
+
+
+
+},800);
+
+
+
+});
+
+
+
+
+
 
 
 
@@ -119,105 +170,129 @@ alert(message);
 // ========================================
 
 
-onAuthStateChanged(auth, async(user)=>{
+onAuthStateChanged(
+auth,
+async(user)=>{
 
 
-    if(!user){
+if(!user){
 
 
-        location.href="login.html";
-
-        return;
-
-
-    }
+window.location.href =
+"login.html";
 
 
+return;
 
-    try{
 
-
-        const adminRef = doc(
-            db,
-            "admins",
-            user.uid
-        );
+}
 
 
 
-        const adminDoc =
-        await getDoc(adminRef);
+
+try{
+
+
+const adminRef =
+doc(
+db,
+"admins",
+user.uid
+);
 
 
 
-        if(!adminDoc.exists()){
-
-
-            alert(
-            "Access denied."
-            );
-
-
-            await signOut(auth);
-
-
-            location.href="login.html";
-
-
-            return;
-
-
-        }
+const adminSnap =
+await getDoc(adminRef);
 
 
 
-        currentUser = user;
+
+
+if(!adminSnap.exists()){
 
 
 
-        const email =
-        document.getElementById(
-            "adminEmail"
-        );
+alert(
+"Unauthorized account."
+);
 
 
 
-        if(email){
-
-
-            email.textContent =
-            user.email;
-
-
-        }
+await signOut(auth);
 
 
 
-        await refresh();
+window.location.href =
+"login.html";
+
+
+return;
+
+
+}
 
 
 
-    }
 
 
-    catch(error){
+currentUser = user;
 
 
-        console.error(
-            "Authentication Error:",
-            error
-        );
 
 
-        notify(
-        "Unable to verify administrator."
-        );
+
+const email =
+document.getElementById(
+"adminEmail"
+);
 
 
-    }
+
+
+if(email){
+
+email.textContent =
+user.email;
+
+}
+
+
+
+
+
+initializeSystem();
+
+
+
+}
+
+catch(error){
+
+
+console.error(
+"Authentication Error:",
+error
+);
+
+
+
+notify(
+"Unable to verify administrator."
+);
+
+
+}
+
 
 
 });
+
+
+
+
+
+
 
 
 
@@ -233,161 +308,59 @@ document
 async()=>{
 
 
-    await signOut(auth);
+await signOut(auth);
 
 
-    location.href="login.html";
+
+window.location.href =
+"login.html";
+
 
 
 });
 
 
 
-// ========================================
-// ANNOUNCEMENT SYSTEM
-// ========================================
 
-
-
-async function createAnnouncement(
-title,
-message
-){
-
-
-    try{
-
-
-        await addDoc(
-        collection(
-            db,
-            "announcements"
-        ),
-        {
-
-
-            title,
-
-
-            message,
-
-
-            postedBy:
-            currentUser?.email ||
-            "Administrator",
-
-
-
-            createdAt:
-            serverTimestamp()
-
-
-        });
-
-
-    }
-
-
-    catch(error){
-
-
-        console.error(
-        "Announcement Error:",
-        error
-        );
-
-
-    }
-
-
-}
 
 
 
 // ========================================
-// ANNOUNCEMENT FORM
+// SYSTEM START
 // ========================================
 
 
-const announcementForm =
-document.getElementById(
-"announcementContainer"
+async function initializeSystem(){
+
+
+await Promise.all([
+
+
+loadRecords(),
+
+
+loadAnnouncements(),
+
+
+loadSummary()
+
+
+]);
+
+
+
+console.log(
+"Dalubwikaan Treasury Admin v4.0 Ready"
 );
 
 
 
-if(announcementForm){
-
-
-announcementForm.addEventListener(
-"submit",
-async(e)=>{
-
-
-    e.preventDefault();
-
-
-
-    const title =
-    value(
-    "announcementTitle"
-    );
-
-
-
-    const message =
-    value(
-    "announcementMessage"
-    );
-
-
-
-    if(!title || !message){
-
-
-        notify(
-        "Please complete announcement fields."
-        );
-
-
-        return;
-
-
-    }
-
-
-
-    await createAnnouncement(
-        title,
-        message
-    );
-
-
-
-    notify(
-    "Announcement posted successfully."
-    );
-
-
-
-    announcementForm.reset();
-
-
-
-    await refresh();
-
-
-
-});
-
-
 }
 
 
 
-
 // ========================================
-// COLLECTION MODULE
+// COLLECTION MANAGEMENT
 // ========================================
 
 
@@ -413,20 +386,21 @@ e.preventDefault();
 try{
 
 
+
 const year =
-value("yearLevel");
+getValue("yearLevel");
 
 
 
 const amount =
 Number(
-value("amount")
+getValue("amount")
 );
 
 
 
 const date =
-value("date");
+getValue("date");
 
 
 
@@ -447,6 +421,7 @@ return;
 
 
 
+
 if(
 isNaN(amount) ||
 amount <= 0
@@ -454,14 +429,16 @@ amount <= 0
 
 
 notify(
-"Enter valid amount."
+"Invalid collection amount."
 );
+
 
 
 return;
 
 
 }
+
 
 
 
@@ -469,14 +446,16 @@ if(!date){
 
 
 notify(
-"Please select date."
+"Please select collection date."
 );
+
 
 
 return;
 
 
 }
+
 
 
 
@@ -505,7 +484,6 @@ type:
 "Collection",
 
 
-
 createdAt:
 serverTimestamp()
 
@@ -517,9 +495,13 @@ serverTimestamp()
 
 
 
+
+
 notify(
-"Collection successfully added."
+"Collection added successfully."
 );
+
+
 
 
 
@@ -527,7 +509,13 @@ collectionForm.reset();
 
 
 
-await refresh();
+
+
+await loadRecords();
+
+
+await loadSummary();
+
 
 
 
@@ -536,6 +524,7 @@ await refresh();
 
 
 catch(error){
+
 
 
 console.error(
@@ -558,9 +547,19 @@ notify(
 });
 
 
+
 }
+
+
+
+
+
+
+
+
+
 // ========================================
-// PROJECT MODULE
+// PROJECT MANAGEMENT
 // ========================================
 
 
@@ -571,7 +570,11 @@ document.getElementById(
 
 
 
+
+
+
 if(projectForm){
+
 
 
 projectForm.addEventListener(
@@ -579,15 +582,21 @@ projectForm.addEventListener(
 async(e)=>{
 
 
+
 e.preventDefault();
+
+
 
 
 
 try{
 
 
+
+
+
 const name =
-value(
+getValue(
 "projectName"
 );
 
@@ -595,17 +604,34 @@ value(
 
 const budget =
 Number(
-value(
+getValue(
 "projectBudget"
 )
 );
 
 
 
+
+
 const description =
-value(
+getValue(
 "description"
 );
+
+
+
+
+
+
+const status =
+getValue(
+"projectStatus"
+)
+||
+"Planning";
+
+
+
 
 
 
@@ -614,8 +640,9 @@ if(!name){
 
 
 notify(
-"Please enter project name."
+"Project name is required."
 );
+
 
 
 return;
@@ -625,9 +652,13 @@ return;
 
 
 
+
+
+
+
 if(
 isNaN(budget) ||
-budget <= 0
+budget <=0
 ){
 
 
@@ -636,25 +667,15 @@ notify(
 );
 
 
-return;
-
-
-}
-
-
-
-if(!description){
-
-
-notify(
-"Please provide description."
-);
-
 
 return;
 
 
 }
+
+
+
+
 
 
 
@@ -678,28 +699,45 @@ budget,
 description,
 
 
-status:
-"Planned",
+
+status,
+
 
 
 type:
 "Project",
 
 
+
 createdAt:
 serverTimestamp()
 
 
+
 }
 
+
+
 );
+
+
+
+
+
 
 
 
 
 notify(
-"Project successfully added."
+
+"Project added successfully."
+
 );
+
+
+
+
+
 
 
 
@@ -707,7 +745,14 @@ projectForm.reset();
 
 
 
-await refresh();
+
+
+await loadRecords();
+
+
+await loadSummary();
+
+
 
 
 
@@ -715,7 +760,9 @@ await refresh();
 
 
 
+
 catch(error){
+
 
 
 console.error(
@@ -738,16 +785,20 @@ notify(
 });
 
 
+
 }
 
 
 
 
-// ========================================
-// EXPENSE MODULE
-// FIREBASE STORAGE + RECEIPT SYSTEM
-// ========================================
 
+
+
+
+
+// ========================================
+// EXPENSE MANAGEMENT
+// ========================================
 
 
 const expenseForm =
@@ -773,6 +824,10 @@ document.getElementById(
 
 
 
+
+
+
+
 // ========================================
 // RECEIPT PREVIEW
 // ========================================
@@ -781,12 +836,17 @@ document.getElementById(
 if(receiptInput){
 
 
+
 receiptInput.addEventListener(
 "change",
 ()=>{
 
 
+if(receiptPreview){
+
 receiptPreview.innerHTML="";
+
+}
 
 
 
@@ -795,7 +855,14 @@ receiptInput.files[0];
 
 
 
-if(!file) return;
+
+
+if(!file){
+
+return;
+
+}
+
 
 
 
@@ -807,9 +874,11 @@ if(
 ){
 
 
+
 notify(
-"Only image files allowed."
+"Only image receipts allowed."
 );
+
 
 
 receiptInput.value="";
@@ -823,13 +892,12 @@ return;
 
 
 
-const maxSize =
-5 * 1024 * 1024;
 
+if(
+file.size >
+5 * 1024 * 1024
+){
 
-
-
-if(file.size > maxSize){
 
 
 notify(
@@ -837,6 +905,7 @@ notify(
 );
 
 
+
 receiptInput.value="";
 
 
@@ -849,60 +918,62 @@ return;
 
 
 
-receiptPreview.innerHTML = `
 
 
-<div class="receipt-card">
+const image =
+document.createElement(
+"img"
+);
 
 
-<h4>
-🧾 Receipt Preview
-</h4>
+
+image.src =
+URL.createObjectURL(
+file
+);
 
 
-<img src="${URL.createObjectURL(file)}">
+
+image.style.width =
+"260px";
 
 
-<div class="receipt-info">
+
+image.style.borderRadius =
+"15px";
 
 
-<p>
-<strong>File:</strong>
-${file.name}
-</p>
+
+image.style.marginTop =
+"15px";
 
 
-<p>
-<strong>Size:</strong>
-${(
-file.size / 1024
-).toFixed(2)}
-KB
-</p>
+
+image.style.boxShadow =
+"0 5px 15px rgba(0,0,0,.2)";
 
 
-</div>
 
 
-</div>
 
-
-`;
+receiptPreview
+.appendChild(
+image
+);
 
 
 
 });
 
 
+
 }
 
 
 
-
 // ========================================
-// SAVE EXPENSE
+// EXPENSE MANAGEMENT SAVE
 // ========================================
-
 
 
 if(expenseForm){
@@ -920,8 +991,9 @@ e.preventDefault();
 try{
 
 
+
 const project =
-value(
+getValue(
 "expenseProject"
 );
 
@@ -929,17 +1001,19 @@ value(
 
 const amount =
 Number(
-value(
+getValue(
 "expenseAmount"
 )
 );
 
 
 
+
 const description =
-value(
+getValue(
 "expenseDescription"
 );
+
 
 
 
@@ -949,7 +1023,7 @@ if(!project){
 
 
 notify(
-"Enter project name."
+"Expense name required."
 );
 
 
@@ -957,24 +1031,28 @@ return;
 
 
 }
+
 
 
 
 if(
 isNaN(amount) ||
-amount <= 0
+amount<=0
 ){
 
 
 notify(
-"Enter valid expense amount."
+"Invalid expense amount."
 );
+
 
 
 return;
 
 
 }
+
+
 
 
 
@@ -982,8 +1060,9 @@ if(!description){
 
 
 notify(
-"Enter expense description."
+"Expense description required."
 );
+
 
 
 return;
@@ -995,7 +1074,10 @@ return;
 
 
 
-let receiptURL = "";
+
+let receiptURL="";
+
+
 
 
 
@@ -1006,21 +1088,42 @@ receiptInput?.files[0];
 
 
 
+
+
+
+// ===============================
+// UPLOAD RECEIPT
+// ===============================
+
+
 if(file){
+
 
 
 const fileName =
 
-`${Date.now()}_${file.name}`;
+Date.now()
++
+"_"
++
+file.name;
+
+
+
 
 
 
 const storageRef =
-
 ref(
+
 storage,
-`receipts/${fileName}`
+
+"receipts/"
++
+fileName
+
 );
+
 
 
 
@@ -1036,8 +1139,8 @@ file
 
 
 
-receiptURL =
 
+receiptURL =
 await getDownloadURL(
 storageRef
 );
@@ -1046,6 +1149,15 @@ storageRef
 
 }
 
+
+
+
+
+
+
+// ===============================
+// SAVE EXPENSE
+// ===============================
 
 
 
@@ -1068,18 +1180,19 @@ amount,
 description,
 
 
+
 receipt:
 receiptURL,
 
 
 
-status:
-"Approved",
-
-
-
 type:
 "Expense",
+
+
+
+status:
+"Approved",
 
 
 
@@ -1093,9 +1206,15 @@ createdAt:
 serverTimestamp()
 
 
+
 }
 
+
+
 );
+
+
+
 
 
 
@@ -1107,22 +1226,32 @@ notify(
 
 
 
+
+
+
 expenseForm.reset();
+
+
+
 
 
 
 if(receiptPreview){
 
-
 receiptPreview.innerHTML="";
-
 
 }
 
 
 
 
-await refresh();
+
+await loadRecords();
+
+
+await loadSummary();
+
+
 
 
 
@@ -1131,6 +1260,7 @@ await refresh();
 
 
 catch(error){
+
 
 
 console.error(
@@ -1153,14 +1283,518 @@ notify(
 });
 
 
+
 }
 
+
+
+
+
+
+
+
+
 // ========================================
-// LOAD TREASURY RECORDS
+// ANNOUNCEMENT SYSTEM
+// ========================================
+
+
+const announcementForm =
+document.getElementById(
+"announcementForm"
+);
+
+
+
+
+
+
+
+
+
+if(announcementForm){
+
+
+
+announcementForm.addEventListener(
+"submit",
+async(e)=>{
+
+
+e.preventDefault();
+
+
+
+
+
+
+try{
+
+
+
+const title =
+getValue(
+"announcementTitle"
+);
+
+
+
+
+
+const message =
+getValue(
+"announcementMessage"
+);
+
+
+
+
+
+
+if(!title ||
+!message
+){
+
+
+
+notify(
+"Complete announcement details."
+);
+
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+
+
+await addDoc(
+
+collection(
+db,
+"announcements"
+),
+
+{
+
+
+title,
+
+
+message,
+
+
+
+author:
+currentUser?.email
+||
+"Administrator",
+
+
+
+createdAt:
+serverTimestamp()
+
+
+
+}
+
+
+
+);
+
+
+
+
+
+
+
+
+notify(
+"Announcement published."
+);
+
+
+
+
+
+
+announcementForm.reset();
+
+
+
+
+
+await loadAnnouncements();
+
+
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+"Announcement Error:",
+error
+);
+
+
+
+notify(
+"Failed to publish announcement."
+);
+
+
+
+}
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ========================================
+// LOAD ANNOUNCEMENTS
+// ========================================
+
+
+async function loadAnnouncements(){
+
+
+
+const container =
+
+document.getElementById(
+"adminAnnouncementContainer"
+);
+
+
+
+
+if(!container)return;
+
+
+
+
+
+try{
+
+
+
+const q =
+
+query(
+
+collection(
+db,
+"announcements"
+),
+
+
+orderBy(
+"createdAt",
+"desc"
+)
+
+
+);
+
+
+
+
+
+
+
+const snapshot =
+await getDocs(q);
+
+
+
+
+
+
+
+if(snapshot.empty){
+
+
+
+container.innerHTML=`
+
+<div class="empty-state">
+
+<p>
+
+📢 No announcements yet.
+
+</p>
+
+</div>
+
+`;
+
+
+
+return;
+
+
+
+}
+
+
+
+
+
+
+
+
+container.innerHTML="";
+
+
+
+
+
+
+
+snapshot.forEach((item)=>{
+
+
+
+
+
+const data =
+item.data();
+
+
+
+
+
+
+container.innerHTML += `
+
+
+
+<div class="announcement-card">
+
+
+
+<h3>
+
+📢 ${data.title}
+
+</h3>
+
+
+
+
+<p>
+
+${data.message}
+
+</p>
+
+
+
+
+<small>
+
+Posted by:
+${data.author || "Admin"}
+
+</small>
+
+
+
+
+
+<button
+
+class="delete-btn"
+
+onclick="deleteAnnouncement('${item.id}')"
+
+>
+
+
+🗑 Delete
+
+</button>
+
+
+
+
+</div>
+
+
+
+`;
+
+
+
+});
+
+
+
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+"Announcement Load Error:",
+error
+);
+
+
+
+container.innerHTML=
+
+`
+<p>
+
+Unable to load announcements.
+
+</p>
+`;
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ========================================
+// DELETE ANNOUNCEMENT
+// ========================================
+
+
+window.deleteAnnouncement =
+async(id)=>{
+
+
+const confirmDelete =
+confirm(
+"Delete this announcement?"
+);
+
+
+
+
+if(!confirmDelete)return;
+
+
+
+
+
+
+
+try{
+
+
+await deleteDoc(
+
+doc(
+
+db,
+
+"announcements",
+
+id
+
+)
+
+);
+
+
+
+
+
+
+notify(
+"Announcement deleted."
+);
+
+
+
+
+
+
+await loadAnnouncements();
+
+
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+"Delete Announcement Error:",
+error
+);
+
+
+
+}
+
+
+
+};
+
+
+
+// ========================================
+// LOAD ALL TREASURY RECORDS
 // ========================================
 
 
 async function loadRecords(){
+
 
 
 const table =
@@ -1170,7 +1804,13 @@ document.getElementById(
 
 
 
-if(!table) return;
+if(!table)return;
+
+
+
+
+
+try{
 
 
 
@@ -1190,136 +1830,92 @@ Loading records...
 
 
 
-try{
 
 
-const collectionsQuery =
-query(
 
+
+const collections =
+await getDocs(
 collection(
 db,
 "collections"
-),
-
-orderBy(
-"createdAt",
-"desc"
 )
-
 );
 
 
 
-const projectsQuery =
-query(
 
+
+const projects =
+await getDocs(
 collection(
 db,
 "projects"
-),
-
-orderBy(
-"createdAt",
-"desc"
 )
-
 );
 
 
 
-const expensesQuery =
-query(
 
+
+
+const expenses =
+await getDocs(
 collection(
 db,
 "expenses"
-),
-
-orderBy(
-"createdAt",
-"desc"
 )
-
 );
 
 
 
 
-const [
-
-collectionsSnap,
-
-projectsSnap,
-
-expensesSnap
-
-] = await Promise.all([
-
-
-getDocs(collectionsQuery),
-
-getDocs(projectsQuery),
-
-getDocs(expensesQuery)
-
-
-]);
 
 
 
-
-const records = [];
+let records=[];
 
 
 
 
 
-// ========================================
-// COLLECTION RECORDS
-// ========================================
 
 
-collectionsSnap.forEach(
-(docSnap)=>{
+
+
+collections.forEach(
+(item)=>{
 
 
 const data =
-docSnap.data();
+item.data();
+
 
 
 
 records.push({
 
 
-id:
-docSnap.id,
+id:item.id,
 
 
-collection:
-"collections",
+collection:"collections",
 
 
-type:
-"Collection",
+type:"Collection",
 
 
-title:
-data.year,
+title:data.year,
 
 
-details:
-data.date,
+details:data.date,
 
 
-amount:
-data.amount,
-
-
-receipt:""
-
+amount:data.amount
 
 
 });
+
 
 
 });
@@ -1327,105 +1923,98 @@ receipt:""
 
 
 
-// ========================================
-// PROJECT RECORDS
-// ========================================
 
 
-projectsSnap.forEach(
-(docSnap)=>{
+
+
+projects.forEach(
+(item)=>{
 
 
 const data =
-docSnap.data();
+item.data();
+
 
 
 
 records.push({
 
 
-id:
-docSnap.id,
+id:item.id,
 
 
-collection:
-"projects",
+collection:"projects",
 
 
-type:
-"Project",
+type:"Project",
 
 
-title:
-data.name,
+title:data.name,
 
 
 details:
-data.description,
+`
+
+${data.description || ""}
+
+<br>
+
+Status:
+
+${data.status || "Planning"}
+
+`,
 
 
-amount:
-data.budget,
+amount:data.budget
 
 
-receipt:""
+});
 
 
 
 });
 
 
-});
 
 
 
 
-// ========================================
-// EXPENSE RECORDS
-// ========================================
 
 
-expensesSnap.forEach(
-(docSnap)=>{
+expenses.forEach(
+(item)=>{
 
 
 const data =
-docSnap.data();
+item.data();
+
 
 
 
 records.push({
 
 
-id:
-docSnap.id,
+id:item.id,
 
 
-collection:
-"expenses",
+collection:"expenses",
 
 
-type:
-"Expense",
+type:"Expense",
 
 
-title:
-data.project,
+title:data.project,
 
 
-details:
-data.description,
+details:data.description,
 
 
-amount:
-data.amount,
-
-
-receipt:
-data.receipt || ""
+amount:data.amount
 
 
 });
+
 
 
 });
@@ -1434,27 +2023,29 @@ data.receipt || ""
 
 
 
-updateStats(records);
 
 
 
 
-if(records.length === 0){
+
+if(records.length===0){
 
 
-table.innerHTML = `
+
+table.innerHTML=`
 
 <tr>
 
 <td colspan="4">
 
-No records available.
+No records found.
 
 </td>
 
 </tr>
 
 `;
+
 
 
 return;
@@ -1468,9 +2059,25 @@ return;
 
 
 
-table.innerHTML =
 
-records.map(record=>`
+table.innerHTML = "";
+
+
+
+
+
+
+
+
+
+records.forEach(
+(record)=>{
+
+
+
+
+
+table.innerHTML += `
 
 
 
@@ -1487,9 +2094,7 @@ ${record.type}
 
 
 
-
 <td>
-
 
 <strong>
 
@@ -1498,50 +2103,10 @@ ${record.title}
 </strong>
 
 
-
 <br>
 
 
 ${record.details}
-
-
-
-${
-record.receipt
-
-?
-
-`
-
-<br><br>
-
-
-<div class="receipt-link">
-
-
-<a
-
-href="${record.receipt}"
-
-target="_blank"
-
->
-
-🧾 View Receipt
-
-</a>
-
-
-</div>
-
-
-`
-
-:
-
-""
-
-}
 
 
 
@@ -1561,7 +2126,10 @@ ${peso(record.amount)}
 
 
 
+
+
 <td>
+
 
 
 <button
@@ -1572,7 +2140,9 @@ onclick="deleteRecord('${record.collection}','${record.id}')"
 
 >
 
+
 🗑 Delete
+
 
 </button>
 
@@ -1582,12 +2152,24 @@ onclick="deleteRecord('${record.collection}','${record.id}')"
 
 
 
-
 </tr>
 
 
 
-`).join("");
+`;
+
+
+
+});
+
+
+
+
+
+
+updateCounters(records);
+
+
 
 
 
@@ -1598,20 +2180,21 @@ onclick="deleteRecord('${record.collection}','${record.id}')"
 catch(error){
 
 
+
 console.error(
-"Load Records Error:",
+"Records Error:",
 error
 );
 
 
 
-table.innerHTML = `
+table.innerHTML=`
 
 <tr>
 
 <td colspan="4">
 
-Failed to load records.
+Failed loading records.
 
 </td>
 
@@ -1624,6 +2207,7 @@ Failed to load records.
 }
 
 
+
 }
 
 
@@ -1631,258 +2215,79 @@ Failed to load records.
 
 
 
+
+
+
 // ========================================
-// DASHBOARD STATISTICS
+// UPDATE DASHBOARD COUNTERS
 // ========================================
 
 
-
-function updateStats(records){
-
-
-
-const totalRecords =
-records.length;
+function updateCounters(records){
 
 
 
 const collections =
+
 records.filter(
-
 r=>r.type==="Collection"
-
 ).length;
+
 
 
 
 
 const projects =
+
 records.filter(
-
 r=>r.type==="Project"
-
 ).length;
+
 
 
 
 
 const expenses =
+
 records.filter(
-
 r=>r.type==="Expense"
-
 ).length;
 
 
 
 
-document
-.getElementById(
-"recordCount"
-)
-.textContent =
-totalRecords;
-
-
-
-
-document
-.getElementById(
-"collectionCount"
-)
-.textContent =
-collections;
-
-
-
-
-document
-.getElementById(
-"projectCount"
-)
-.textContent =
-projects;
-
-
-
-
-document
-.getElementById(
-"expenseCount"
-)
-.textContent =
-expenses;
-
-
-
-}
 
 
 
 
 
-
-// ========================================
-// ANNOUNCEMENT DISPLAY
-// ========================================
-
-
-
-async function loadAnnouncements(){
-
-
-const container =
-document.getElementById(
-"announcementContainer"
-);
-
-
-
-if(!container) return;
-
-
-
-
-try{
-
-
-const announcementQuery =
-
-query(
-
-collection(
-db,
-"announcements"
-),
-
-orderBy(
-"createdAt",
-"desc"
-)
-
+setText(
+"recordCount",
+records.length
 );
 
 
 
 
-const snapshot =
-
-await getDocs(
-announcementQuery
+setText(
+"collectionCount",
+collections
 );
 
 
 
 
+setText(
+"projectCount",
+projects
+);
 
-if(snapshot.empty){
 
 
-container.innerHTML = `
 
-
-<div class="empty-state">
-
-
-<p>
-
-📢 No announcements yet.
-
-</p>
-
-
-</div>
-
-
-`;
-
-
-
-return;
-
-
-}
-
-
-
-
-
-
-container.innerHTML =
-
-
-
-snapshot.docs.map(
-(docSnap)=>{
-
-
-const data =
-docSnap.data();
-
-
-
-
-return `
-
-
-
-<div class="announcement-card">
-
-
-<h3>
-
-📢 ${data.title}
-
-</h3>
-
-
-
-<p>
-
-${data.message}
-
-</p>
-
-
-
-
-<small>
-
-Posted by:
-
-${data.postedBy || "Admin"}
-
-</small>
-
-
-
-</div>
-
-
-
-`;
-
-
-
-}
-
-).join("");
-
-
-
-}
-
-
-
-catch(error){
-
-
-console.error(
-
-"Announcement Load Error:",
-
-error
-
+setText(
+"expenseCount",
+expenses
 );
 
 
@@ -1891,7 +2296,6 @@ error
 
 
 
-}
 
 
 
@@ -1903,31 +2307,27 @@ error
 // ========================================
 
 
-
-window.deleteRecord = async(
-
+window.deleteRecord =
+async(
 collectionName,
-
-documentId
-
+id
 )=>{
 
 
 
 const confirmDelete =
-
 confirm(
-
 "Delete this record?"
-
 );
 
 
 
 
-if(!confirmDelete)
 
-return;
+if(!confirmDelete)return;
+
+
+
 
 
 
@@ -1945,7 +2345,7 @@ db,
 
 collectionName,
 
-documentId
+id
 
 )
 
@@ -1955,16 +2355,22 @@ documentId
 
 
 
+
 notify(
-
-"Record deleted successfully."
-
+"Record deleted."
 );
 
 
 
 
-await refresh();
+
+
+await loadRecords();
+
+await loadSummary();
+
+
+
 
 
 
@@ -1977,19 +2383,14 @@ catch(error){
 
 
 console.error(
-
 "Delete Error:",
-
 error
-
 );
 
 
 
 notify(
-
 "Unable to delete record."
-
 );
 
 
@@ -2006,141 +2407,6 @@ notify(
 
 
 
-// ========================================
-// SEARCH RECORDS
-// ========================================
-
-
-
-const searchInput =
-
-document.getElementById(
-"searchRecord"
-);
-
-
-
-
-if(searchInput){
-
-
-
-searchInput.addEventListener(
-"keyup",
-()=>{
-
-
-
-const keyword =
-
-searchInput.value
-
-.toLowerCase()
-
-.trim();
-
-
-
-
-document
-
-.querySelectorAll(
-"#records tr"
-)
-
-.forEach(row=>{
-
-
-
-const text =
-
-row.textContent
-
-.toLowerCase();
-
-
-
-
-
-row.style.display =
-
-text.includes(keyword)
-
-?
-
-""
-
-:
-
-"none";
-
-
-
-});
-
-
-
-});
-
-
-
-}
-
-// ========================================
-// REFRESH SYSTEM
-// ========================================
-
-
-async function refresh(){
-
-
-try{
-
-
-await Promise.all([
-
-
-loadRecords(),
-
-
-loadAnnouncements(),
-
-
-loadFinancialSummary()
-
-
-]);
-
-
-
-}
-
-
-
-catch(error){
-
-
-
-console.error(
-
-"Refresh Error:",
-
-error
-
-);
-
-
-
-}
-
-
-
-}
-
-
-
-
-
 
 
 // ========================================
@@ -2148,7 +2414,7 @@ error
 // ========================================
 
 
-async function loadFinancialSummary(){
+async function loadSummary(){
 
 
 
@@ -2156,66 +2422,53 @@ try{
 
 
 
-const [
-
-collectionsSnap,
-
-expensesSnap
-
-] = await Promise.all([
-
-
-
-getDocs(
-
+const collections =
+await getDocs(
 collection(
 db,
 "collections"
 )
-
-),
-
+);
 
 
-getDocs(
 
+
+
+const expenses =
+await getDocs(
 collection(
 db,
 "expenses"
 )
-
-)
-
-
-
-]);
+);
 
 
 
 
 
-let totalCollections = 0;
-
-let totalExpenses = 0;
 
 
 
+let totalCollections=0;
+
+let totalExpenses=0;
 
 
-collectionsSnap.forEach(
-(docSnap)=>{
 
 
 
-const data =
-docSnap.data();
 
+
+
+
+collections.forEach(
+(item)=>{
 
 
 totalCollections +=
 
 Number(
-data.amount || 0
+item.data().amount || 0
 );
 
 
@@ -2228,25 +2481,23 @@ data.amount || 0
 
 
 
-expensesSnap.forEach(
-(docSnap)=>{
 
 
-
-const data =
-docSnap.data();
-
+expenses.forEach(
+(item)=>{
 
 
 totalExpenses +=
 
 Number(
-data.amount || 0
+item.data().amount || 0
 );
 
 
 
 });
+
+
 
 
 
@@ -2264,28 +2515,14 @@ totalExpenses;
 
 
 
-const collectionDisplay =
-
-document.getElementById(
-"totalCollections"
-);
 
 
+setText(
 
+"totalCollections",
 
-const expenseDisplay =
+peso(totalCollections)
 
-document.getElementById(
-"totalExpenses"
-);
-
-
-
-
-const balanceDisplay =
-
-document.getElementById(
-"currentBalance"
 );
 
 
@@ -2294,12 +2531,83 @@ document.getElementById(
 
 
 
-if(collectionDisplay){
+setText(
+
+"totalExpenses",
+
+peso(totalExpenses)
+
+);
 
 
-collectionDisplay.textContent =
 
-peso(totalCollections);
+
+
+
+
+setText(
+
+"currentBalance",
+
+peso(balance)
+
+);
+
+
+
+
+
+
+
+
+const status =
+document.getElementById(
+"dashboardStatus"
+);
+
+
+
+
+
+if(status){
+
+
+
+if(balance>0){
+
+
+
+status.innerHTML =
+"🟢 Healthy";
+
+
+
+}
+
+
+
+else if(balance===0){
+
+
+
+status.innerHTML =
+"🟡 Balanced";
+
+
+
+}
+
+
+
+else{
+
+
+status.innerHTML =
+"🔴 Deficit";
+
+
+}
+
 
 
 }
@@ -2308,40 +2616,9 @@ peso(totalCollections);
 
 
 
-
-
-if(expenseDisplay){
-
-
-expenseDisplay.textContent =
-
-peso(totalExpenses);
-
-
 }
 
 
-
-
-
-
-
-if(balanceDisplay){
-
-
-balanceDisplay.textContent =
-
-peso(balance);
-
-
-}
-
-
-
-
-
-
-}
 
 
 
@@ -2350,11 +2627,8 @@ catch(error){
 
 
 console.error(
-
-"Financial Summary Error:",
-
+"Summary Error:",
 error
-
 );
 
 
@@ -2372,69 +2646,48 @@ error
 
 
 
+
 // ========================================
-// DARK / LIGHT MODE
+// SEARCH SYSTEM
 // ========================================
 
 
-
-const themeButton =
+const searchInput =
 
 document.getElementById(
-"themeToggle"
+"searchRecord"
 );
 
 
 
 
-if(themeButton){
+
+
+if(searchInput){
 
 
 
-const savedTheme =
-
-localStorage.getItem(
-"theme"
-)
-
-|| "light";
-
-
-
-
-
-if(savedTheme==="dark"){
-
-
-
-document.body.classList.add(
-"dark"
-);
-
-
-
-themeButton.textContent =
-
-"☀ Light Mode";
-
-
-
-}
-
-
-
-
-
-themeButton.addEventListener(
-"click",
+searchInput.addEventListener(
+"keyup",
 ()=>{
 
 
 
+const keyword =
+
+searchInput.value
+.toLowerCase();
 
 
-document.body.classList.toggle(
-"dark"
+
+
+
+
+
+const rows =
+
+document.querySelectorAll(
+"#records tr"
 );
 
 
@@ -2442,51 +2695,29 @@ document.body.classList.toggle(
 
 
 
-const darkMode =
-
-document.body.classList.contains(
-"dark"
-);
+rows.forEach(
+(row)=>{
 
 
 
+row.style.display =
 
-
-
-
-localStorage.setItem(
-
-"theme",
-
-darkMode
+row.innerText
+.toLowerCase()
+.includes(keyword)
 
 ?
 
-"dark"
+""
 
 :
 
-"light"
-
-);
+"none";
 
 
 
+});
 
-
-
-
-themeButton.textContent =
-
-darkMode
-
-?
-
-"☀ Light Mode"
-
-:
-
-"🌙 Dark Mode";
 
 
 
@@ -2503,159 +2734,39 @@ darkMode
 
 
 
+
+
 // ========================================
-// EXPORT TREASURY RECORDS CSV
+// SAFE TEXT UPDATE
 // ========================================
 
 
-
-window.exportCSV = ()=>{
-
-
-
-const table =
-
-document.getElementById(
-"records"
-);
+function setText(
+id,
+value
+){
 
 
 
+const element =
 
-if(!table)
-
-return;
+document.getElementById(id);
 
 
 
 
 
-
-let csv = [];
-
+if(element){
 
 
+element.innerHTML=value;
 
-
-table
-
-.querySelectorAll(
-"tr"
-)
-
-.forEach(row=>{
-
-
-
-const columns =
-
-[
-
-...row.querySelectorAll(
-"td,th"
-)
-
-];
-
-
-
-
-
-csv.push(
-
-
-
-columns
-
-.map(
-
-col=>
-
-`"${col.innerText
-.replace(/"/g,'""')}"`
-
-)
-
-.join(",")
-
-
-
-);
-
-
-
-});
-
-
-
-
-
-
-
-const blob =
-
-new Blob(
-
-[
-
-csv.join("\n")
-
-],
-
-{
-
-type:
-
-"text/csv;charset=utf-8;"
 
 }
 
-);
 
 
-
-
-
-
-
-const link =
-
-document.createElement(
-"a"
-);
-
-
-
-
-
-
-link.href =
-
-URL.createObjectURL(
-blob
-);
-
-
-
-
-
-
-link.download =
-
-`Dalubwikaan_Treasury_${Date.now()}.csv`;
-
-
-
-
-
-
-link.click();
-
-
-
-
-
-};
+}
 
 
 
@@ -2666,47 +2777,27 @@ link.click();
 
 
 // ========================================
-// AUTO REFRESH
+// AUTO UPDATE
 // ========================================
-
 
 
 setInterval(
-
 async()=>{
 
 
-await refresh();
+await loadRecords();
+
+
+await loadSummary();
 
 
 },
-
 30000
-
 );
 
 
 
 
-
-
-
-
-// ========================================
-// SYSTEM INITIALIZATION
-// ========================================
-
-
-
-async function initializeDashboard(){
-
-
-
-try{
-
-
-
-await refresh();
 
 
 
@@ -2714,208 +2805,22 @@ await refresh();
 
 console.log(`
 
-=========================================
+===================================
 
-DALUBWIKAAN TREASURY MANAGEMENT SYSTEM
+DALUBWIKAAN TREASURY ADMIN v4.0
 
-Version: 3.0
+✔ Firebase Authentication
 
+✔ Firestore CRUD
 
-Firebase Authentication
+✔ Receipt Storage
 
-Firestore CRUD
+✔ Project Transparency
 
-Storage Receipt Upload
+✔ Announcement System
 
-Announcement System
+✔ Financial Summary
 
-Financial Analytics
-
-Dark Mode
-
-CSV Export
-
-
-SYSTEM READY
-
-=========================================
+===================================
 
 `);
-
-
-
-
-}
-
-
-
-catch(error){
-
-
-
-console.error(
-
-"Initialization Error:",
-
-error
-
-);
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-initializeDashboard();
-
-
-
-
-
-
-
-
-// ========================================
-// GLOBAL ERROR HANDLER
-// ========================================
-
-
-
-window.addEventListener(
-
-"error",
-
-(event)=>{
-
-
-
-console.error(
-
-"System Error:",
-
-event.error
-
-);
-
-
-
-}
-
-);
-
-
-
-
-
-
-window.addEventListener(
-
-"unhandledrejection",
-
-(event)=>{
-
-
-
-console.error(
-
-"Unhandled Promise:",
-
-event.reason
-
-);
-
-
-
-}
-
-);
-
-
-
-
-
-
-
-// ========================================
-// OPTIONAL SECURITY
-// ========================================
-
-
-
-document.addEventListener(
-
-"contextmenu",
-
-(e)=>{
-
-
-e.preventDefault();
-
-
-}
-
-);
-
-
-
-
-document.addEventListener(
-
-"keydown",
-
-(e)=>{
-
-
-
-if(
-
-e.key==="F12"
-
-||
-
-
-(
-e.ctrlKey
-
-&&
-
-e.shiftKey
-
-&&
-
-[
-
-"I",
-
-"J",
-
-"C"
-
-]
-
-.includes(
-e.key.toUpperCase()
-)
-
-)
-
-){
-
-
-e.preventDefault();
-
-
-}
-
-
-
-}
-
-);
