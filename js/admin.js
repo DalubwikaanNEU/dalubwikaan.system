@@ -1,54 +1,34 @@
 // ========================================
 // DALUBWIKAAN TREASURY MANAGEMENT SYSTEM
-// ADMIN PANEL v12.0
-// COMPLETE FIREBASE CRUD VERSION
-// ANNOUNCEMENT FIXED
-// EDIT + DELETE ENABLED
+// ADMIN PANEL v13.0
+// FIXED CRUD VERSION
+// ID MATCHED WITH ADMIN.HTML
 // ========================================
-
 
 
 // ========================================
 // FIREBASE IMPORTS
 // ========================================
 
-
 import {
-
     db,
     storage
-
-}
-
-from "./firebase.js";
-
-
+} from "./firebase.js";
 
 
 
 import {
 
-
     collection,
-
     addDoc,
-
     getDocs,
-
     getDoc,
-
     deleteDoc,
-
     updateDoc,
-
     doc,
-
     serverTimestamp,
-
     query,
-
     orderBy
-
 
 }
 
@@ -58,17 +38,11 @@ from
 
 
 
-
-
 import {
 
-
     ref,
-
     uploadBytes,
-
     getDownloadURL
-
 
 }
 
@@ -78,27 +52,17 @@ from
 
 
 
-
-
 import {
 
-
     getAuth,
-
     onAuthStateChanged,
-
     signOut
-
 
 }
 
 from
 
 "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-
-
-
-
 
 
 
@@ -112,13 +76,10 @@ from
 const auth = getAuth();
 
 
-
 let currentUser = null;
 
 
-
 let selectedReceiptFile = null;
-
 
 
 let projectCache = [];
@@ -127,8 +88,7 @@ let expenseCache = [];
 
 let recordCache = [];
 
-
-
+let announcementCache = [];
 
 
 
@@ -142,53 +102,34 @@ let recordCache = [];
 
 function getValue(id){
 
+    const element = document.getElementById(id);
 
-    const element =
+    if(!element){
 
-    document.getElementById(id);
+        return "";
 
-
-
-    if(!element)
-
-    return "";
-
+    }
 
 
     return element.value.trim();
 
-
 }
-
-
-
 
 
 
 
 function setText(id,value){
 
-
-    const element =
-
-    document.getElementById(id);
-
+    const element = document.getElementById(id);
 
 
     if(element){
 
-
         element.textContent = value;
-
 
     }
 
-
 }
-
-
-
-
 
 
 
@@ -221,18 +162,12 @@ function peso(value){
 
 
 
-
-
-
 function notify(message,type="info"){
-
 
 
     console.log(
 
-        `[${type}]`,
-
-        message
+        `[${type}] ${message}`
 
     );
 
@@ -240,37 +175,7 @@ function notify(message,type="info"){
     alert(message);
 
 
-
 }
-
-
-
-
-
-
-
-
-
-function formatDate(date){
-
-
-    if(!date)
-
-    return "N/A";
-
-
-
-    return new Date(date)
-
-    .toLocaleDateString(
-
-        "en-PH"
-
-    );
-
-
-}
-
 
 
 
@@ -287,23 +192,13 @@ function formatDate(date){
 function hideLoader(){
 
 
-    const loader =
-
-    document.getElementById(
-
-        "loader"
-
-    );
-
-
-
+    const loader = document.getElementById("loader");
 
 
     if(loader){
 
 
         loader.style.opacity="0";
-
 
 
         setTimeout(()=>{
@@ -326,24 +221,23 @@ function hideLoader(){
 
 window.addEventListener(
 
-"load",
+    "load",
 
-()=>{
-
-
-    setTimeout(
-
-        hideLoader,
-
-        800
-
-    );
+    ()=>{
 
 
-});
+        setTimeout(
+
+            hideLoader,
+
+            800
+
+        );
 
 
+    }
 
+);
 
 
 
@@ -353,7 +247,7 @@ window.addEventListener(
 
 
 // ========================================
-// AUTHENTICATION
+// AUTHENTICATION SYSTEM
 // ========================================
 
 
@@ -367,17 +261,11 @@ async(user)=>{
     if(!user){
 
 
-        window.location.href =
-
-        "login.html";
-
+        window.location.href="login.html";
 
         return;
 
-
     }
-
-
 
 
 
@@ -386,9 +274,7 @@ async(user)=>{
     try{
 
 
-        const adminRef =
-
-        doc(
+        const adminRef = doc(
 
             db,
 
@@ -402,11 +288,7 @@ async(user)=>{
 
 
 
-
-
-        const adminSnap =
-
-        await getDoc(
+        const adminSnap = await getDoc(
 
             adminRef
 
@@ -416,11 +298,7 @@ async(user)=>{
 
 
 
-
-
-
         if(!adminSnap.exists()){
-
 
 
             notify(
@@ -433,20 +311,13 @@ async(user)=>{
 
 
 
-
-
             await signOut(auth);
 
 
-
-            window.location.href =
-
-            "login.html";
-
+            window.location.href="login.html";
 
 
             return;
-
 
 
         }
@@ -455,19 +326,13 @@ async(user)=>{
 
 
 
-
-
-
-        currentUser = user;
-
+        currentUser=user;
 
 
 
 
 
-        const email =
-
-        document.getElementById(
+        const email = document.getElementById(
 
             "adminEmail"
 
@@ -480,14 +345,10 @@ async(user)=>{
         if(email){
 
 
-            email.textContent =
-
-            user.email;
+            email.textContent=user.email;
 
 
         }
-
-
 
 
 
@@ -500,10 +361,7 @@ async(user)=>{
     }
 
 
-
-
     catch(error){
-
 
 
         console.error(
@@ -513,7 +371,6 @@ async(user)=>{
             error
 
         );
-
 
 
         notify(
@@ -526,7 +383,6 @@ async(user)=>{
 
 
     }
-
 
 
 });
@@ -546,17 +402,11 @@ async(user)=>{
 // ========================================
 
 
-const logoutButton =
-
-document.getElementById(
+const logoutButton = document.getElementById(
 
     "logout"
 
 );
-
-
-
-
 
 
 
@@ -567,22 +417,16 @@ if(logoutButton){
     logoutButton.onclick = async()=>{
 
 
-
         await signOut(auth);
 
 
-
-        window.location.href =
-
-        "login.html";
-
+        window.location.href="login.html";
 
 
     };
 
 
 }
-
 
 
 
@@ -602,49 +446,39 @@ async function initializeDashboard(){
 
 
 
+    console.log(
+
+        "Loading Dalubwikaan Treasury..."
+
+    );
+
+
+
+
+
     try{
-
-
-
-        console.log(
-
-            "Loading Dalubwikaan Treasury System..."
-
-        );
-
-
-
-
 
 
 
         await Promise.all([
 
 
-
             loadProjects(),
-
 
 
             loadExpenses(),
 
 
-
             loadRecords(),
-
 
 
             loadAnnouncements(),
 
 
-
             loadSummary()
 
 
-
         ]);
-
-
 
 
 
@@ -654,19 +488,13 @@ async function initializeDashboard(){
 
 =================================
 
-DALUBWIKAAN TREASURY ADMIN v12.0
+DALUBWIKAAN ADMIN PANEL v13.0
 
-SYSTEM ONLINE
-
-FULL CRUD ENABLED
-
-ANNOUNCEMENT FIXED
+SYSTEM READY
 
 =================================
 
         `);
-
-
 
 
 
@@ -680,7 +508,7 @@ ANNOUNCEMENT FIXED
 
         console.error(
 
-            "Dashboard Error:",
+            "DASHBOARD ERROR:",
 
             error
 
@@ -704,7 +532,7 @@ ANNOUNCEMENT FIXED
 
 
 // ========================================
-// GLOBAL ERROR HANDLER
+// ERROR MONITOR
 // ========================================
 
 
@@ -729,7 +557,6 @@ window.addEventListener(
 
 
 
-
 window.addEventListener(
 
 "unhandledrejection",
@@ -748,32 +575,30 @@ window.addEventListener(
 
 });
 // ========================================
-// PROJECT CRUD SYSTEM
+// PROJECT MANAGEMENT CRUD
 // ========================================
-
 
 
 // LOAD PROJECTS
 // ========================================
 
-
 async function loadProjects(){
 
 
-    const container =
-
-    document.getElementById(
-
+    const container = document.getElementById(
         "projectContainer"
-
     );
 
 
+    if(!container){
 
-    if(!container)
+        console.warn(
+            "projectContainer not found"
+        );
 
-    return;
+        return;
 
+    }
 
 
 
@@ -781,26 +606,18 @@ async function loadProjects(){
     try{
 
 
-        const snapshot =
-
-        await getDocs(
+        const snapshot = await getDocs(
 
             query(
 
                 collection(
-
                     db,
-
                     "projects"
-
                 ),
 
                 orderBy(
-
                     "createdAt",
-
                     "desc"
-
                 )
 
             )
@@ -809,9 +626,7 @@ async function loadProjects(){
 
 
 
-
         projectCache=[];
-
 
 
         container.innerHTML="";
@@ -823,11 +638,11 @@ async function loadProjects(){
         if(snapshot.empty){
 
 
-            container.innerHTML = `
+            container.innerHTML=`
 
             <div class="empty-state">
 
-            No projects found.
+            No projects available.
 
             </div>
 
@@ -844,13 +659,10 @@ async function loadProjects(){
 
 
 
-
-        snapshot.forEach(docSnap=>{
+        snapshot.forEach((docSnap)=>{
 
 
             const data = docSnap.data();
-
-
 
 
 
@@ -870,31 +682,23 @@ async function loadProjects(){
             container.innerHTML += `
 
 
-
             <div class="data-card">
 
 
                 <h3>
-
-                ${data.name}
-
+                🏗 ${data.name || "Project"}
                 </h3>
 
 
                 <p>
-
                 ${data.description || ""}
-
                 </p>
 
 
 
                 <strong>
-
                 Budget:
-
                 ${peso(data.budget)}
-
                 </strong>
 
 
@@ -903,11 +707,7 @@ async function loadProjects(){
 
 
 
-                <button
-
-                onclick="editProject('${docSnap.id}')"
-
-                >
+                <button onclick="editProject('${docSnap.id}')">
 
                 ✏️ Edit
 
@@ -915,11 +715,8 @@ async function loadProjects(){
 
 
 
-                <button
 
-                onclick="deleteProject('${docSnap.id}')"
-
-                >
+                <button onclick="deleteProject('${docSnap.id}')">
 
                 🗑 Delete
 
@@ -928,7 +725,6 @@ async function loadProjects(){
 
 
             </div>
-
 
 
             `;
@@ -941,13 +737,12 @@ async function loadProjects(){
     }
 
 
-
     catch(error){
 
 
         console.error(
 
-            "Project Error:",
+            "PROJECT LOAD ERROR:",
 
             error
 
@@ -975,7 +770,6 @@ async function loadProjects(){
 async function addProject(data){
 
 
-
     await addDoc(
 
         collection(
@@ -997,7 +791,6 @@ async function addProject(data){
             serverTimestamp()
 
 
-
         }
 
 
@@ -1007,14 +800,12 @@ async function addProject(data){
 
     notify(
 
-        "Project added."
+        "Project successfully added."
 
     );
 
 
-
     loadProjects();
-
 
 
 }
@@ -1035,9 +826,7 @@ window.editProject = async function(id){
 
 
 
-    const projectRef =
-
-    doc(
+    const projectRef = doc(
 
         db,
 
@@ -1051,9 +840,7 @@ window.editProject = async function(id){
 
 
 
-    const snap =
-
-    await getDoc(
+    const snap = await getDoc(
 
         projectRef
 
@@ -1071,16 +858,13 @@ window.editProject = async function(id){
 
 
 
-    const data = snap.data();
+    const data=snap.data();
 
 
 
 
 
-
-    const name =
-
-    prompt(
+    const name = prompt(
 
         "Project name:",
 
@@ -1114,7 +898,6 @@ window.editProject = async function(id){
             updatedAt:
 
             serverTimestamp()
-
 
 
         }
@@ -1158,7 +941,7 @@ window.deleteProject = async function(id){
 
     if(!confirm(
 
-        "Delete project?"
+        "Delete this project?"
 
     ))
 
@@ -1197,7 +980,6 @@ window.deleteProject = async function(id){
     loadProjects();
 
 
-
 };
 
 
@@ -1211,19 +993,96 @@ window.deleteProject = async function(id){
 
 
 // ========================================
-// EXPENSE CRUD SYSTEM
+// EXPENSE MANAGEMENT CRUD
 // ========================================
 
 
 
+// RECEIPT SELECT FIX
+// ========================================
+
+
+const receiptInput = document.getElementById(
+
+    "receiptFile"
+
+);
+
+
+
+
+if(receiptInput){
+
+
+
+    receiptInput.addEventListener(
+
+        "change",
+
+        (event)=>{
+
+
+            selectedReceiptFile =
+
+            event.target.files[0];
+
+
+
+            const preview = document.getElementById(
+
+                "receiptPreview"
+
+            );
+
+
+
+
+
+            if(preview && selectedReceiptFile){
+
+
+                preview.innerHTML = `
+
+
+                <p>
+
+                🧾 ${selectedReceiptFile.name}
+
+                </p>
+
+
+                `;
+
+
+            }
+
+
+
+        }
+
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// LOAD EXPENSES
+// ========================================
 
 
 async function loadExpenses(){
 
 
-    const container =
 
-    document.getElementById(
+    const container = document.getElementById(
 
         "expenseContainer"
 
@@ -1231,9 +1090,23 @@ async function loadExpenses(){
 
 
 
-    if(!container)
 
-    return;
+
+    if(!container){
+
+
+        console.warn(
+
+            "expenseContainer not found"
+
+        );
+
+
+        return;
+
+
+    }
+
 
 
 
@@ -1242,9 +1115,7 @@ async function loadExpenses(){
     try{
 
 
-        const snapshot =
-
-        await getDocs(
+        const snapshot = await getDocs(
 
             query(
 
@@ -1283,11 +1154,34 @@ async function loadExpenses(){
 
 
 
+        if(snapshot.empty){
+
+
+            container.innerHTML=`
+
+            <div class="empty-state">
+
+            No expenses found.
+
+            </div>
+
+            `;
+
+
+            return;
+
+
+        }
+
+
+
+
+
 
         snapshot.forEach(docSnap=>{
 
 
-            const data = docSnap.data();
+            const data=docSnap.data();
 
 
 
@@ -1298,9 +1192,8 @@ async function loadExpenses(){
 
                 ...data
 
+
             });
-
-
 
 
 
@@ -1315,7 +1208,7 @@ async function loadExpenses(){
 
             <h3>
 
-            ${data.category}
+            💸 ${data.category || "Expense"}
 
             </h3>
 
@@ -1337,7 +1230,9 @@ async function loadExpenses(){
 
 
 
-            <br>
+
+
+            <br><br>
 
 
 
@@ -1362,11 +1257,7 @@ async function loadExpenses(){
 
 
 
-            <button
-
-            onclick="editExpense('${docSnap.id}')"
-
-            >
+            <button onclick="editExpense('${docSnap.id}')">
 
             ✏️ Edit
 
@@ -1374,11 +1265,7 @@ async function loadExpenses(){
 
 
 
-            <button
-
-            onclick="deleteExpense('${docSnap.id}')"
-
-            >
+            <button onclick="deleteExpense('${docSnap.id}')">
 
             🗑 Delete
 
@@ -1406,7 +1293,7 @@ async function loadExpenses(){
 
         console.error(
 
-            "Expense Error:",
+            "EXPENSE LOAD ERROR:",
 
             error
 
@@ -1415,46 +1302,6 @@ async function loadExpenses(){
 
     }
 
-
-
-}
-
-
-
-
-
-
-
-
-
-// RECEIPT SELECT
-// ========================================
-
-
-const receiptInput =
-
-document.getElementById(
-
-    "receipt"
-
-);
-
-
-
-
-
-if(receiptInput){
-
-
-    receiptInput.onchange=(e)=>{
-
-
-        selectedReceiptFile =
-
-        e.target.files[0];
-
-
-    };
 
 
 }
@@ -1485,9 +1332,7 @@ async function addExpense(data){
 
 
 
-        const storageRef =
-
-        ref(
+        const storageRef = ref(
 
             storage,
 
@@ -1499,7 +1344,9 @@ async function addExpense(data){
 
             selectedReceiptFile.name
 
+
         );
+
 
 
 
@@ -1517,9 +1364,7 @@ async function addExpense(data){
 
 
 
-        receiptURL =
-
-        await getDownloadURL(
+        receiptURL = await getDownloadURL(
 
             storageRef
 
@@ -1558,7 +1403,6 @@ async function addExpense(data){
             serverTimestamp()
 
 
-
         }
 
 
@@ -1574,7 +1418,7 @@ async function addExpense(data){
 
     notify(
 
-        "Expense added."
+        "Expense saved."
 
     );
 
@@ -1594,94 +1438,73 @@ async function addExpense(data){
 
 
 
-// EDIT EXPENSE
+// EXPENSE FORM SUBMIT
 // ========================================
 
 
-window.editExpense = async function(id){
+const expenseForm = document.getElementById(
 
+    "expenseForm"
 
-
-    const expenseRef =
-
-    doc(
-
-        db,
-
-        "expenses",
-
-        id
-
-    );
+);
 
 
 
 
 
-    const snap =
-
-    await getDoc(
-
-        expenseRef
-
-    );
+if(expenseForm){
 
 
 
+    expenseForm.addEventListener(
+
+        "submit",
+
+        async(e)=>{
 
 
-    if(!snap.exists())
-
-    return;
+            e.preventDefault();
 
 
 
 
 
-    const data=snap.data();
+            await addExpense({
+
+
+                category:
+
+                getValue(
+                    "expenseProject"
+                ),
+
+
+
+                amount:
+
+                Number(
+                    getValue(
+                        "expenseAmount"
+                    )
+                ),
+
+
+
+                description:
+
+                getValue(
+                    "expenseDescription"
+                )
+
+
+
+            });
 
 
 
 
 
-    const amount =
-
-    prompt(
-
-        "Update amount:",
-
-        data.amount
-
-    );
-
-
-
-
-
-
-    if(amount===null)
-
-    return;
-
-
-
-
-
-
-
-    await updateDoc(
-
-        expenseRef,
-
-        {
-
-
-            amount:Number(amount),
-
-
-            updatedAt:
-
-            serverTimestamp()
+            expenseForm.reset();
 
 
 
@@ -1691,110 +1514,42 @@ window.editExpense = async function(id){
     );
 
 
+}
 
-
-
-    notify(
-
-        "Expense updated."
-
-    );
-
-
-
-    loadExpenses();
-
-
-
-};
-
-
-
-
-
-
-
-
-
-// DELETE EXPENSE
 // ========================================
-
-
-window.deleteExpense = async function(id){
-
-
-
-    if(!confirm(
-
-        "Delete expense?"
-
-    ))
-
-    return;
-
-
-
-
-
-
-    await deleteDoc(
-
-        doc(
-
-            db,
-
-            "expenses",
-
-            id
-
-        )
-
-    );
-
-
-
-
-
-
-    notify(
-
-        "Expense deleted."
-
-    );
-
-
-
-    loadExpenses();
-
-
-
-};
+// RECORD MANAGEMENT CRUD
 // ========================================
-// RECORD CRUD SYSTEM
-// ========================================
-
 
 
 // LOAD RECORDS
 // ========================================
 
-
 async function loadRecords(){
 
 
-    const container =
+    const container = document.getElementById(
 
-    document.getElementById(
-
-        "recordContainer"
+        "records"
 
     );
 
 
 
-    if(!container)
+    if(!container){
 
-    return;
+
+        console.warn(
+
+            "records table not found"
+
+        );
+
+
+        return;
+
+
+    }
+
 
 
 
@@ -1803,9 +1558,7 @@ async function loadRecords(){
     try{
 
 
-        const snapshot =
-
-        await getDocs(
+        const snapshot = await getDocs(
 
             query(
 
@@ -1836,10 +1589,7 @@ async function loadRecords(){
         recordCache=[];
 
 
-
         container.innerHTML="";
-
-
 
 
 
@@ -1848,13 +1598,18 @@ async function loadRecords(){
         if(snapshot.empty){
 
 
+
             container.innerHTML=`
 
-            <div class="empty-state">
+            <tr>
 
-            No records found.
+            <td colspan="5">
 
-            </div>
+            No records available.
+
+            </td>
+
+            </tr>
 
             `;
 
@@ -1870,13 +1625,10 @@ async function loadRecords(){
 
 
 
+        snapshot.forEach((docSnap)=>{
 
-        snapshot.forEach(docSnap=>{
 
-
-            const data =
-
-            docSnap.data();
+            const data = docSnap.data();
 
 
 
@@ -1899,76 +1651,68 @@ async function loadRecords(){
             container.innerHTML += `
 
 
-            <div class="data-card">
+            <tr>
 
 
-                <h3>
+            <td>
 
-                ${data.title || "Record"}
+            ${data.type || "N/A"}
 
-                </h3>
-
-
+            </td>
 
 
-                <p>
 
-                Type:
+            <td>
 
-                ${data.type || "N/A"}
+            ${data.title || data.details || "Record"}
 
-                </p>
+            </td>
 
 
 
 
+            <td>
 
-                <strong>
+            ${peso(data.amount)}
 
-                ${peso(data.amount)}
-
-                </strong>
-
+            </td>
 
 
 
+            <td>
 
-                <br><br>
+            ${data.status || "Active"}
+
+            </td>
 
 
 
+            <td>
 
 
-                <button
 
-                onclick="editRecord('${docSnap.id}')"
+            <button onclick="editRecord('${docSnap.id}')">
 
-                >
+            ✏️
 
-                ✏️ Edit
-
-                </button>
-
+            </button>
 
 
 
 
+            <button onclick="deleteRecord('${docSnap.id}')">
 
-                <button
+            🗑
 
-                onclick="deleteRecord('${docSnap.id}')"
-
-                >
-
-                🗑 Delete
-
-                </button>
+            </button>
 
 
 
+            </td>
 
-            </div>
 
+
+            </tr>
 
 
             `;
@@ -1981,18 +1725,15 @@ async function loadRecords(){
 
 
 
-
     }
-
 
 
     catch(error){
 
 
-
         console.error(
 
-            "Record Loading Error:",
+            "RECORD ERROR:",
 
             error
 
@@ -2002,198 +1743,8 @@ async function loadRecords(){
     }
 
 
-}
-
-
-
-
-
-
-
-
-
-// ADD RECORD
-// ========================================
-
-
-async function addRecord(data){
-
-
-
-    await addDoc(
-
-        collection(
-
-            db,
-
-            "records"
-
-        ),
-
-        {
-
-
-            ...data,
-
-
-            createdAt:
-
-            serverTimestamp()
-
-
-
-        }
-
-
-    );
-
-
-
-
-    notify(
-
-        "Record added."
-
-    );
-
-
-
-    loadRecords();
-
-
 
 }
-
-
-
-
-
-
-
-
-
-// EDIT RECORD
-// ========================================
-
-
-window.editRecord = async function(id){
-
-
-
-    const recordRef =
-
-    doc(
-
-        db,
-
-        "records",
-
-        id
-
-    );
-
-
-
-
-
-
-
-    const snap =
-
-    await getDoc(
-
-        recordRef
-
-    );
-
-
-
-
-
-    if(!snap.exists())
-
-    return;
-
-
-
-
-
-
-
-    const data = snap.data();
-
-
-
-
-
-
-
-    const title =
-
-    prompt(
-
-        "Update title:",
-
-        data.title
-
-    );
-
-
-
-
-
-
-
-    if(title===null)
-
-    return;
-
-
-
-
-
-
-
-
-    await updateDoc(
-
-        recordRef,
-
-        {
-
-
-            title:title,
-
-
-            updatedAt:
-
-            serverTimestamp()
-
-
-
-        }
-
-
-    );
-
-
-
-
-
-
-    notify(
-
-        "Record updated."
-
-    );
-
-
-
-    loadRecords();
-
-
-
-};
 
 
 
@@ -2224,7 +1775,6 @@ window.deleteRecord = async function(id){
 
 
 
-
     await deleteDoc(
 
         doc(
@@ -2238,7 +1788,6 @@ window.deleteRecord = async function(id){
         )
 
     );
-
 
 
 
@@ -2267,6 +1816,122 @@ window.deleteRecord = async function(id){
 
 
 
+// EDIT RECORD
+// ========================================
+
+
+window.editRecord = async function(id){
+
+
+
+    const recordRef = doc(
+
+        db,
+
+        "records",
+
+        id
+
+    );
+
+
+
+
+
+    const snap = await getDoc(
+
+        recordRef
+
+    );
+
+
+
+
+
+    if(!snap.exists())
+
+    return;
+
+
+
+
+
+    const data=snap.data();
+
+
+
+
+
+
+    const title = prompt(
+
+        "Update details:",
+
+        data.title || ""
+
+    );
+
+
+
+
+
+    if(title===null)
+
+    return;
+
+
+
+
+
+
+
+    await updateDoc(
+
+        recordRef,
+
+        {
+
+
+            title:title,
+
+
+            updatedAt:
+
+            serverTimestamp()
+
+
+        }
+
+
+    );
+
+
+
+
+
+    notify(
+
+        "Record updated."
+
+    );
+
+
+
+    loadRecords();
+
+
+
+};
+
+
+
+
+
+
+
+
+
+
 
 
 // ========================================
@@ -2274,13 +1939,237 @@ window.deleteRecord = async function(id){
 // ========================================
 
 
-// POST ANNOUNCEMENT
+// LOAD ANNOUNCEMENTS
 // ========================================
 
 
-const announcementForm =
+async function loadAnnouncements(){
 
-document.getElementById(
+
+
+    const container = document.getElementById(
+
+        "announcementContainer"
+
+    );
+
+
+
+
+
+    if(!container){
+
+
+        console.warn(
+
+            "announcementContainer missing"
+
+        );
+
+
+        return;
+
+
+    }
+
+
+
+
+
+
+    try{
+
+
+        const snapshot = await getDocs(
+
+            query(
+
+                collection(
+
+                    db,
+
+                    "announcements"
+
+                ),
+
+                orderBy(
+
+                    "createdAt",
+
+                    "desc"
+
+                )
+
+            )
+
+        );
+
+
+
+
+
+        announcementCache=[];
+
+
+        container.innerHTML="";
+
+
+
+
+
+
+
+        if(snapshot.empty){
+
+
+
+            container.innerHTML=`
+
+            <div class="empty-state">
+
+            📢 No announcements yet.
+
+            </div>
+
+            `;
+
+
+            return;
+
+
+        }
+
+
+
+
+
+
+
+        snapshot.forEach((docSnap)=>{
+
+
+            const data=docSnap.data();
+
+
+
+
+            announcementCache.push({
+
+                id:docSnap.id,
+
+                ...data
+
+
+            });
+
+
+
+
+
+
+            container.innerHTML += `
+
+
+            <div class="announcement-card">
+
+
+            <h3>
+
+            📢 ${data.title}
+
+            </h3>
+
+
+
+            <p>
+
+            ${data.message}
+
+            </p>
+
+
+
+
+            <small>
+
+            Posted by:
+
+            ${data.author || "Admin"}
+
+            </small>
+
+
+
+            <br><br>
+
+
+
+            <button onclick="editAnnouncement('${docSnap.id}')">
+
+            ✏️ Edit
+
+            </button>
+
+
+
+
+            <button onclick="deleteAnnouncement('${docSnap.id}')">
+
+            🗑 Delete
+
+            </button>
+
+
+
+            </div>
+
+
+
+            `;
+
+
+
+        });
+
+
+
+    }
+
+
+
+    catch(error){
+
+
+        console.error(
+
+            "ANNOUNCEMENT ERROR:",
+
+            error
+
+        );
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+// ANNOUNCEMENT FORM
+// ========================================
+
+
+const announcementForm = document.getElementById(
 
     "announcementForm"
 
@@ -2307,9 +2196,7 @@ if(announcementForm){
 
 
 
-            const title =
-
-            getValue(
+            const title = getValue(
 
                 "announcementTitle"
 
@@ -2319,9 +2206,7 @@ if(announcementForm){
 
 
 
-            const message =
-
-            getValue(
+            const message = getValue(
 
                 "announcementMessage"
 
@@ -2332,13 +2217,13 @@ if(announcementForm){
 
 
 
-
             if(!title || !message){
+
 
 
                 notify(
 
-                    "Complete announcement fields.",
+                    "Please complete announcement fields.",
 
                     "warning"
 
@@ -2357,97 +2242,63 @@ if(announcementForm){
 
 
 
-            try{
+            await addDoc(
+
+                collection(
+
+                    db,
+
+                    "announcements"
+
+                ),
+
+                {
 
 
-                await addDoc(
-
-                    collection(
-
-                        db,
-
-                        "announcements"
-
-                    ),
-
-                    {
+                    title:title,
 
 
-                        title,
+                    message:message,
 
 
-                        message,
+                    author:
 
-
-                        author:
-
-                        currentUser?.email || "Admin",
+                    currentUser?.email || "Admin",
 
 
 
-                        createdAt:
 
-                        serverTimestamp()
+                    createdAt:
 
-
-
-                    }
+                    serverTimestamp()
 
 
-                );
 
+                }
+
+
+            );
 
 
 
 
 
 
-                notify(
+            notify(
 
-                    "Announcement posted."
+                "Announcement posted."
 
-                );
-
-
-
-
-
-                announcementForm.reset();
+            );
 
 
 
 
-                loadAnnouncements();
+
+            announcementForm.reset();
 
 
 
-
-            }
-
-
-
-            catch(error){
-
-
-                console.error(
-
-                    "Announcement Error:",
-
-                    error
-
-                );
-
-
-                notify(
-
-                    "Failed posting announcement.",
-
-                    "error"
-
-                );
-
-
-            }
+            loadAnnouncements();
 
 
 
@@ -2455,173 +2306,6 @@ if(announcementForm){
 
 
     );
-
-
-}
-
-
-
-
-
-
-
-
-
-// LOAD ANNOUNCEMENTS
-// ========================================
-
-
-async function loadAnnouncements(){
-
-
-
-    const container =
-
-    document.getElementById(
-
-        "adminAnnouncementContainer"
-
-    );
-
-
-
-
-
-    if(!container)
-
-    return;
-
-
-
-
-
-
-    const snapshot =
-
-    await getDocs(
-
-        query(
-
-            collection(
-
-                db,
-
-                "announcements"
-
-            ),
-
-            orderBy(
-
-                "createdAt",
-
-                "desc"
-
-            )
-
-        )
-
-    );
-
-
-
-
-
-
-    container.innerHTML="";
-
-
-
-
-
-
-
-
-    snapshot.forEach(docSnap=>{
-
-
-        const data =
-
-        docSnap.data();
-
-
-
-
-
-        container.innerHTML += `
-
-
-        <div class="announcement-card">
-
-
-            <h3>
-
-            📢 ${data.title}
-
-            </h3>
-
-
-
-
-            <p>
-
-            ${data.message}
-
-            </p>
-
-
-
-
-            <small>
-
-            Posted by:
-
-            ${data.author || "Admin"}
-
-            </small>
-
-
-
-
-            <br><br>
-
-
-
-            <button
-
-            onclick="editAnnouncement('${docSnap.id}')"
-
-            >
-
-            ✏️ Edit
-
-            </button>
-
-
-
-
-
-            <button
-
-            onclick="deleteAnnouncement('${docSnap.id}')"
-
-            >
-
-            🗑 Delete
-
-            </button>
-
-
-
-        </div>
-
-
-
-        `;
-
-
-
-    });
-
 
 
 }
@@ -2642,9 +2326,7 @@ window.editAnnouncement = async function(id){
 
 
 
-    const announcementRef =
-
-    doc(
+    const refDoc = doc(
 
         db,
 
@@ -2658,11 +2340,9 @@ window.editAnnouncement = async function(id){
 
 
 
-    const snap =
+    const snap = await getDoc(
 
-    await getDoc(
-
-        announcementRef
+        refDoc
 
     );
 
@@ -2678,18 +2358,15 @@ window.editAnnouncement = async function(id){
 
 
 
-
-    const data = snap.data();
-
+    const data=snap.data();
 
 
 
 
-    const title =
 
-    prompt(
+    const title = prompt(
 
-        "New title:",
+        "New announcement title:",
 
         data.title
 
@@ -2708,14 +2385,15 @@ window.editAnnouncement = async function(id){
 
 
 
+
     await updateDoc(
 
-        announcementRef,
+        refDoc,
 
         {
 
 
-            title,
+            title:title,
 
 
             updatedAt:
@@ -2723,12 +2401,10 @@ window.editAnnouncement = async function(id){
             serverTimestamp()
 
 
-
         }
 
 
     );
-
 
 
 
@@ -2777,7 +2453,6 @@ window.deleteAnnouncement = async function(id){
 
 
 
-
     await deleteDoc(
 
         doc(
@@ -2810,51 +2485,323 @@ window.deleteAnnouncement = async function(id){
 
 
 };
+
 // ========================================
-// DASHBOARD SUMMARY
+// COLLECTION MANAGEMENT
+// ========================================
+
+
+// COLLECTION FORM
+// ========================================
+
+
+const collectionForm = document.getElementById(
+
+    "collectionForm"
+
+);
+
+
+
+
+
+if(collectionForm){
+
+
+
+    collectionForm.addEventListener(
+
+        "submit",
+
+        async(e)=>{
+
+
+            e.preventDefault();
+
+
+
+
+
+            const yearLevel = getValue(
+
+                "yearLevel"
+
+            );
+
+
+
+
+
+            const amount = Number(
+
+                getValue(
+
+                    "amount"
+
+                )
+
+            );
+
+
+
+
+
+            const date = getValue(
+
+                "date"
+
+            );
+
+
+
+
+
+
+            if(!yearLevel || !amount || !date){
+
+
+
+                notify(
+
+                    "Complete collection information.",
+
+                    "warning"
+
+                );
+
+
+                return;
+
+
+            }
+
+
+
+
+
+
+
+
+            await addDoc(
+
+                collection(
+
+                    db,
+
+                    "collections"
+
+                ),
+
+                {
+
+
+                    yearLevel,
+
+
+                    amount,
+
+
+                    date,
+
+
+                    createdAt:
+
+                    serverTimestamp()
+
+
+
+                }
+
+
+            );
+
+
+
+
+
+
+            notify(
+
+                "Collection saved."
+
+            );
+
+
+
+
+
+            collectionForm.reset();
+
+
+
+            loadSummary();
+
+
+
+        }
+
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// ========================================
+// SUMMARY SYSTEM
 // ========================================
 
 
 async function loadSummary(){
 
 
+
     try{
 
 
-        const totalProjects =
 
-        projectCache.length;
-
+        let totalCollections = 0;
 
 
-        const totalExpenses =
-
-        expenseCache.reduce(
-
-            (total,item)=>{
+        let totalExpenses = 0;
 
 
-                return total +
-
-                Number(
-
-                    item.amount || 0
-
-                );
+        let totalProjects = 0;
 
 
-            },
 
-            0
+        let totalRecords = 0;
+
+
+
+
+
+
+
+        const collectionSnap = await getDocs(
+
+            collection(
+
+                db,
+
+                "collections"
+
+            )
 
         );
 
 
 
 
-        const totalRecords =
 
-        recordCache.length;
+        collectionSnap.forEach((item)=>{
+
+
+            totalCollections += Number(
+
+                item.data().amount || 0
+
+            );
+
+
+        });
+
+
+
+
+
+
+
+
+        const expenseSnap = await getDocs(
+
+            collection(
+
+                db,
+
+                "expenses"
+
+            )
+
+        );
+
+
+
+
+
+        expenseSnap.forEach((item)=>{
+
+
+            totalExpenses += Number(
+
+                item.data().amount || 0
+
+            );
+
+
+        });
+
+
+
+
+
+
+
+        const projectSnap = await getDocs(
+
+            collection(
+
+                db,
+
+                "projects"
+
+            )
+
+        );
+
+
+
+
+
+        totalProjects = projectSnap.size;
+
+
+
+
+
+
+
+
+        const recordSnap = await getDocs(
+
+            collection(
+
+                db,
+
+                "records"
+
+            )
+
+        );
+
+
+
+
+
+        totalRecords = recordSnap.size;
+
+
+
 
 
 
@@ -2863,11 +2810,12 @@ async function loadSummary(){
 
         setText(
 
-            "totalProjects",
+            "totalCollections",
 
-            totalProjects
+            peso(totalCollections)
 
         );
+
 
 
 
@@ -2885,13 +2833,72 @@ async function loadSummary(){
 
 
 
+
+
         setText(
 
-            "totalRecords",
+            "currentBalance",
+
+            peso(
+
+                totalCollections - totalExpenses
+
+            )
+
+        );
+
+
+
+
+
+
+        setText(
+
+            "recordCount",
 
             totalRecords
 
         );
+
+
+
+
+
+
+        setText(
+
+            "projectCount",
+
+            totalProjects
+
+        );
+
+
+
+
+
+
+        setText(
+
+            "collectionCount",
+
+            collectionSnap.size
+
+        );
+
+
+
+
+
+
+        setText(
+
+            "expenseCount",
+
+            expenseSnap.size
+
+        );
+
 
 
 
@@ -2906,7 +2913,7 @@ async function loadSummary(){
 
         console.error(
 
-            "Summary Error:",
+            "SUMMARY ERROR:",
 
             error
 
@@ -2931,14 +2938,11 @@ async function loadSummary(){
 // ========================================
 
 
-const searchInput =
+const searchInput = document.getElementById(
 
-document.getElementById(
-
-    "searchInput"
+    "searchRecord"
 
 );
-
 
 
 
@@ -2966,12 +2970,9 @@ if(searchInput){
 
 
 
+            const elements = document.querySelectorAll(
 
-            const cards =
-
-            document.querySelectorAll(
-
-                ".data-card, .announcement-card"
+                ".data-card, .announcement-card, #records tr"
 
             );
 
@@ -2980,13 +2981,12 @@ if(searchInput){
 
 
 
-            cards.forEach(card=>{
+
+            elements.forEach((element)=>{
 
 
 
-                const text =
-
-                card.textContent
+                const text = element.textContent
 
                 .toLowerCase();
 
@@ -2995,31 +2995,26 @@ if(searchInput){
 
 
 
-                if(
 
-                    text.includes(keyword)
-
-                ){
+                if(text.includes(keyword)){
 
 
-                    card.style.display="";
+                    element.style.display="";
 
 
                 }
-
 
                 else{
 
 
-                    card.style.display="none";
+                    element.style.display="none";
 
 
                 }
 
 
+
             });
-
-
 
 
 
@@ -3039,73 +3034,6 @@ if(searchInput){
 
 
 
-// ========================================
-// REFRESH DASHBOARD
-// ========================================
-
-
-const refreshButton =
-
-document.getElementById(
-
-    "refreshDashboard"
-
-);
-
-
-
-
-
-
-if(refreshButton){
-
-
-
-    refreshButton.onclick = async()=>{
-
-
-
-        refreshButton.disabled = true;
-
-
-
-        refreshButton.textContent =
-
-        "Loading...";
-
-
-
-
-
-        await initializeDashboard();
-
-
-
-
-
-
-        refreshButton.disabled=false;
-
-
-
-        refreshButton.textContent =
-
-        "Refresh";
-
-
-
-    };
-
-
-
-}
-
-
-
-
-
-
-
 
 
 // ========================================
@@ -3113,9 +3041,7 @@ if(refreshButton){
 // ========================================
 
 
-const exportButton =
-
-document.getElementById(
+const exportButton = document.getElementById(
 
     "exportReport"
 
@@ -3125,16 +3051,27 @@ document.getElementById(
 
 
 
-
 if(exportButton){
 
 
 
-    exportButton.onclick = ()=>{
+    exportButton.onclick=()=>{
 
 
 
         const report = {
+
+
+            generated:
+
+            new Date()
+
+            .toLocaleString(
+
+                "en-PH"
+
+            ),
+
 
 
             projects:
@@ -3151,19 +3088,8 @@ if(exportButton){
 
             records:
 
-            recordCache.length,
+            recordCache.length
 
-
-
-            generated:
-
-            new Date()
-
-            .toLocaleString(
-
-                "en-PH"
-
-            )
 
 
         };
@@ -3172,9 +3098,9 @@ if(exportButton){
 
 
 
-        console.log(
 
-            "TREASURY REPORT",
+
+        console.table(
 
             report
 
@@ -3184,9 +3110,11 @@ if(exportButton){
 
 
 
+
+
         notify(
 
-            "📄 Report data generated. Check console."
+            "Treasury report generated. Check console."
 
         );
 
@@ -3205,70 +3133,10 @@ if(exportButton){
 
 
 
-// ========================================
-// CURRENT DATE DISPLAY
-// ========================================
-
-
-const dateDisplay =
-
-document.getElementById(
-
-    "currentDate"
-
-);
-
-
-
-
-
-
-if(dateDisplay){
-
-
-
-    dateDisplay.textContent =
-
-    new Date()
-
-    .toLocaleDateString(
-
-        "en-PH",
-
-        {
-
-
-            weekday:"long",
-
-
-            year:"numeric",
-
-
-            month:"long",
-
-
-            day:"numeric"
-
-
-        }
-
-
-    );
-
-
-
-}
-
-
-
-
-
-
-
 
 
 // ========================================
-// FIREBASE CHECK
+// FIREBASE CONNECTION CHECK
 // ========================================
 
 
@@ -3277,6 +3145,7 @@ async function firebaseConnectionCheck(){
 
 
     try{
+
 
 
         await getDocs(
@@ -3301,7 +3170,7 @@ async function firebaseConnectionCheck(){
 
 FIREBASE CONNECTION SUCCESS ✅
 
-DALUBWIKAAN DATABASE READY
+DALUBWIKAAN DATABASE ONLINE
 
 =================================
 
@@ -3319,12 +3188,11 @@ DALUBWIKAAN DATABASE READY
 
         console.error(
 
-            "Firebase Connection Failed:",
+            "FIREBASE ERROR:",
 
             error
 
         );
-
 
 
     }
@@ -3342,7 +3210,7 @@ DALUBWIKAAN DATABASE READY
 
 
 // ========================================
-// START CHECK
+// START SYSTEM
 // ========================================
 
 
@@ -3353,40 +3221,34 @@ firebaseConnectionCheck();
 
 
 
-
-
-
-// ========================================
-// FINAL SYSTEM MESSAGE
-// ========================================
-
-
 console.log(`
 
 ========================================
 
 DALUBWIKAAN TREASURY MANAGEMENT SYSTEM
 
-ADMIN PANEL v12.0
+ADMIN PANEL v13.0
 
+
+✅ Authentication
 
 ✅ Firebase Connected
 
-✅ Authentication Enabled
+✅ Collection CRUD
 
-✅ Projects CRUD Enabled
+✅ Expense CRUD
 
-✅ Expenses CRUD Enabled
+✅ Project CRUD
 
-✅ Records CRUD Enabled
+✅ Record CRUD
 
-✅ Receipt Upload Enabled
+✅ Announcement CRUD
 
-✅ Announcement System Enabled
+✅ Receipt Upload
 
-✅ Edit Enabled
+✅ Search Enabled
 
-✅ Delete Enabled
+✅ Summary Enabled
 
 
 SYSTEM READY 🚀
