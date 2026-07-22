@@ -4,30 +4,63 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 
 <title>
 Dalubwikaan Treasury Transparency Portal
 </title>
 
 
+
 <link rel="stylesheet" href="css/style.css">
+
 
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 
+
 </head>
 
 
+
+
 <body>
+
+
+
+<!-- LOADING SCREEN -->
+
+
+<div id="loader">
+
+
+<div class="loader-circle"></div>
+
+
+<p>
+Loading Dalubwikaan Treasury...
+</p>
+
+
+</div>
+
+
+
+
+
 
 
 <div class="dashboard">
 
 
 
+
+
 <!-- SIDEBAR -->
+
 
 <aside class="sidebar">
 
@@ -37,13 +70,17 @@ Dalubwikaan Treasury Transparency Portal
 </h2>
 
 
+
 <p>
 Treasury Transparency Portal
 </p>
 
 
 
+
+
 <nav>
+
 
 
 <a class="active" href="index.html">
@@ -54,11 +91,13 @@ Treasury Transparency Portal
 
 
 
+
 <a href="#collections">
 
 💰 Collections
 
 </a>
+
 
 
 
@@ -72,11 +111,13 @@ Treasury Transparency Portal
 
 
 
+
 <a href="projects.html">
 
 🏗 Projects
 
 </a>
+
 
 
 
@@ -89,7 +130,10 @@ Treasury Transparency Portal
 
 
 
+
 </nav>
+
+
 
 
 </aside>
@@ -100,10 +144,14 @@ Treasury Transparency Portal
 
 
 
-<!-- MAIN CONTENT -->
+
+
+<!-- MAIN -->
 
 
 <main class="main">
+
+
 
 
 
@@ -120,14 +168,21 @@ Treasury Dashboard
 </h1>
 
 
+
 <p>
+
 Financial Transparency Portal
+
 <br>
+
 Academic Year 2026-2027
+
 </p>
 
 
 </div>
+
+
 
 
 
@@ -136,6 +191,7 @@ Academic Year 2026-2027
 🌙
 
 </button>
+
 
 
 
@@ -152,7 +208,11 @@ Academic Year 2026-2027
 <!-- SUMMARY CARDS -->
 
 
+
 <section class="cards">
+
+
+
 
 
 <div class="card">
@@ -163,9 +223,7 @@ Total Funds
 
 
 <h2 id="totalFunds">
-
 ₱0
-
 </h2>
 
 
@@ -181,6 +239,7 @@ Total Collected Contributions
 
 
 
+
 <div class="card">
 
 <h3>
@@ -189,9 +248,7 @@ Registered Members
 
 
 <h2 id="totalMembers">
-
 0
-
 </h2>
 
 
@@ -207,8 +264,8 @@ Dalubwikaan Members
 
 
 
-<div class="card">
 
+<div class="card">
 
 <h3>
 Total Expenses
@@ -216,18 +273,17 @@ Total Expenses
 
 
 <h2 id="totalExpenses">
-
 ₱0
-
 </h2>
 
 
 <span>
-Approved Project Expenses
+Approved Projects
 </span>
 
 
 </div>
+
 
 
 
@@ -236,25 +292,24 @@ Approved Project Expenses
 
 <div class="card">
 
-
 <h3>
-Available Balance
+Remaining Balance
 </h3>
 
 
 <h2 id="remainingBalance">
-
 ₱0
-
 </h2>
 
 
 <span>
-Remaining Treasury Funds
+Available Treasury Funds
 </span>
 
 
 </div>
+
+
 
 
 
@@ -271,6 +326,7 @@ Remaining Treasury Funds
 <!-- COLLECTION BREAKDOWN -->
 
 
+
 <section class="panel" id="collections">
 
 
@@ -280,7 +336,11 @@ Remaining Treasury Funds
 
 
 
+
+
 <div class="year-container">
+
+
 
 
 
@@ -309,6 +369,9 @@ First Year
 
 
 
+
+
+
 <div class="year">
 
 <h3>
@@ -329,6 +392,7 @@ Second Year
 
 
 </div>
+
 
 
 
@@ -361,6 +425,7 @@ Third Year
 
 
 
+
 <div class="year">
 
 <h3>
@@ -384,7 +449,12 @@ Fourth Year
 
 
 
+
+
+
+
 </div>
+
 
 
 </section>
@@ -397,15 +467,18 @@ Fourth Year
 
 
 
-<!-- REPORT ANALYTICS -->
+<!-- ANALYTICS -->
+
 
 
 <section class="panel" id="reports">
 
 
+
 <h2>
 📊 Financial Analytics Report
 </h2>
+
 
 
 
@@ -417,15 +490,17 @@ Fourth Year
 
 
 
-<br><br>
 
 
 
 <div class="chart-container">
 
+
 <canvas id="collectionChart"></canvas>
 
+
 </div>
+
 
 
 
@@ -437,9 +512,12 @@ Fourth Year
 
 <div class="chart-container">
 
+
 <canvas id="budgetChart"></canvas>
 
+
 </div>
+
 
 
 
@@ -457,6 +535,7 @@ Fourth Year
 <!-- COLLECTION HISTORY -->
 
 
+
 <section class="panel">
 
 
@@ -472,7 +551,9 @@ Fourth Year
 
 <thead>
 
+
 <tr>
+
 
 <th>
 Date
@@ -505,11 +586,25 @@ Status
 <tbody id="transactionTable">
 
 
+<tr>
+
+<td colspan="4">
+
+No collection records yet.
+
+</td>
+
+
+</tr>
+
+
 </tbody>
 
 
 
+
 </table>
+
 
 
 
@@ -526,7 +621,8 @@ Status
 <!-- PROJECT SUMMARY -->
 
 
-<section class="panel">
+
+<section class="panel" id="projects">
 
 
 <h2>
@@ -537,6 +633,7 @@ Status
 
 
 <table>
+
 
 
 <thead>
@@ -571,11 +668,26 @@ Description
 <tbody id="projectTable">
 
 
+<tr>
+
+<td colspan="3">
+
+No projects available.
+
+</td>
+
+
+</tr>
+
+
+
 </tbody>
 
 
 
+
 </table>
+
 
 
 
@@ -593,6 +705,7 @@ View Complete Project Reports →
 
 
 
+
 </section>
 
 
@@ -603,7 +716,8 @@ View Complete Project Reports →
 
 
 
-<!-- RECEIPT TRANSPARENCY -->
+<!-- EXPENSE RECORDS -->
+
 
 
 <section class="panel">
@@ -619,14 +733,40 @@ View Complete Project Reports →
 <p>
 
 All Dalubwikaan expenses are recorded with
-supporting receipts to maintain transparency,
-accountability, and proper financial management.
+official documentation and supporting receipts
+to maintain transparency and accountability.
 
 </p>
 
 
 
+
 <br>
+
+
+
+
+
+<div id="expensePreview">
+
+
+
+<p>
+
+No expense records available.
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+<br>
+
 
 
 
@@ -635,6 +775,7 @@ accountability, and proper financial management.
 View Expense Records & Receipts →
 
 </a>
+
 
 
 
@@ -648,7 +789,8 @@ View Expense Records & Receipts →
 
 
 
-<!-- ORGANIZATION STATEMENT -->
+<!-- FINANCIAL RESPONSIBILITY -->
+
 
 
 <section class="panel">
@@ -660,17 +802,22 @@ View Expense Records & Receipts →
 
 
 
+
 <p>
 
 Ang Dalubwikaan Treasury Transparency Portal ay
 naglalayong ipakita ang malinaw at responsableng
 pamamahala ng pondo ng organisasyon.
 
-Layunin nitong mapanatili ang tiwala ng bawat miyembro
-sa pamamagitan ng bukas na ulat pinansyal,
-maayos na dokumentasyon, at pananagutan.
+<br><br>
+
+Sa pamamagitan ng sistemang ito, makikita ng bawat
+miyembro ang koleksyon, gastusin, at paggamit ng
+pondo upang mapanatili ang tiwala, integridad,
+at pananagutan.
 
 </p>
+
 
 
 
@@ -702,7 +849,11 @@ maayos na dokumentasyon, at pananagutan.
 
 
 
+
 </main>
+
+
+
 
 
 </div>
@@ -715,13 +866,17 @@ maayos na dokumentasyon, at pananagutan.
 
 
 
-<!-- CHART LIBRARY -->
+<!-- CHART JS -->
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
 
+
+
 <!-- PDF GENERATOR -->
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -729,12 +884,18 @@ maayos na dokumentasyon, at pananagutan.
 
 
 
-<!-- FIREBASE DASHBOARD SCRIPT -->
+
+
+<!-- FIREBASE -->
+
 
 <script type="module" src="js/dashboard.js"></script>
 
 
 
+
+
 </body>
+
 
 </html>
