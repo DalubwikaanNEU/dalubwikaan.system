@@ -9,12 +9,13 @@
 
 
 <title>
-Dalubwikaan Projects & Expenses
+Dalubwikaan Projects & Budget Report
 </title>
 
 
 
 <link rel="stylesheet" href="css/style.css">
+
 
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -34,8 +35,12 @@ Dalubwikaan Projects & Expenses
 
 
 
+<!-- SIDEBAR -->
+
 <aside class="sidebar">
 
+
+<div class="brand">
 
 <h2>
 📚 Dalubwikaan
@@ -43,8 +48,12 @@ Dalubwikaan Projects & Expenses
 
 
 <p>
-Financial Transparency
+Financial Transparency Portal
 </p>
+
+
+</div>
+
 
 
 
@@ -57,6 +66,7 @@ Financial Transparency
 🏠 Dashboard
 
 </a>
+
 
 
 <a class="active">
@@ -88,7 +98,11 @@ Financial Transparency
 
 
 
+
+<!-- MAIN -->
+
 <main class="main">
+
 
 
 <header>
@@ -96,13 +110,14 @@ Financial Transparency
 
 <div>
 
+
 <h1>
-Projects & Budget Report
+🏗 Projects & Budget Report
 </h1>
 
 
 <p>
-Where your contributions are allocated
+Transparency report of organizational projects, budget allocation, and expenses.
 </p>
 
 
@@ -117,8 +132,119 @@ Where your contributions are allocated
 
 
 
-<section id="projectContainer"
+
+
+<!-- PROJECT STATUS LEGEND -->
+
+<section class="panel">
+
+
+<h2>
+📌 Project Status Guide
+</h2>
+
+
+
+<div class="status-guide">
+
+
+<div class="guide-card">
+
+<span class="planning">
+🟡 Planning
+</span>
+
+<p>
+Project is being prepared or proposed.
+</p>
+
+</div>
+
+
+
+
+<div class="guide-card">
+
+
+<span class="ongoing">
+🔵 Ongoing
+</span>
+
+
+<p>
+Project implementation is currently in progress.
+</p>
+
+
+</div>
+
+
+
+
+
+<div class="guide-card">
+
+
+<span class="completed">
+🟢 Completed
+</span>
+
+
+<p>
+Project has been successfully completed.
+</p>
+
+
+</div>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- PROJECT REPORT -->
+
+<section class="panel">
+
+
+<h2>
+📊 Project Budget Allocation
+</h2>
+
+
+
+
+<div id="projectContainer"
 class="project-grid">
+
+
+
+<!-- PROJECTS WILL LOAD HERE FROM FIREBASE -->
+
+
+<div class="empty-state">
+
+
+<p>
+Loading project transparency report...
+</p>
+
+
+</div>
+
+
+
+</div>
+
 
 
 
@@ -129,8 +255,55 @@ class="project-grid">
 
 
 
-</main>
 
+
+
+<!-- TRANSPARENCY NOTE -->
+
+<section class="panel">
+
+
+<h2>
+🔎 Financial Transparency Note
+</h2>
+
+
+
+<p>
+
+
+All project reports display the approved budget, actual expenses, remaining funds, and current implementation status to ensure accountability and transparency among Dalubwikaan members.
+
+
+</p>
+
+
+</section>
+
+
+
+
+
+
+
+<footer>
+
+
+<p>
+
+© 2026 Dalubwikaan Treasury Transparency Portal
+
+</p>
+
+
+</footer>
+
+
+
+
+
+
+</main>
 
 
 
