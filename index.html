@@ -53,7 +53,10 @@ Loading Dalubwikaan Treasury...
 
 
 
+
 <div class="dashboard">
+
+
 
 
 
@@ -65,15 +68,22 @@ Loading Dalubwikaan Treasury...
 <aside class="sidebar">
 
 
+<div class="brand">
+
+
 <h2>
 📚 Dalubwikaan
 </h2>
 
 
-
 <p>
 Treasury Transparency Portal
 </p>
+
+
+</div>
+
+
 
 
 
@@ -88,6 +98,7 @@ Treasury Transparency Portal
 🏠 Dashboard
 
 </a>
+
 
 
 
@@ -122,6 +133,16 @@ Treasury Transparency Portal
 
 
 
+<a href="#audit">
+
+📝 Audit Trail
+
+</a>
+
+
+
+
+
 <a href="login.html">
 
 🔐 Admin Login
@@ -146,7 +167,7 @@ Treasury Transparency Portal
 
 
 
-<!-- MAIN -->
+<!-- MAIN CONTENT -->
 
 
 <main class="main">
@@ -157,7 +178,9 @@ Treasury Transparency Portal
 
 
 
+
 <header>
+
 
 
 <div>
@@ -171,7 +194,7 @@ Treasury Dashboard
 
 <p>
 
-Financial Transparency Portal
+Dalubwikaan Financial Transparency Portal
 
 <br>
 
@@ -186,7 +209,9 @@ Academic Year 2026-2027
 
 
 
-<button id="themeToggle">
+<button 
+id="themeToggle"
+aria-label="Toggle Dark Mode">
 
 🌙
 
@@ -208,7 +233,6 @@ Academic Year 2026-2027
 <!-- SUMMARY CARDS -->
 
 
-
 <section class="cards">
 
 
@@ -217,8 +241,9 @@ Academic Year 2026-2027
 
 <div class="card">
 
+
 <h3>
-Total Funds
+💰 Total Funds
 </h3>
 
 
@@ -228,7 +253,7 @@ Total Funds
 
 
 <span>
-Total Collected Contributions
+Total Contributions Collected
 </span>
 
 
@@ -240,10 +265,13 @@ Total Collected Contributions
 
 
 
+
+
 <div class="card">
 
+
 <h3>
-Registered Members
+👥 Registered Members
 </h3>
 
 
@@ -265,10 +293,13 @@ Dalubwikaan Members
 
 
 
+
+
 <div class="card">
 
+
 <h3>
-Total Expenses
+📉 Total Expenses
 </h3>
 
 
@@ -278,7 +309,7 @@ Total Expenses
 
 
 <span>
-Approved Projects
+Approved Allocations
 </span>
 
 
@@ -290,10 +321,13 @@ Approved Projects
 
 
 
+
+
 <div class="card">
 
+
 <h3>
-Remaining Balance
+💵 Remaining Balance
 </h3>
 
 
@@ -308,7 +342,6 @@ Available Treasury Funds
 
 
 </div>
-
 
 
 
@@ -330,6 +363,7 @@ Available Treasury Funds
 <section class="panel" id="collections">
 
 
+
 <h2>
 💰 Collection Breakdown Per Year Level
 </h2>
@@ -342,9 +376,8 @@ Available Treasury Funds
 
 
 
-
-
 <div class="year">
+
 
 <h3>
 First Year
@@ -354,6 +387,7 @@ First Year
 <p id="firstYear">
 ₱0
 </p>
+
 
 
 <div class="progress">
@@ -374,6 +408,7 @@ First Year
 
 <div class="year">
 
+
 <h3>
 Second Year
 </h3>
@@ -382,6 +417,7 @@ Second Year
 <p id="secondYear">
 ₱0
 </p>
+
 
 
 <div class="progress">
@@ -399,7 +435,9 @@ Second Year
 
 
 
+
 <div class="year">
+
 
 <h3>
 Third Year
@@ -409,6 +447,7 @@ Third Year
 <p id="thirdYear">
 ₱0
 </p>
+
 
 
 <div class="progress">
@@ -426,7 +465,9 @@ Third Year
 
 
 
+
 <div class="year">
+
 
 <h3>
 Fourth Year
@@ -436,6 +477,7 @@ Fourth Year
 <p id="fourthYear">
 ₱0
 </p>
+
 
 
 <div class="progress">
@@ -450,11 +492,7 @@ Fourth Year
 
 
 
-
-
-
 </div>
-
 
 
 </section>
@@ -470,9 +508,7 @@ Fourth Year
 <!-- ANALYTICS -->
 
 
-
 <section class="panel" id="reports">
-
 
 
 <h2>
@@ -482,9 +518,12 @@ Fourth Year
 
 
 
+
 <button id="generateReport">
 
+
 📄 Generate Treasury Report
+
 
 </button>
 
@@ -521,7 +560,6 @@ Fourth Year
 
 
 
-
 </section>
 
 
@@ -535,13 +573,13 @@ Fourth Year
 <!-- COLLECTION HISTORY -->
 
 
-
 <section class="panel">
 
 
 <h2>
 📋 Collection History
 </h2>
+
 
 
 
@@ -553,7 +591,6 @@ Fourth Year
 
 
 <tr>
-
 
 <th>
 Date
@@ -583,10 +620,12 @@ Status
 
 
 
+
 <tbody id="transactionTable">
 
 
 <tr>
+
 
 <td colspan="4">
 
@@ -598,8 +637,8 @@ No collection records yet.
 </tr>
 
 
-</tbody>
 
+</tbody>
 
 
 
@@ -621,8 +660,7 @@ No collection records yet.
 <!-- PROJECT SUMMARY -->
 
 
-
-<section class="panel" id="projects">
+<section class="panel">
 
 
 <h2>
@@ -633,7 +671,6 @@ No collection records yet.
 
 
 <table>
-
 
 
 <thead>
@@ -665,6 +702,7 @@ Description
 
 
 
+
 <tbody id="projectTable">
 
 
@@ -680,14 +718,11 @@ No projects available.
 </tr>
 
 
-
 </tbody>
 
 
 
-
 </table>
-
 
 
 
@@ -716,8 +751,7 @@ View Complete Project Reports →
 
 
 
-<!-- EXPENSE RECORDS -->
-
+<!-- EXPENSE TRANSPARENCY -->
 
 
 <section class="panel">
@@ -732,16 +766,11 @@ View Complete Project Reports →
 
 <p>
 
-All Dalubwikaan expenses are recorded with
-official documentation and supporting receipts
-to maintain transparency and accountability.
+All Dalubwikaan expenses are documented with
+supporting receipts and financial records to
+ensure accountability and proper monitoring.
 
 </p>
-
-
-
-
-<br>
 
 
 
@@ -750,13 +779,11 @@ to maintain transparency and accountability.
 <div id="expensePreview">
 
 
-
 <p>
 
 No expense records available.
 
 </p>
-
 
 
 </div>
@@ -789,8 +816,45 @@ View Expense Records & Receipts →
 
 
 
-<!-- FINANCIAL RESPONSIBILITY -->
+<!-- AUDIT TRAIL -->
 
+
+<section class="panel" id="audit">
+
+
+<h2>
+📝 Recent Audit Activity
+</h2>
+
+
+
+
+<div id="auditContainer">
+
+
+<p>
+
+No recent activities.
+
+</p>
+
+
+</div>
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- RESPONSIBILITY STATEMENT -->
 
 
 <section class="panel">
@@ -806,15 +870,15 @@ View Expense Records & Receipts →
 <p>
 
 Ang Dalubwikaan Treasury Transparency Portal ay
-naglalayong ipakita ang malinaw at responsableng
-pamamahala ng pondo ng organisasyon.
+naglalayong ipakita ang malinaw, responsable, at
+makatarungang pamamahala ng pondo ng organisasyon.
 
 <br><br>
 
-Sa pamamagitan ng sistemang ito, makikita ng bawat
-miyembro ang koleksyon, gastusin, at paggamit ng
-pondo upang mapanatili ang tiwala, integridad,
-at pananagutan.
+Layunin nitong mapanatili ang tiwala ng bawat
+miyembro sa pamamagitan ng bukas na paglalathala
+ng koleksyon, gastusin, at mga proyektong
+pinopondohan.
 
 </p>
 
@@ -836,7 +900,10 @@ at pananagutan.
 
 <p>
 
-© 2026 Dalubwikaan | Treasury Transparency Portal
+© 2026 Dalubwikaan  
+<br>
+
+Treasury Transparency Portal
 
 </p>
 
@@ -849,11 +916,7 @@ at pananagutan.
 
 
 
-
 </main>
-
-
-
 
 
 </div>
@@ -866,10 +929,11 @@ at pananagutan.
 
 
 
-<!-- CHART JS -->
+<!-- CHART LIBRARY -->
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
 
 
@@ -886,7 +950,17 @@ at pananagutan.
 
 
 
-<!-- FIREBASE -->
+<!-- THEME SYSTEM -->
+
+
+<script src="js/theme.js"></script>
+
+
+
+
+
+
+<!-- FIREBASE DASHBOARD -->
 
 
 <script type="module" src="js/dashboard.js"></script>
