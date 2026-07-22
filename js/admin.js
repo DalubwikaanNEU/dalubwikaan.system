@@ -1,6 +1,6 @@
 // =================================
 // DALUBWIKAAN ADMIN PANEL
-// FIREBASE + AUTH + STORAGE VERSION
+// FIREBASE + AUTH + STORAGE + CRUD VERSION
 // =================================
 
 
@@ -14,6 +14,8 @@ import {
 collection,
 addDoc,
 getDocs,
+deleteDoc,
+doc,
 serverTimestamp
 
 }
@@ -66,13 +68,17 @@ from
 
 
 
-// ===============================
-// AUTHENTICATION CHECK
-// ===============================
-
-
 const auth = getAuth();
 
+
+
+
+
+
+
+// =================================
+// AUTH CHECK
+// =================================
 
 
 onAuthStateChanged(auth,(user)=>{
@@ -97,20 +103,20 @@ window.location.href="login.html";
 
 
 
-// ===============================
+// =================================
 // LOGOUT
-// ===============================
+// =================================
 
 
-const logoutBtn =
+const logout =
 document.getElementById("logout");
 
 
 
-if(logoutBtn){
+if(logout){
 
 
-logoutBtn.addEventListener("click",()=>{
+logout.onclick=()=>{
 
 
 signOut(auth)
@@ -124,7 +130,7 @@ window.location.href="login.html";
 });
 
 
-});
+};
 
 
 }
@@ -137,9 +143,30 @@ window.location.href="login.html";
 
 
 
-// ===============================
-// ADD COLLECTION
-// ===============================
+// =================================
+// FORMAT PESO
+// =================================
+
+
+function peso(value){
+
+
+return "₱"+Number(value).toLocaleString();
+
+
+}
+
+
+
+
+
+
+
+
+
+// =================================
+// COLLECTION ADD
+// =================================
 
 
 const collectionForm =
@@ -150,27 +177,26 @@ document.getElementById("collectionForm");
 if(collectionForm){
 
 
-collectionForm.addEventListener("submit",async function(e){
+collectionForm.addEventListener(
+
+"submit",
+
+async(e)=>{
 
 
 e.preventDefault();
 
 
 
-let year =
-document.getElementById("yearLevel").value;
+
+let btn =
+collectionForm.querySelector("button");
 
 
-
-let amount =
-Number(
-document.getElementById("amount").value
-);
+btn.disabled=true;
 
 
-
-let date =
-document.getElementById("date").value;
+btn.innerHTML="Saving...";
 
 
 
@@ -186,13 +212,20 @@ collection(db,"collections"),
 {
 
 
-year:year,
+year:
+document.getElementById("yearLevel").value,
 
-amount:amount,
 
-date:date,
+amount:
+Number(document.getElementById("amount").value),
+
+
+date:
+document.getElementById("date").value,
+
 
 type:"Collection",
+
 
 createdAt:serverTimestamp()
 
@@ -200,7 +233,10 @@ createdAt:serverTimestamp()
 }
 
 
+
 );
+
+
 
 
 
@@ -210,7 +246,7 @@ alert(
 
 
 
-this.reset();
+collectionForm.reset();
 
 
 
@@ -221,7 +257,6 @@ loadRecords();
 }
 
 
-
 catch(error){
 
 
@@ -229,11 +264,18 @@ console.error(error);
 
 
 alert(
-"Error adding collection"
+"Failed saving collection"
 );
 
 
 }
+
+
+
+btn.disabled=false;
+
+
+btn.innerHTML="Save Collection";
 
 
 
@@ -250,9 +292,10 @@ alert(
 
 
 
-// ===============================
-// ADD PROJECT
-// ===============================
+// =================================
+// PROJECT ADD
+// =================================
+
 
 
 const projectForm =
@@ -263,29 +306,15 @@ document.getElementById("projectForm");
 if(projectForm){
 
 
-projectForm.addEventListener("submit",async function(e){
+
+projectForm.addEventListener(
+
+"submit",
+
+async(e)=>{
 
 
 e.preventDefault();
-
-
-
-
-let name =
-document.getElementById("projectName").value;
-
-
-
-let budget =
-Number(
-document.getElementById("projectBudget").value
-);
-
-
-
-let description =
-document.getElementById("description").value;
-
 
 
 
@@ -300,13 +329,23 @@ collection(db,"projects"),
 {
 
 
-name:name,
+name:
+document.getElementById("projectName").value,
 
-budget:budget,
 
-description:description,
+budget:
+Number(document.getElementById("projectBudget").value),
+
+
+description:
+document.getElementById("description").value,
+
+
+status:"Planned",
+
 
 type:"Project",
+
 
 createdAt:serverTimestamp()
 
@@ -318,14 +357,15 @@ createdAt:serverTimestamp()
 
 
 
+
+
 alert(
-"Project Added Successfully!"
+"Project Added!"
 );
 
 
 
-this.reset();
-
+projectForm.reset();
 
 
 loadRecords();
@@ -335,15 +375,14 @@ loadRecords();
 }
 
 
-
 catch(error){
 
 
-console.error(error);
+console.log(error);
 
 
 alert(
-"Error saving project"
+"Project failed"
 );
 
 
@@ -364,9 +403,9 @@ alert(
 
 
 
-// ===============================
-// ADD EXPENSE + RECEIPT
-// ===============================
+// =================================
+// EXPENSE + RECEIPT UPLOAD
+// =================================
 
 
 
@@ -375,10 +414,16 @@ document.getElementById("expenseForm");
 
 
 
+
 if(expenseForm){
 
 
-expenseForm.addEventListener("submit",async function(e){
+
+expenseForm.addEventListener(
+
+"submit",
+
+async(e)=>{
 
 
 e.preventDefault();
@@ -386,43 +431,26 @@ e.preventDefault();
 
 
 
-let project =
-document.getElementById("expenseProject").value;
-
-
-
-let amount =
-Number(
-document.getElementById("expenseAmount").value
-);
-
-
-
-let description =
-document.getElementById("expenseDescription").value;
+try{
 
 
 
 let file =
-document.getElementById("receiptFile").files[0];
+document.getElementById("receiptFile")
+.files[0];
+
+
+
+let receiptURL="";
 
 
 
 
-
-try{
-
-
-let receiptURL = "";
-
-
-
-// upload receipt if available
 
 if(file){
 
 
-let storageRef =
+let fileRef =
 ref(
 
 storage,
@@ -435,7 +463,7 @@ storage,
 
 await uploadBytes(
 
-storageRef,
+fileRef,
 
 file
 
@@ -444,10 +472,12 @@ file
 
 
 receiptURL =
-await getDownloadURL(storageRef);
+await getDownloadURL(fileRef);
+
 
 
 }
+
 
 
 
@@ -462,19 +492,34 @@ collection(db,"expenses"),
 {
 
 
-project:project,
+project:
+document.getElementById("expenseProject").value,
 
-amount:amount,
 
-description:description,
+amount:
+Number(document.getElementById("expenseAmount").value),
 
-receipt:receiptURL,
 
-date:new Date().toLocaleDateString(),
+description:
+document.getElementById("expenseDescription").value,
+
+
+receipt:
+receiptURL,
+
+
+date:
+new Date().toLocaleDateString(),
+
+
+status:"Approved",
+
 
 type:"Expense",
 
-createdAt:serverTimestamp()
+
+createdAt:
+serverTimestamp()
 
 
 }
@@ -486,13 +531,14 @@ createdAt:serverTimestamp()
 
 
 
+
 alert(
 "Expense Saved Successfully!"
 );
 
 
 
-this.reset();
+expenseForm.reset();
 
 
 
@@ -532,9 +578,9 @@ alert(
 
 
 
-// ===============================
-// DISPLAY RECORDS
-// ===============================
+// =================================
+// LOAD ALL RECORDS
+// =================================
 
 
 async function loadRecords(){
@@ -546,12 +592,20 @@ document.getElementById("records");
 
 
 
-if(!table) return;
+if(!table)
+return;
+
 
 
 
 
 table.innerHTML="";
+
+
+
+
+
+let allRecords=[];
 
 
 
@@ -564,7 +618,7 @@ table.innerHTML="";
 // COLLECTIONS
 
 
-let collectionData =
+let collections =
 await getDocs(
 
 collection(db,"collections")
@@ -575,53 +629,27 @@ collection(db,"collections")
 
 
 
-collectionData.forEach((doc)=>{
+collections.forEach((item)=>{
 
 
-let data =
-doc.data();
+let data=item.data();
 
 
+allRecords.push({
 
+id:item.id,
 
-table.innerHTML += `
+type:"Collection",
 
+title:data.year,
 
-<tr>
+details:data.date,
 
+amount:data.amount,
 
-<td>
-Collection
-</td>
+collection:"collections"
 
-
-
-<td>
-
-${data.year}
-
-<br>
-
-<small>
-${data.date}
-</small>
-
-</td>
-
-
-
-<td>
-
-₱${Number(data.amount).toLocaleString()}
-
-</td>
-
-
-</tr>
-
-
-`;
-
+});
 
 
 });
@@ -637,7 +665,7 @@ ${data.date}
 // PROJECTS
 
 
-let projectData =
+let projects =
 await getDocs(
 
 collection(db,"projects")
@@ -648,53 +676,27 @@ collection(db,"projects")
 
 
 
-projectData.forEach((doc)=>{
+projects.forEach((item)=>{
 
 
-let data =
-doc.data();
+let data=item.data();
 
 
+allRecords.push({
 
+id:item.id,
 
-table.innerHTML += `
+type:"Project",
 
+title:data.name,
 
-<tr>
+details:data.description,
 
+amount:data.budget,
 
-<td>
-Project
-</td>
+collection:"projects"
 
-
-
-<td>
-
-<b>${data.name}</b>
-
-<br>
-
-<small>
-${data.description}
-</small>
-
-</td>
-
-
-
-<td>
-
-₱${Number(data.budget).toLocaleString()}
-
-</td>
-
-
-</tr>
-
-
-`;
-
+});
 
 
 });
@@ -710,7 +712,7 @@ ${data.description}
 // EXPENSES
 
 
-let expenseData =
+let expenses =
 await getDocs(
 
 collection(db,"expenses")
@@ -721,73 +723,168 @@ collection(db,"expenses")
 
 
 
-expenseData.forEach((doc)=>{
+expenses.forEach((item)=>{
 
 
-let data =
-doc.data();
+let data=item.data();
+
+
+allRecords.push({
+
+id:item.id,
+
+type:"Expense",
+
+title:data.project,
+
+details:data.description,
+
+amount:data.amount,
+
+receipt:data.receipt,
+
+collection:"expenses"
+
+});
+
+
+});
 
 
 
 
-table.innerHTML += `
 
+
+
+
+
+// DISPLAY
+
+
+
+if(allRecords.length===0){
+
+
+table.innerHTML=`
 
 <tr>
 
+<td colspan="4">
 
-<td>
-Expense
+No records available.
+
 </td>
 
+</tr>
 
+`;
 
-<td>
+return;
 
-<b>${data.project}</b>
-
-<br>
-
-<small>
-${data.description}</small>
-
-
-<br>
-
-
-${
-data.receipt
-
-?
-
-`<a href="${data.receipt}" target="_blank">
-View Receipt
-</a>`
-
-:
-
-"No Receipt"
 
 }
 
 
 
+
+
+
+
+
+allRecords.forEach((record)=>{
+
+
+table.innerHTML += `
+
+<tr>
+
+
+<td>
+
+${record.type}
+
 </td>
+
 
 
 
 <td>
 
-₱${Number(data.amount).toLocaleString()}
+
+<b>
+
+${record.title}
+
+</b>
+
+
+<br>
+
+
+<small>
+
+${record.details}
+
+</small>
+
+
+
+${record.receipt ? 
+
+`
+
+<br>
+
+<a href="${record.receipt}" target="_blank">
+
+🧾 Receipt
+
+</a>
+
+`
+
+:""}
+
+
 
 </td>
 
 
+
+
+<td>
+
+${peso(record.amount)}
+
+</td>
+
+
+
+
+<td>
+
+
+<button 
+
+class="delete-btn"
+
+onclick="deleteRecord('${record.collection}','${record.id}')">
+
+
+Delete
+
+
+</button>
+
+
+
+</td>
+
+
+
 </tr>
 
-
 `;
-
 
 
 });
@@ -805,9 +902,71 @@ View Receipt
 
 
 
-// ===============================
-// INITIAL LOAD
-// ===============================
+// =================================
+// DELETE RECORD
+// =================================
+
+
+
+window.deleteRecord =
+async function(collectionName,id){
+
+
+
+let confirmDelete =
+confirm(
+"Delete this record?"
+);
+
+
+
+if(!confirmDelete)
+return;
+
+
+
+
+await deleteDoc(
+
+doc(
+
+db,
+
+collectionName,
+
+id
+
+)
+
+);
+
+
+
+
+
+alert(
+"Record deleted"
+);
+
+
+
+loadRecords();
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =================================
+// START
+// =================================
 
 
 loadRecords();
