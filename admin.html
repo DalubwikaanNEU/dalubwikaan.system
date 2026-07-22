@@ -1,158 +1,461 @@
-// =============================
-// DALUBWIKAAN TREASURY DASHBOARD
-// DASHBOARD SCRIPT
-// =============================
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
 
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-// NUMBER COUNTER ANIMATION
+<title>
+Dalubwikaan Admin Treasury
+</title>
 
-function animateNumber(element, target){
 
-    let current = 0;
+<link rel="stylesheet" href="css/style.css">
 
-    let speed = target / 80;
 
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    let counter = setInterval(()=>{
 
+</head>
 
-        current += speed;
 
 
-        if(current >= target){
+<body>
 
-            current = target;
-            clearInterval(counter);
 
-        }
 
+<div class="dashboard">
 
-        element.innerHTML =
-        "₱" + Math.floor(current).toLocaleString();
 
 
-    },20);
 
 
-}
+<!-- SIDEBAR -->
 
+<aside class="sidebar">
 
 
+<h2>
+📚 Dalubwikaan
+</h2>
 
-// APPLY ANIMATION TO FUND CARDS
 
+<p>
+Treasury Admin Panel
+</p>
 
-document.addEventListener("DOMContentLoaded",()=>{
 
 
-const moneyCards =
-document.querySelectorAll(".card h2");
 
+<nav>
 
 
-const values=[
+<a href="index.html">
 
-25000,
-150,
-8000,
-17000
+🏠 Dashboard
 
-];
+</a>
 
 
 
-moneyCards.forEach((card,index)=>{
 
+<a class="active">
 
-if(index === 1){
+⚙ Admin Panel
 
-let current=0;
+</a>
 
-let target=values[index];
 
 
-let counter=setInterval(()=>{
 
-current+=3;
+<a id="logout">
 
+🚪 Logout
 
-if(current>=target){
+</a>
 
-current=target;
-clearInterval(counter);
 
-}
 
+</nav>
 
-card.innerHTML =
-Math.floor(current);
 
 
-},20);
+</aside>
 
 
 
-}
 
-else{
 
 
-animateNumber(
-card,
-values[index]
-);
 
 
-}
 
+<!-- MAIN CONTENT -->
 
+<main class="main">
 
-});
 
 
 
-});
 
+<header>
 
 
+<div>
 
+<h1>
+Treasurer Control Panel
+</h1>
 
 
+<p>
+Manage collections, projects, and organization funds
+</p>
 
-// =============================
-// DARK MODE PREPARATION
-// =============================
 
+</div>
 
-const themeButton =
-document.querySelector("header button");
 
 
+</header>
 
-themeButton.addEventListener("click",()=>{
 
 
-document.body.classList.toggle("dark");
 
 
 
-if(document.body.classList.contains("dark")){
 
 
-themeButton.innerHTML="☀️";
 
+<!-- COLLECTION FORM -->
 
-}
+<section class="panel">
 
-else{
 
+<h2>
+💰 Add Weekly Collection
+</h2>
 
-themeButton.innerHTML="🌙";
 
 
-}
 
+<form id="collectionForm">
 
 
-});
+
+<label>
+Year Level
+</label>
+
+
+
+<select id="yearLevel" required>
+
+
+<option value="First Year">
+First Year
+</option>
+
+
+<option value="Second Year">
+Second Year
+</option>
+
+
+<option value="Third Year">
+Third Year
+</option>
+
+
+<option value="Fourth Year">
+Fourth Year
+</option>
+
+
+
+</select>
+
+
+
+
+
+<label>
+Amount Collected
+</label>
+
+
+
+<input
+
+type="number"
+
+id="amount"
+
+placeholder="Enter amount"
+
+required
+
+>
+
+
+
+
+
+
+<label>
+Collection Date
+</label>
+
+
+<input
+
+type="date"
+
+id="date"
+
+required
+
+>
+
+
+
+
+
+
+
+<button type="submit">
+
+Save Collection
+
+</button>
+
+
+
+
+</form>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- PROJECT FORM -->
+
+<section class="panel">
+
+
+<h2>
+🏗 Add Project Budget
+</h2>
+
+
+
+
+
+<form id="projectForm">
+
+
+
+
+
+<label>
+Project Name
+</label>
+
+
+
+<input
+
+type="text"
+
+id="projectName"
+
+placeholder="Example: Poetry Competition"
+
+required
+
+>
+
+
+
+
+
+
+
+
+<label>
+Budget Allocation
+</label>
+
+
+
+<input
+
+type="number"
+
+id="projectBudget"
+
+placeholder="Enter budget"
+
+required
+
+>
+
+
+
+
+
+
+
+<label>
+Project Description
+</label>
+
+
+
+<textarea
+
+id="description"
+
+placeholder="Describe the project"
+
+required
+
+></textarea>
+
+
+
+
+
+
+
+<button type="submit">
+
+Save Project
+
+</button>
+
+
+
+
+
+</form>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- RECORDS -->
+
+<section class="panel">
+
+
+
+<h2>
+📋 Treasury Records
+</h2>
+
+
+
+
+
+<table>
+
+
+
+<thead>
+
+
+<tr>
+
+
+<th>
+Type
+</th>
+
+
+
+<th>
+Details
+</th>
+
+
+
+<th>
+Amount
+</th>
+
+
+</tr>
+
+
+
+</thead>
+
+
+
+
+
+<tbody id="records">
+
+
+
+</tbody>
+
+
+
+
+
+</table>
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+</main>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<script type="module" src="js/admin.js"></script>
+
+
+
+</body>
+
+
+</html>
