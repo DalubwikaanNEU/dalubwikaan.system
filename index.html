@@ -26,46 +26,62 @@ Dalubwikaan Treasury Dashboard
 <div class="dashboard">
 
 
+
 <!-- SIDEBAR -->
 
 <aside class="sidebar">
 
+
 <h2>
 📚 Dalubwikaan
 </h2>
+
 
 <p>
 Treasury Portal
 </p>
 
 
+
 <nav>
 
-<a class="active">
+
+<a class="active" href="index.html">
 🏠 Dashboard
 </a>
 
-<a>
+
+<a href="#collections">
 💰 Collections
 </a>
 
-<a>
+
+<a href="#reports">
 📊 Reports
 </a>
 
-<a>
+
+<a href="#projects">
 🏗 Projects
 </a>
 
-<a>
-⚙ Settings
+
+<a href="admin.html">
+⚙ Admin Panel
 </a>
+
 
 
 </nav>
 
 
+
 </aside>
+
+
+
+
+
 
 
 
@@ -75,7 +91,9 @@ Treasury Portal
 <main class="main">
 
 
+
 <header>
+
 
 <div>
 
@@ -83,17 +101,22 @@ Treasury Portal
 Treasury Dashboard
 </h1>
 
+
 <p>
 Financial Transparency Portal
+<br>
 Academic Year 2026-2027
 </p>
+
 
 </div>
 
 
-<button>
+
+<button id="themeToggle">
 🌙
 </button>
+
 
 
 </header>
@@ -102,9 +125,15 @@ Academic Year 2026-2027
 
 
 
+
+
+
+
 <!-- SUMMARY CARDS -->
 
+
 <section class="cards">
+
 
 
 <div class="card">
@@ -113,15 +142,22 @@ Academic Year 2026-2027
 Total Funds
 </h3>
 
-<h2>
-₱25,000
+
+<h2 id="totalFunds">
+₱0
 </h2>
 
+
 <span>
-Updated Weekly
+Total Collections
 </span>
 
+
 </div>
+
+
+
+
 
 
 
@@ -131,15 +167,21 @@ Updated Weekly
 Total Members
 </h3>
 
-<h2>
-150
+
+<h2 id="totalMembers">
+0
 </h2>
+
 
 <span>
 Registered Members
 </span>
 
+
 </div>
+
+
+
 
 
 
@@ -150,15 +192,21 @@ Registered Members
 Expenses
 </h3>
 
-<h2>
-₱8,000
+
+<h2 id="totalExpenses">
+₱0
 </h2>
+
 
 <span>
 Project Allocation
 </span>
 
+
 </div>
+
+
+
 
 
 
@@ -169,15 +217,20 @@ Project Allocation
 Remaining Balance
 </h3>
 
-<h2>
-₱17,000
+
+<h2 id="remainingBalance">
+₱0
 </h2>
+
 
 <span>
 Available Funds
 </span>
 
+
 </div>
+
+
 
 
 
@@ -188,9 +241,12 @@ Available Funds
 
 
 
-<!-- YEAR COLLECTION -->
 
-<section class="panel">
+
+
+<!-- COLLECTION BREAKDOWN -->
+
+<section class="panel" id="collections">
 
 
 <h2>
@@ -198,72 +254,105 @@ Collection Breakdown
 </h2>
 
 
+
 <div class="year-container">
 
 
+
+
+
 <div class="year">
+
 
 <h3>
 First Year
 </h3>
 
-<p>
-₱8,000
+
+<p id="firstYear">
+₱0
 </p>
+
+
 
 <div class="progress">
 
-<span style="width:80%">
+<span id="firstProgress" style="width:0%">
 </span>
 
 </div>
 
+
+
 </div>
+
+
+
+
 
 
 
 
 <div class="year">
+
 
 <h3>
 Second Year
 </h3>
 
-<p>
-₱7,000
+
+<p id="secondYear">
+₱0
 </p>
+
 
 <div class="progress">
 
-<span style="width:70%">
+<span id="secondProgress" style="width:0%">
 </span>
 
 </div>
 
+
+
 </div>
+
+
+
+
 
 
 
 
 
 <div class="year">
+
 
 <h3>
 Third Year
 </h3>
 
-<p>
-₱6,000
+
+<p id="thirdYear">
+₱0
 </p>
+
+
 
 <div class="progress">
 
-<span style="width:60%">
+<span id="thirdProgress" style="width:0%">
 </span>
 
 </div>
 
+
+
 </div>
+
+
+
+
 
 
 
@@ -271,28 +360,38 @@ Third Year
 
 <div class="year">
 
+
 <h3>
 Fourth Year
 </h3>
 
-<p>
-₱4,000
+
+<p id="fourthYear">
+₱0
 </p>
+
 
 <div class="progress">
 
-<span style="width:40%">
+<span id="fourthProgress" style="width:0%">
 </span>
 
 </div>
 
+
+
 </div>
 
 
 
+
+
+
 </div>
+
 
 </section>
+
 
 
 
@@ -312,71 +411,52 @@ Recent Collections
 </h2>
 
 
+
+
 <table>
 
 
+<thead>
+
+
 <tr>
+
 
 <th>
 Date
 </th>
 
+
 <th>
 Year Level
 </th>
+
 
 <th>
 Amount
 </th>
 
+
 <th>
 Status
 </th>
 
-</tr>
 
-
-<tr>
-
-<td>
-July 20, 2026
-</td>
-
-<td>
-First Year
-</td>
-
-<td>
-₱1,500
-</td>
-
-<td class="paid">
-Completed
-</td>
 
 </tr>
 
 
+</thead>
 
-<tr>
 
-<td>
-July 20, 2026
-</td>
 
-<td>
-Second Year
-</td>
 
-<td>
-₱1,200
-</td>
 
-<td class="paid">
-Completed
-</td>
+<tbody id="transactionTable">
 
-</tr>
+
+</tbody>
+
 
 
 
@@ -384,7 +464,78 @@ Completed
 </table>
 
 
+
 </section>
+
+
+
+
+
+
+
+
+
+<!-- PROJECT PREVIEW -->
+
+
+<section class="panel" id="projects">
+
+
+<h2>
+Recent Projects
+</h2>
+
+
+
+<table>
+
+
+
+<thead>
+
+
+<tr>
+
+
+<th>
+Project
+</th>
+
+
+<th>
+Budget
+</th>
+
+
+<th>
+Description
+</th>
+
+
+</tr>
+
+
+
+</thead>
+
+
+
+<tbody id="projectTable">
+
+
+</tbody>
+
+
+
+</table>
+
+
+
+</section>
+
+
+
+
 
 
 
@@ -395,7 +546,13 @@ Completed
 </div>
 
 
-<script src="js/dashboard.js"></script>
+
+
+
+
+<script type="module" src="js/dashboard.js"></script>
+
+
 
 </body>
 
