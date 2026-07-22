@@ -1,7 +1,8 @@
 /* =========================================
 DALUBWIKAAN TREASURY SYSTEM
-STYLE VERSION 7.0
-PREMIUM POLISHED UI
+STYLE VERSION 8.0
+PREMIUM TREASURY UI
+POLISHED RECEIPT SYSTEM
 ========================================= */
 
 
@@ -9,44 +10,67 @@ PREMIUM POLISHED UI
 RESET
 ========================= */
 
+
 *{
+
     margin:0;
     padding:0;
     box-sizing:border-box;
     font-family:'Poppins',sans-serif;
+
 }
 
 
+
 html{
+
     scroll-behavior:smooth;
+
 }
 
 
 
 :root{
 
+
     --primary:#3b2415;
-    --primary-light:#6b4226;
+
+    --primary-light:#704525;
+
 
     --gold:#c89b3c;
-    --gold-light:#f1d27a;
 
-    --cream:#f7f1e6;
+    --gold-light:#f2d58a;
+
+
+    --cream:#f8f3e8;
+
 
     --white:#ffffff;
 
+
     --text:#2b2118;
+
 
     --gray:#777;
 
+
     --success:#198754;
+
     --danger:#b02a37;
+
     --info:#0d6efd;
 
+
+
     --shadow:
-    0 10px 30px rgba(0,0,0,.08);
+
+    0 12px 35px rgba(0,0,0,.08);
+
+
 
 }
+
 
 
 
@@ -58,31 +82,46 @@ BODY
 
 body{
 
+
     background:var(--cream);
+
 
     color:var(--text);
 
+
     transition:.35s ease;
 
+
 }
+
+
 
 
 
 a{
 
+
     text-decoration:none;
+
 
     color:inherit;
 
+
 }
+
+
 
 
 
 button{
 
+
     font-family:inherit;
 
+
 }
+
+
 
 
 
@@ -90,17 +129,24 @@ button{
 
 
 /* =========================
-LAYOUT
+DASHBOARD STRUCTURE
 ========================= */
 
 
 .dashboard{
 
+
     display:flex;
+
 
     min-height:100vh;
 
+
 }
+
+
+
+
 
 
 
@@ -113,52 +159,70 @@ SIDEBAR
 
 .sidebar{
 
-    width:270px;
+
+    width:280px;
+
 
     height:100vh;
 
+
     position:fixed;
 
+
     left:0;
+
 
     top:0;
 
 
     background:
 
+
     linear-gradient(
+
         180deg,
+
         #3b2415,
-        #1f1208
+
+        #1d1007
+
     );
 
 
     color:white;
 
-    padding:35px 22px;
+
+    padding:35px 25px;
 
 
     box-shadow:
 
-    8px 0 30px rgba(0,0,0,.2);
+    8px 0 30px rgba(0,0,0,.25);
 
 
-    z-index:100;
+    z-index:1000;
 
 
 }
+
 
 
 
 .sidebar h2{
 
-    font-size:27px;
+
+    font-size:28px;
+
 
     font-weight:700;
 
+
     letter-spacing:.5px;
 
+
 }
+
+
 
 
 
@@ -171,7 +235,7 @@ SIDEBAR
     display:block;
 
 
-    width:70px;
+    width:75px;
 
 
     height:4px;
@@ -191,6 +255,7 @@ SIDEBAR
 
 
 
+
 .sidebar p{
 
 
@@ -200,13 +265,14 @@ SIDEBAR
     margin-bottom:40px;
 
 
-    color:#dbc69d;
+    color:#dcc79d;
 
 
     font-size:14px;
 
 
 }
+
 
 
 
@@ -224,13 +290,13 @@ SIDEBAR
     gap:12px;
 
 
-    padding:15px 18px;
+    padding:16px 18px;
 
 
     margin-bottom:12px;
 
 
-    border-radius:15px;
+    border-radius:18px;
 
 
     transition:.3s ease;
@@ -245,33 +311,39 @@ SIDEBAR
 
 
 
+
+
 .sidebar nav a:hover,
 .sidebar nav .active{
 
 
     background:
 
+
     linear-gradient(
+
         135deg,
+
         var(--gold),
+
         var(--gold-light)
+
     );
 
 
     color:var(--primary);
 
 
-    transform:
-
-    translateX(8px);
+    transform:translateX(8px);
 
 
     box-shadow:
 
-    0 10px 25px rgba(200,155,60,.3);
+    0 10px 25px rgba(200,155,60,.35);
 
 
 }
+
 
 
 
@@ -288,19 +360,16 @@ MAIN CONTENT
 .main{
 
 
-    margin-left:270px;
+    margin-left:280px;
 
 
-    width:
-
-    calc(100% - 270px);
+    width:calc(100% - 280px);
 
 
     padding:40px;
 
 
 }
-
 
 
 
@@ -326,13 +395,14 @@ header{
 
 
 
+
 header h1{
 
 
+    font-size:35px;
+
+
     color:var(--primary);
-
-
-    font-size:34px;
 
 
     font-weight:700;
@@ -359,6 +429,14 @@ header p{
 
 
 
+
+
+
+/* =========================
+THEME BUTTON
+========================= */
+
+
 #themeToggle{
 
 
@@ -374,13 +452,13 @@ header p{
     border:none;
 
 
-    cursor:pointer;
-
-
     background:var(--primary);
 
 
     color:white;
+
+
+    cursor:pointer;
 
 
     font-size:20px;
@@ -394,6 +472,7 @@ header p{
 
 
 
+
 #themeToggle:hover{
 
 
@@ -403,10 +482,18 @@ header p{
     color:var(--primary);
 
 
-    transform:rotate(25deg) scale(1.1);
+    transform:rotate(20deg);
 
 
 }
+
+
+
+
+
+
+
+
 /* =========================
 SUMMARY CARDS
 ========================= */
@@ -414,16 +501,23 @@ SUMMARY CARDS
 
 .cards{
 
+
     display:grid;
 
+
     grid-template-columns:
+
     repeat(4,1fr);
+
 
     gap:25px;
 
+
     margin-bottom:35px;
 
+
 }
+
 
 
 
@@ -432,7 +526,7 @@ SUMMARY CARDS
 .card{
 
 
-    background:var(--white);
+    background:white;
 
 
     padding:30px;
@@ -455,7 +549,7 @@ SUMMARY CARDS
     overflow:hidden;
 
 
-    transition:.35s ease;
+    transition:.35s;
 
 
 }
@@ -499,6 +593,8 @@ SUMMARY CARDS
 
 
 
+
+
 .card:hover{
 
 
@@ -532,6 +628,7 @@ SUMMARY CARDS
 
 
 
+
 .card h2{
 
 
@@ -552,15 +649,17 @@ SUMMARY CARDS
 
 
 
+
+
 /* =========================
-PANELS
+GENERAL PANEL
 ========================= */
 
 
 .panel{
 
 
-    background:var(--white);
+    background:white;
 
 
     padding:35px;
@@ -580,13 +679,14 @@ PANELS
 
 
 
+
 .panel h2{
 
 
+    font-size:26px;
+
+
     color:var(--primary);
-
-
-    font-size:25px;
 
 
     margin-bottom:25px;
@@ -601,8 +701,177 @@ PANELS
 
 
 
+
 /* =========================
-YEAR COLLECTION
+FORMS
+========================= */
+
+
+input,
+select,
+textarea{
+
+
+    width:100%;
+
+
+    padding:15px 18px;
+
+
+    margin-bottom:18px;
+
+
+    border-radius:15px;
+
+
+    border:1px solid #ddd;
+
+
+    outline:none;
+
+
+    background:white;
+
+
+    transition:.3s;
+
+
+}
+
+
+
+
+input:focus,
+select:focus,
+textarea:focus{
+
+
+    border-color:var(--gold);
+
+
+    box-shadow:
+
+    0 0 15px rgba(200,155,60,.25);
+
+
+}
+
+
+
+
+
+textarea{
+
+
+    min-height:120px;
+
+
+    resize:none;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =========================
+BUTTON SYSTEM
+========================= */
+
+
+button,
+.view-btn,
+.receipt-btn{
+
+
+    display:inline-flex;
+
+
+    align-items:center;
+
+
+    justify-content:center;
+
+
+    gap:8px;
+
+
+    padding:13px 22px;
+
+
+    border:none;
+
+
+    border-radius:15px;
+
+
+    cursor:pointer;
+
+
+    font-weight:600;
+
+
+    background:
+
+
+    linear-gradient(
+
+        135deg,
+
+        var(--primary),
+
+        var(--primary-light)
+
+    );
+
+
+    color:white;
+
+
+    transition:.3s;
+
+
+}
+
+
+
+
+
+button:hover,
+.view-btn:hover,
+.receipt-btn:hover{
+
+
+    background:
+
+
+    linear-gradient(
+
+        135deg,
+
+        var(--gold),
+
+        var(--gold-light)
+
+    );
+
+
+    color:var(--primary);
+
+
+    transform:
+
+    translateY(-3px);
+
+
+}
+/* =========================
+COLLECTION YEAR CARDS
 ========================= */
 
 
@@ -625,33 +894,79 @@ YEAR COLLECTION
 
 
 
+
 .year{
 
 
     background:
 
+
     linear-gradient(
+
         145deg,
+
         #ffffff,
-        #faf2df
+
+        #faf1df
+
     );
 
 
-    padding:25px;
+    padding:28px;
 
 
-    border-radius:22px;
+    border-radius:25px;
 
 
-    box-shadow:
-
-    0 8px 25px rgba(0,0,0,.07);
+    box-shadow:var(--shadow);
 
 
-    transition:.3s;
+    transition:.35s;
+
+
+    position:relative;
+
+
+    overflow:hidden;
 
 
 }
+
+
+
+
+
+.year::before{
+
+
+    content:"";
+
+
+    position:absolute;
+
+
+    width:100px;
+
+
+    height:100px;
+
+
+    right:-35px;
+
+
+    top:-35px;
+
+
+    background:
+
+    rgba(200,155,60,.15);
+
+
+    border-radius:50%;
+
+
+}
+
 
 
 
@@ -661,7 +976,7 @@ YEAR COLLECTION
 
     transform:
 
-    translateY(-7px);
+    translateY(-8px);
 
 
 }
@@ -669,10 +984,29 @@ YEAR COLLECTION
 
 
 
+
+.year h3{
+
+
+    color:var(--primary);
+
+
+    font-size:18px;
+
+
+}
+
+
+
+
+
 .year p{
 
 
-    font-size:28px;
+    margin-top:15px;
+
+
+    font-size:30px;
 
 
     font-weight:700;
@@ -689,8 +1023,11 @@ YEAR COLLECTION
 
 
 
+
+
+
 /* =========================
-TABLE DESIGN
+TABLE SYSTEM
 ========================= */
 
 
@@ -701,6 +1038,9 @@ table{
 
 
     border-collapse:collapse;
+
+
+    border-radius:20px;
 
 
     overflow:hidden;
@@ -717,10 +1057,15 @@ thead{
 
     background:
 
+
     linear-gradient(
+
         135deg,
+
         var(--primary),
+
         var(--primary-light)
+
     );
 
 
@@ -729,19 +1074,20 @@ thead{
 
 
 
+
 th{
 
 
-    padding:17px;
+    padding:18px;
 
 
     color:white;
 
 
-    text-align:left;
-
-
     font-size:14px;
+
+
+    text-align:left;
 
 
 }
@@ -759,6 +1105,9 @@ td{
     border-bottom:
 
     1px solid #eee;
+
+
+    font-size:14px;
 
 
 }
@@ -796,10 +1145,20 @@ tbody tr:hover{
 
 
 
+
+/* VERIFIED BADGE */
+
+
 .verified{
 
 
-    display:inline-block;
+    display:inline-flex;
+
+
+    align-items:center;
+
+
+    gap:5px;
 
 
     background:#d1f7dc;
@@ -808,7 +1167,7 @@ tbody tr:hover{
     color:#146c43;
 
 
-    padding:7px 15px;
+    padding:8px 15px;
 
 
     border-radius:50px;
@@ -821,6 +1180,7 @@ tbody tr:hover{
 
 
 }
+
 
 
 
@@ -855,6 +1215,8 @@ PROJECT GRID
 
 
 
+
+
 .project-card{
 
 
@@ -867,15 +1229,12 @@ PROJECT GRID
     border-radius:28px;
 
 
-    border-top:
-
-    6px solid var(--gold);
-
-
     box-shadow:var(--shadow);
 
 
-    transition:.35s;
+    border-top:
+
+    6px solid var(--gold);
 
 
     position:relative;
@@ -884,13 +1243,16 @@ PROJECT GRID
     overflow:hidden;
 
 
+    transition:.35s;
+
+
 }
 
 
 
 
 
-.project-card::before{
+.project-card::after{
 
 
     content:"";
@@ -899,10 +1261,16 @@ PROJECT GRID
     position:absolute;
 
 
-    width:100px;
+    width:120px;
 
 
-    height:100px;
+    height:120px;
+
+
+    right:-40px;
+
+
+    top:-40px;
 
 
     background:
@@ -911,12 +1279,6 @@ PROJECT GRID
 
 
     border-radius:50%;
-
-
-    right:-30px;
-
-
-    top:-30px;
 
 
 }
@@ -935,7 +1297,7 @@ PROJECT GRID
 
     box-shadow:
 
-    0 20px 45px rgba(0,0,0,.15);
+    0 20px 45px rgba(0,0,0,.16);
 
 
 }
@@ -953,7 +1315,30 @@ PROJECT GRID
     margin-bottom:15px;
 
 
+    position:relative;
+
+
+    z-index:2;
+
+
 }
+
+
+
+
+
+.project-card p{
+
+
+    line-height:1.7;
+
+
+    color:#555;
+
+
+}
+
+
 
 
 
@@ -967,6 +1352,7 @@ PROJECT STATUS BADGES
 ========================= */
 
 
+.project-status,
 .status{
 
 
@@ -976,10 +1362,10 @@ PROJECT STATUS BADGES
     align-items:center;
 
 
-    gap:6px;
+    gap:7px;
 
 
-    padding:8px 18px;
+    padding:9px 18px;
 
 
     border-radius:50px;
@@ -1001,7 +1387,8 @@ PROJECT STATUS BADGES
 
 
 
-.status.completed{
+
+.completed{
 
 
     background:#d1f7dc;
@@ -1015,7 +1402,9 @@ PROJECT STATUS BADGES
 
 
 
-.status.ongoing{
+
+
+.ongoing{
 
 
     background:#dbeafe;
@@ -1030,7 +1419,7 @@ PROJECT STATUS BADGES
 
 
 
-.status.planning{
+.planning{
 
 
     background:#fff3cd;
@@ -1048,8 +1437,74 @@ PROJECT STATUS BADGES
 
 
 
+
+
 /* =========================
-PROJECT PROGRESS BAR
+PROJECT FINANCIAL INFO
+========================= */
+
+
+.success-status{
+
+
+    display:inline-block;
+
+
+    background:#d1f7dc;
+
+
+    color:#146c43;
+
+
+    padding:8px 16px;
+
+
+    border-radius:50px;
+
+
+    font-weight:700;
+
+
+}
+
+
+
+
+
+.danger-status{
+
+
+    display:inline-block;
+
+
+    background:#f8d7da;
+
+
+    color:#b02a37;
+
+
+    padding:8px 16px;
+
+
+    border-radius:50px;
+
+
+    font-weight:700;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+/* =========================
+PROGRESS BAR
 ========================= */
 
 
@@ -1073,6 +1528,7 @@ PROJECT PROGRESS BAR
 
 
 
+
 .progress-container small{
 
 
@@ -1089,6 +1545,7 @@ PROJECT PROGRESS BAR
 
 
 }
+
 
 
 
@@ -1117,6 +1574,7 @@ PROJECT PROGRESS BAR
 
 
 
+
 .progress-fill{
 
 
@@ -1128,10 +1586,15 @@ PROJECT PROGRESS BAR
 
     background:
 
+
     linear-gradient(
+
         90deg,
+
         var(--gold),
+
         var(--gold-light)
+
     );
 
 
@@ -1148,7 +1611,8 @@ PROJECT PROGRESS BAR
 
 
 
-.progress-fill::after{
+
+.progress-fill::before{
 
 
     content:"";
@@ -1157,20 +1621,26 @@ PROJECT PROGRESS BAR
     position:absolute;
 
 
-    inset:0;
+    top:0;
 
 
-    width:40%;
+    left:0;
+
+
+    height:100%;
+
+
+    width:35%;
 
 
     background:
 
-    rgba(255,255,255,.35);
+    rgba(255,255,255,.4);
 
 
     animation:
 
-    shine 2s infinite;
+    progressGlow 2s infinite;
 
 
 }
@@ -1180,19 +1650,29 @@ PROJECT PROGRESS BAR
 
 
 
-@keyframes shine{
+
+@keyframes progressGlow{
 
 
     from{
 
-        transform:translateX(-150%);
+
+        transform:
+
+        translateX(-150%);
+
 
     }
+
 
 
     to{
 
-        transform:translateX(300%);
+
+        transform:
+
+        translateX(350%);
+
 
     }
 
@@ -1206,116 +1686,9 @@ PROJECT PROGRESS BAR
 
 
 
-/* =========================
-FINANCIAL STATUS
-========================= */
-
-
-.success-status{
-
-
-    color:var(--success);
-
-
-    font-weight:700;
-
-
-}
-
-
-
-
-.danger-status{
-
-
-    color:var(--danger);
-
-
-    font-weight:700;
-
-
-}
-
-
-
-
-
-
-
 
 /* =========================
-BUTTON STYLE
-========================= */
-
-
-button,
-.view-btn,
-.receipt-btn{
-
-
-    background:
-
-    linear-gradient(
-        135deg,
-        var(--primary),
-        var(--primary-light)
-    );
-
-
-    color:white;
-
-
-    padding:13px 22px;
-
-
-    border:none;
-
-
-    border-radius:14px;
-
-
-    cursor:pointer;
-
-
-    transition:.3s;
-
-
-    font-weight:600;
-
-
-    display:inline-block;
-
-
-}
-
-
-
-
-button:hover,
-.view-btn:hover,
-.receipt-btn:hover{
-
-
-    background:
-
-    linear-gradient(
-        135deg,
-        var(--gold),
-        var(--gold-light)
-    );
-
-
-    color:var(--primary);
-
-
-    transform:
-
-    translateY(-3px);
-
-
-}
-/* =========================
-EXPENSE CARD DESIGN
+EXPENSE LIST CARD
 ========================= */
 
 
@@ -1325,13 +1698,10 @@ EXPENSE CARD DESIGN
     background:white;
 
 
-    padding:28px;
+    padding:30px;
 
 
     border-radius:25px;
-
-
-    margin-bottom:22px;
 
 
     border-left:
@@ -1342,7 +1712,10 @@ EXPENSE CARD DESIGN
     box-shadow:var(--shadow);
 
 
-    transition:.3s;
+    margin-bottom:22px;
+
+
+    transition:.35s;
 
 
 }
@@ -1356,15 +1729,11 @@ EXPENSE CARD DESIGN
 
     transform:
 
-    translateY(-6px);
-
-
-    box-shadow:
-
-    0 18px 35px rgba(0,0,0,.15);
+    translateY(-7px);
 
 
 }
+
 
 
 
@@ -1375,16 +1744,10 @@ EXPENSE CARD DESIGN
     display:flex;
 
 
+    justify-content:space-between;
+
+
     align-items:center;
-
-
-    gap:10px;
-
-
-    font-size:20px;
-
-
-    color:var(--primary);
 
 
     margin-bottom:18px;
@@ -1396,13 +1759,28 @@ EXPENSE CARD DESIGN
 
 
 
-.expense-body p{
+.expense-header h3{
+
+
+    color:var(--primary);
+
+
+    font-size:20px;
+
+
+}
+
+
+
+
+
+.expense-details p{
 
 
     margin-bottom:12px;
 
 
-    line-height:1.6;
+    line-height:1.7;
 
 
 }
@@ -1413,23 +1791,70 @@ EXPENSE CARD DESIGN
 
 
 
+
+
+
 /* =========================
-RECEIPT PREVIEW SYSTEM
+CHART CONTAINER
 ========================= */
 
 
-.receipt-preview-card{
+.chart-container{
+
+
+    background:white;
+
+
+    padding:30px;
+
+
+    border-radius:25px;
+
+
+    box-shadow:var(--shadow);
+
+
+    margin-bottom:30px;
+
+
+}
+/* =========================================
+RECEIPT MANAGEMENT SYSTEM
+POLISHED VERSION 8.0
+========================================= */
+
+
+/* =========================
+RECEIPT PREVIEW UPLOAD
+========================= */
+
+
+#receiptPreview{
 
 
     margin-top:20px;
 
 
+}
+
+
+
+
+
+.receipt-preview-card{
+
+
     background:
 
+
     linear-gradient(
+
         145deg,
-        #fff,
-        #faf3e3
+
+        #ffffff,
+
+        #faf2df
+
     );
 
 
@@ -1441,10 +1866,20 @@ RECEIPT PREVIEW SYSTEM
 
     box-shadow:
 
-    0 10px 25px rgba(0,0,0,.08);
+    var(--shadow);
+
+
+    border:
+
+    1px solid rgba(200,155,60,.25);
 
 
     text-align:center;
+
+
+    animation:
+
+    fadeIn .4s ease;
 
 
 }
@@ -1453,7 +1888,7 @@ RECEIPT PREVIEW SYSTEM
 
 
 
-.receipt-header{
+.receipt-title{
 
 
     font-size:20px;
@@ -1483,12 +1918,24 @@ RECEIPT PREVIEW SYSTEM
     max-width:320px;
 
 
-    border-radius:18px;
+    height:280px;
+
+
+    object-fit:contain;
+
+
+    background:#fff;
+
+
+    padding:10px;
+
+
+    border-radius:20px;
 
 
     box-shadow:
 
-    0 10px 25px rgba(0,0,0,.2);
+    0 10px 25px rgba(0,0,0,.18);
 
 
     transition:.3s;
@@ -1505,7 +1952,7 @@ RECEIPT PREVIEW SYSTEM
 
     transform:
 
-    scale(1.05);
+    scale(1.04);
 
 
 }
@@ -1516,19 +1963,94 @@ RECEIPT PREVIEW SYSTEM
 
 
 
+
+/* =========================
+RECEIPT FILE INFORMATION
+========================= */
+
+
+.receipt-info{
+
+
+    margin-top:20px;
+
+
+    background:#fff;
+
+
+    padding:15px;
+
+
+    border-radius:15px;
+
+
+    text-align:left;
+
+
+}
+
+
+
+
+
+.receipt-info p{
+
+
+    margin-bottom:8px;
+
+
+    font-size:14px;
+
+
+    color:#555;
+
+
+}
+
+
+
+
+
+.receipt-info strong{
+
+
+    color:var(--primary);
+
+
+}
+
+
+
+
+
+
+
+
+
+/* REMOVE RECEIPT BUTTON */
+
+
 .remove-receipt{
 
 
-    margin-top:18px;
+    margin-top:20px;
 
 
     background:
 
+
     linear-gradient(
+
         135deg,
+
         #b02a37,
+
         #dc3545
+
     );
+
+
+    color:white;
 
 
 }
@@ -1540,13 +2062,15 @@ RECEIPT PREVIEW SYSTEM
 .remove-receipt:hover{
 
 
-    color:white;
-
-
     background:#b02a37;
 
 
+    color:white;
+
+
 }
+
+
 
 
 
@@ -1556,31 +2080,102 @@ RECEIPT PREVIEW SYSTEM
 
 
 /* =========================
-RECEIPT VIEW BOX
+EXPENSE RECEIPT DISPLAY
 ========================= */
 
 
-.receipt-box{
+.receipt-area{
 
 
-    margin-top:20px;
-
-
-    background:#faf7f0;
-
-
-    padding:25px;
-
-
-    border-radius:22px;
-
-
-    text-align:center;
+    margin-top:25px;
 
 
 }
 
 
+
+
+
+.receipt-card{
+
+
+    background:
+
+
+    linear-gradient(
+
+        145deg,
+
+        #ffffff,
+
+        #faf5eb
+
+    );
+
+
+    padding:25px;
+
+
+    border-radius:25px;
+
+
+    text-align:center;
+
+
+    box-shadow:
+
+    0 10px 30px rgba(0,0,0,.08);
+
+
+    border:
+
+    1px solid rgba(200,155,60,.2);
+
+
+}
+
+
+
+
+
+.receipt-card-header{
+
+
+    display:flex;
+
+
+    justify-content:center;
+
+
+    align-items:center;
+
+
+    gap:10px;
+
+
+    font-size:18px;
+
+
+    font-weight:700;
+
+
+    color:var(--primary);
+
+
+    margin-bottom:20px;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* RECEIPT IMAGE THUMBNAIL */
 
 
 .receipt-image{
@@ -1589,15 +2184,28 @@ RECEIPT VIEW BOX
     width:100%;
 
 
-    max-width:350px;
+    max-width:260px;
 
 
-    border-radius:18px;
+    height:260px;
+
+
+    object-fit:cover;
+
+
+    border-radius:20px;
+
+
+    cursor:pointer;
 
 
     box-shadow:
 
-    0 10px 25px rgba(0,0,0,.18);
+
+    0 10px 25px rgba(0,0,0,.2);
+
+
+    transition:.35s;
 
 
 }
@@ -1609,7 +2217,99 @@ RECEIPT VIEW BOX
 .receipt-image:hover{
 
 
-    transform:scale(1.05);
+    transform:
+
+    scale(1.05);
+
+
+}
+
+
+
+
+
+
+
+
+
+
+/* OPEN RECEIPT BUTTON */
+
+
+.receipt-btn{
+
+
+    margin-top:20px;
+
+
+    display:inline-flex;
+
+
+    justify-content:center;
+
+
+    align-items:center;
+
+
+    gap:8px;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+/* =========================
+NO RECEIPT DESIGN
+========================= */
+
+
+.no-receipt{
+
+
+    display:flex;
+
+
+    justify-content:center;
+
+
+    align-items:center;
+
+
+    gap:8px;
+
+
+    padding:18px;
+
+
+    background:#f2f2f2;
+
+
+    color:#777;
+
+
+    border-radius:18px;
+
+
+    font-weight:600;
+
+
+}
+
+
+
+
+
+.no-receipt::before{
+
+
+    content:"⚠️";
 
 
 }
@@ -1623,7 +2323,253 @@ RECEIPT VIEW BOX
 
 
 /* =========================
-ANNOUNCEMENT BOARD
+RECEIPT MODAL VIEWER
+========================= */
+
+
+.receipt-modal{
+
+
+    position:fixed;
+
+
+    inset:0;
+
+
+    background:
+
+
+    rgba(0,0,0,.85);
+
+
+    display:flex;
+
+
+    justify-content:center;
+
+
+    align-items:center;
+
+
+    z-index:99999;
+
+
+    padding:25px;
+
+
+    animation:
+
+    fadeIn .3s ease;
+
+
+}
+
+
+
+
+
+
+.receipt-modal-content{
+
+
+    background:white;
+
+
+    padding:30px;
+
+
+    border-radius:30px;
+
+
+    max-width:95%;
+
+
+    max-height:95%;
+
+
+    position:relative;
+
+
+    box-shadow:
+
+
+    0 20px 60px rgba(0,0,0,.4);
+
+
+}
+
+
+
+
+
+
+
+.receipt-modal-content img{
+
+
+    width:auto;
+
+
+    max-width:90vw;
+
+
+    max-height:80vh;
+
+
+    border-radius:20px;
+
+
+    object-fit:contain;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* CLOSE BUTTON */
+
+
+.close-receipt{
+
+
+    position:absolute;
+
+
+    top:-15px;
+
+
+    right:-15px;
+
+
+    width:45px;
+
+
+    height:45px;
+
+
+    border-radius:50%;
+
+
+    border:none;
+
+
+    background:#b02a37;
+
+
+    color:white;
+
+
+    font-size:20px;
+
+
+    cursor:pointer;
+
+
+    display:flex;
+
+
+    justify-content:center;
+
+
+    align-items:center;
+
+
+}
+
+
+
+
+
+.close-receipt:hover{
+
+
+    background:#dc3545;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+/* =========================
+DARK MODE RECEIPT FIX
+========================= */
+
+
+body.dark .receipt-preview-card,
+body.dark .receipt-card,
+body.dark .receipt-info{
+
+
+    background:#242424;
+
+
+    color:white;
+
+
+}
+
+
+
+
+
+body.dark .receipt-info p{
+
+
+    color:#ddd;
+
+
+}
+
+
+
+
+
+body.dark .receipt-modal-content{
+
+
+    background:#1f1f1f;
+
+
+}
+
+
+
+
+
+body.dark .no-receipt{
+
+
+    background:#333;
+
+
+    color:#ddd;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =========================
+ANNOUNCEMENT CARD
 ========================= */
 
 
@@ -1639,15 +2585,17 @@ ANNOUNCEMENT BOARD
     border-radius:25px;
 
 
-    margin-bottom:22px;
-
-
     border-left:
 
     6px solid var(--gold);
 
 
-    box-shadow:var(--shadow);
+    box-shadow:
+
+    var(--shadow);
+
+
+    margin-bottom:22px;
 
 
     transition:.3s;
@@ -1664,10 +2612,11 @@ ANNOUNCEMENT BOARD
 
     transform:
 
-    translateY(-7px);
+    translateY(-6px);
 
 
 }
+
 
 
 
@@ -1681,9 +2630,6 @@ ANNOUNCEMENT BOARD
     margin-bottom:12px;
 
 
-    font-size:20px;
-
-
 }
 
 
@@ -1693,10 +2639,10 @@ ANNOUNCEMENT BOARD
 .announcement-card p{
 
 
-    color:#555;
-
-
     line-height:1.7;
+
+
+    color:#555;
 
 
 }
@@ -1718,6 +2664,8 @@ ANNOUNCEMENT BOARD
 
 
 }
+
+
 
 
 
@@ -1749,7 +2697,9 @@ EMPTY STATE
     color:#777;
 
 
-    box-shadow:var(--shadow);
+    box-shadow:
+
+    var(--shadow);
 
 
     font-size:18px;
@@ -1761,282 +2711,19 @@ EMPTY STATE
 
 
 
+body.dark .empty-state{
 
 
-
-/* =========================
-FORM DESIGN
-========================= */
-
-
-input,
-select,
-textarea{
-
-
-    width:100%;
-
-
-    padding:15px 18px;
-
-
-    margin-bottom:18px;
-
-
-    border-radius:15px;
-
-
-    border:
-
-    1px solid #ddd;
-
-
-    outline:none;
-
-
-    background:white;
-
-
-    transition:.3s;
-
-
-    font-size:14px;
-
-
-}
-
-
-
-
-input:focus,
-select:focus,
-textarea:focus{
-
-
-    border-color:var(--gold);
-
-
-    box-shadow:
-
-    0 0 15px rgba(200,155,60,.25);
-
-
-}
-
-
-
-
-
-textarea{
-
-
-    resize:none;
-
-
-    min-height:120px;
-
-
-}
-
-
-
-
-
-
-
-/* =========================
-SEARCH BAR
-========================= */
-
-
-#searchRecord{
-
-
-    width:100%;
-
-
-    max-width:450px;
-
-
-    padding:16px 22px;
-
-
-    border-radius:50px;
-
-
-    border:
-
-    1px solid #ddd;
-
-
-    margin-bottom:25px;
-
-
-    outline:none;
-
-
-}
-
-
-
-
-
-#searchRecord:focus{
-
-
-    border-color:var(--gold);
-
-
-    box-shadow:
-
-    0 0 15px rgba(200,155,60,.25);
-
-
-}
-
-
-
-
-
-
-
-/* =========================
-CHART AREA
-========================= */
-
-
-.chart-container{
-
-
-    background:white;
-
-
-    padding:30px;
-
-
-    border-radius:25px;
-
-
-    box-shadow:var(--shadow);
-
-
-    margin-bottom:30px;
-
-
-}
-
-
-
-
-
-
-
-
-/* =========================
-LOADER
-========================= */
-
-
-#loader{
-
-
-    position:fixed;
-
-
-    inset:0;
-
-
-    background:
-
-    linear-gradient(
-        135deg,
-        #3b2415,
-        #1f1208
-    );
-
-
-    display:flex;
-
-
-    justify-content:center;
-
-
-    align-items:center;
-
-
-    flex-direction:column;
+    background:#1f1f1f;
 
 
     color:white;
 
 
-    z-index:9999;
-
-
 }
-
-
-
-
-
-.loader-circle{
-
-
-    width:65px;
-
-
-    height:65px;
-
-
-    border:
-
-    6px solid var(--gold);
-
-
-    border-top-color:transparent;
-
-
-    border-radius:50%;
-
-
-    animation:
-
-    spin 1s linear infinite;
-
-
-}
-
-
-
-
-#loader p{
-
-
-    margin-top:20px;
-
-
-    font-size:18px;
-
-
-}
-
-
-
-
-@keyframes spin{
-
-
-    to{
-
-        transform:rotate(360deg);
-
-    }
-
-
-}
-/* =========================
+/* =========================================
 DARK MODE SYSTEM
-========================= */
+========================================= */
 
 
 body.dark{
@@ -2044,6 +2731,7 @@ body.dark{
 
     background:#121212;
 
+
     color:white;
 
 
@@ -2053,16 +2741,18 @@ body.dark{
 
 
 
+
 body.dark .card,
 body.dark .panel,
+body.dark .year,
 body.dark .project-card,
 body.dark .expense-card,
-body.dark .announcement-card,
 body.dark .chart-container,
-body.dark .year,
+body.dark .announcement-card,
+body.dark .receipt-preview-card,
+body.dark .receipt-card,
 body.dark .empty-state,
-body.dark .login-box,
-body.dark .receipt-preview-card{
+body.dark .login-box{
 
 
     background:#1f1f1f;
@@ -2080,8 +2770,7 @@ body.dark .receipt-preview-card{
 
 body.dark h1,
 body.dark h2,
-body.dark h3,
-body.dark strong{
+body.dark h3{
 
 
     color:white;
@@ -2102,6 +2791,20 @@ body.dark small{
 
 
 }
+
+
+
+
+
+
+body.dark strong{
+
+
+    color:var(--gold-light);
+
+
+}
+
 
 
 
@@ -2152,9 +2855,7 @@ body.dark #searchRecord{
 
 
 
-
-body.dark .progress-container,
-body.dark .receipt-box{
+body.dark .progress-container{
 
 
     background:#292929;
@@ -2166,22 +2867,10 @@ body.dark .receipt-box{
 
 
 
-body.dark .receipt-preview-card{
+body.dark .receipt-info{
 
 
-    background:#242424;
-
-
-}
-
-
-
-
-
-body.dark .announcement-card p{
-
-
-    color:#ccc;
+    background:#292929;
 
 
 }
@@ -2192,9 +2881,70 @@ body.dark .announcement-card p{
 
 
 
-/* =========================
+
+/* =========================================
+SEARCH SYSTEM
+========================================= */
+
+
+#searchRecord{
+
+
+    width:100%;
+
+
+    max-width:450px;
+
+
+    padding:16px 22px;
+
+
+    border-radius:50px;
+
+
+    border:
+
+    1px solid #ddd;
+
+
+    outline:none;
+
+
+    margin-bottom:25px;
+
+
+    transition:.3s;
+
+
+}
+
+
+
+
+
+#searchRecord:focus{
+
+
+    border-color:var(--gold);
+
+
+    box-shadow:
+
+    0 0 15px rgba(200,155,60,.25);
+
+
+}
+
+
+
+
+
+
+
+
+/* =========================================
 LOGIN PAGE
-========================= */
+========================================= */
 
 
 .login-box{
@@ -2214,7 +2964,8 @@ LOGIN PAGE
 
     box-shadow:
 
-    0 20px 50px rgba(0,0,0,.18);
+
+    0 20px 60px rgba(0,0,0,.2);
 
 
     position:absolute;
@@ -2228,10 +2979,12 @@ LOGIN PAGE
 
     transform:
 
+
     translate(-50%,-50%);
 
 
 }
+
 
 
 
@@ -2255,11 +3008,163 @@ LOGIN PAGE
 
 
 
+.login-box input,
+.login-box button{
 
 
-/* =========================
-SCROLLBAR
-========================= */
+    width:100%;
+
+
+    padding:16px;
+
+
+    margin-bottom:18px;
+
+
+    border-radius:15px;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =========================================
+LOADER
+========================================= */
+
+
+#loader{
+
+
+    position:fixed;
+
+
+    inset:0;
+
+
+    background:
+
+
+    linear-gradient(
+
+        135deg,
+
+        #3b2415,
+
+        #1d1007
+
+    );
+
+
+    display:flex;
+
+
+    flex-direction:column;
+
+
+    justify-content:center;
+
+
+    align-items:center;
+
+
+    color:white;
+
+
+    z-index:99999;
+
+
+}
+
+
+
+
+
+
+.loader-circle{
+
+
+    width:70px;
+
+
+    height:70px;
+
+
+    border:
+
+
+    7px solid var(--gold);
+
+
+    border-top-color:transparent;
+
+
+    border-radius:50%;
+
+
+    animation:
+
+
+    spin 1s linear infinite;
+
+
+}
+
+
+
+
+
+
+#loader p{
+
+
+    margin-top:20px;
+
+
+    font-size:18px;
+
+
+    letter-spacing:.5px;
+
+
+}
+
+
+
+
+
+
+@keyframes spin{
+
+
+    to{
+
+
+        transform:rotate(360deg);
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =========================================
+SCROLL BAR
+========================================= */
 
 
 ::-webkit-scrollbar{
@@ -2291,9 +3196,13 @@ SCROLLBAR
 
     background:
 
+
     linear-gradient(
+
         var(--primary),
+
         var(--gold)
+
     );
 
 
@@ -2308,15 +3217,18 @@ SCROLLBAR
 
 
 
-/* =========================
-FADE ANIMATION
-========================= */
+
+
+/* =========================================
+ANIMATION SYSTEM
+========================================= */
 
 
 .fade-in{
 
 
     animation:
+
 
     fadeIn .5s ease;
 
@@ -2338,6 +3250,7 @@ FADE ANIMATION
 
         transform:
 
+
         translateY(20px);
 
 
@@ -2353,6 +3266,7 @@ FADE ANIMATION
 
         transform:
 
+
         translateY(0);
 
 
@@ -2367,21 +3281,19 @@ FADE ANIMATION
 
 
 
-/* =========================
-GLOBAL CARD ANIMATION
-========================= */
-
 
 .card,
 .panel,
 .project-card,
 .expense-card,
+.receipt-card,
 .announcement-card{
 
 
     animation:
 
-    fadeIn .5s ease;
+
+    fadeIn .45s ease;
 
 
 }
@@ -2392,9 +3304,10 @@ GLOBAL CARD ANIMATION
 
 
 
-/* =========================
-RESPONSIVE TABLET
-========================= */
+
+/* =========================================
+TABLET RESPONSIVE
+========================================= */
 
 
 @media(max-width:1200px){
@@ -2405,6 +3318,7 @@ RESPONSIVE TABLET
 
 
     grid-template-columns:
+
 
     repeat(2,1fr);
 
@@ -2419,6 +3333,7 @@ RESPONSIVE TABLET
 
     grid-template-columns:
 
+
     repeat(2,1fr);
 
 
@@ -2432,6 +3347,7 @@ RESPONSIVE TABLET
 
     grid-template-columns:
 
+
     repeat(2,1fr);
 
 
@@ -2439,16 +3355,20 @@ RESPONSIVE TABLET
 
 
 
-
 }
 
 
 
 
 
-/* =========================
-MOBILE VERSION
-========================= */
+
+
+
+
+
+/* =========================================
+MOBILE RESPONSIVE
+========================================= */
 
 
 @media(max-width:750px){
@@ -2462,6 +3382,7 @@ MOBILE VERSION
 
 
 }
+
 
 
 
@@ -2552,6 +3473,7 @@ header h1{
 
     grid-template-columns:
 
+
     1fr;
 
 
@@ -2566,6 +3488,7 @@ header h1{
 
     grid-template-columns:
 
+
     1fr;
 
 
@@ -2579,6 +3502,7 @@ header h1{
 
 
     grid-template-columns:
+
 
     1fr;
 
@@ -2645,6 +3569,18 @@ table{
 
 
 
+.receipt-modal-content{
+
+
+    padding:15px;
+
+
+}
+
+
+
+
+
 .login-box{
 
 
@@ -2658,6 +3594,7 @@ table{
 
 
 
+
 }
 
 
@@ -2667,12 +3604,25 @@ table{
 
 
 
-/* =========================
+
+/* =========================================
 SMALL PHONE
-========================= */
+========================================= */
 
 
 @media(max-width:400px){
+
+
+
+.sidebar h2{
+
+
+    font-size:22px;
+
+
+}
+
+
 
 
 
@@ -2700,75 +3650,14 @@ header h1{
 
 
 
-.sidebar h2{
+.receipt-image{
 
 
-    font-size:22px;
-
-
-}
-
+    height:200px;
 
 
 }
 
-
-
-
-
-
-
-/* =========================
-FINAL DALUBWIKAAN TOUCH
-========================= */
-
-
-strong{
-
-
-    color:var(--primary);
-
-
-}
-
-
-
-
-body.dark strong{
-
-
-    color:var(--gold-light);
-
-
-}
-
-
-
-
-
-
-.project-card,
-.expense-card,
-.card,
-.panel,
-.announcement-card{
-
-
-    cursor:pointer;
-
-
-}
-
-
-
-
-
-
-.project-card:hover,
-.expense-card:hover{
-
-
-    border-color:var(--gold);
 
 
 }
@@ -2779,7 +3668,11 @@ body.dark strong{
 
 
 
-/* GOLD HIGHLIGHT EFFECT */
+
+
+/* =========================================
+DALUBWIKAAN FINAL BRAND EFFECT
+========================================= */
 
 
 .gold-text{
@@ -2797,44 +3690,31 @@ body.dark strong{
 
 
 
+.sidebar::after{
 
 
-/* SUCCESS / DANGER LABELS */
+    content:"";
 
 
-.success-status{
+    position:absolute;
 
 
-    background:#d1f7dc;
+    bottom:25px;
 
 
-    padding:8px 15px;
+    left:25px;
 
 
-    border-radius:50px;
+    width:80px;
 
 
-    display:inline-block;
+    height:3px;
 
 
-}
+    background:var(--gold);
 
 
-
-
-.danger-status{
-
-
-    background:#f8d7da;
-
-
-    padding:8px 15px;
-
-
-    border-radius:50px;
-
-
-    display:inline-block;
+    border-radius:20px;
 
 
 }
@@ -2845,69 +3725,16 @@ body.dark strong{
 
 
 
-/* =========================
-END OF VERSION 7.0
-DALUBWIKAAN TREASURY UI
-========================= */
-/* =========================
-RECEIPT MODAL VIEWER
-========================= */
+
+/* PREMIUM HOVER EFFECT */
 
 
-.receipt-box{
-
-margin-top:20px;
-
-padding:20px;
-
-background:#faf7f0;
-
-border-radius:20px;
-
-text-align:center;
-
-}
+.project-card:hover,
+.expense-card:hover,
+.card:hover{
 
 
-
-.receipt-box h4{
-
-color:var(--primary);
-
-margin-bottom:15px;
-
-}
-
-
-
-.receipt-image{
-
-
-width:100%;
-
-max-width:250px;
-
-height:250px;
-
-object-fit:cover;
-
-border-radius:15px;
-
-cursor:pointer;
-
-box-shadow:
-
-0 10px 25px rgba(0,0,0,.15);
-
-
-}
-
-
-
-.receipt-image:hover{
-
-
-transform:scale(1.05);
+    border-color:var(--gold);
 
 
 }
@@ -2916,105 +3743,14 @@ transform:scale(1.05);
 
 
 
-.receipt-modal{
-
-
-position:fixed;
-
-inset:0;
-
-background:
-
-rgba(0,0,0,.75);
-
-display:flex;
-
-justify-content:center;
-
-align-items:center;
-
-z-index:99999;
-
-
-}
-
-
-
-.receipt-modal-content{
-
-
-background:white;
-
-padding:25px;
-
-border-radius:25px;
-
-max-width:90%;
-
-max-height:90%;
-
-position:relative;
-
-
-}
-
-
-
-.receipt-modal-content img{
-
-
-max-width:100%;
-
-max-height:80vh;
-
-border-radius:15px;
-
-
-}
 
 
 
 
-.close-receipt{
+/* END OF STYLE VERSION 8.0
 
+DALUBWIKAAN TREASURY MANAGEMENT SYSTEM
 
-position:absolute;
+PREMIUM POLISHED UI
 
-right:15px;
-
-top:15px;
-
-background:#b02a37;
-
-color:white;
-
-border:none;
-
-border-radius:50%;
-
-width:40px;
-
-height:40px;
-
-cursor:pointer;
-
-
-}
-
-
-
-.no-receipt{
-
-
-padding:15px;
-
-background:#eee;
-
-border-radius:15px;
-
-color:#777;
-
-display:block;
-
-
-}
+*/
