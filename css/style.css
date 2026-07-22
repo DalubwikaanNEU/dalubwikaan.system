@@ -867,3 +867,39 @@ form button:hover{
 
 
 }
+
+#generateReport{
+
+
+background:#3b2415;
+
+color:white;
+
+border:none;
+
+padding:15px 25px;
+
+border-radius:12px;
+
+font-size:15px;
+
+cursor:pointer;
+
+margin-bottom:25px;
+
+transition:.3s;
+
+
+}
+
+
+
+#generateReport:hover{
+
+
+background:#c89b3c;
+
+color:#3b2415;
+
+
+}
