@@ -42,7 +42,7 @@ Dalubwikaan Admin Treasury
 
 
 <p>
-Treasury Admin Panel
+Treasurer Panel
 </p>
 
 
@@ -59,13 +59,11 @@ Treasury Admin Panel
 
 
 
-
 <a class="active">
 
 ⚙ Admin Panel
 
 </a>
-
 
 
 
@@ -78,7 +76,6 @@ Treasury Admin Panel
 
 
 </nav>
-
 
 
 </aside>
@@ -105,12 +102,12 @@ Treasury Admin Panel
 <div>
 
 <h1>
-Treasurer Control Panel
+Treasury Management
 </h1>
 
 
 <p>
-Manage collections, projects, and organization funds
+Manage collections, projects, and expenses
 </p>
 
 
@@ -128,7 +125,7 @@ Manage collections, projects, and organization funds
 
 
 
-<!-- COLLECTION FORM -->
+<!-- ADD COLLECTION -->
 
 <section class="panel">
 
@@ -139,9 +136,7 @@ Manage collections, projects, and organization funds
 
 
 
-
 <form id="collectionForm">
-
 
 
 <label>
@@ -149,29 +144,27 @@ Year Level
 </label>
 
 
+<select id="yearLevel">
 
-<select id="yearLevel" required>
 
-
-<option value="First Year">
+<option>
 First Year
 </option>
 
 
-<option value="Second Year">
+<option>
 Second Year
 </option>
 
 
-<option value="Third Year">
+<option>
 Third Year
 </option>
 
 
-<option value="Fourth Year">
+<option>
 Fourth Year
 </option>
-
 
 
 </select>
@@ -185,19 +178,10 @@ Amount Collected
 </label>
 
 
-
-<input
-
+<input 
 type="number"
-
 id="amount"
-
-placeholder="Enter amount"
-
-required
-
->
-
+placeholder="Enter amount">
 
 
 
@@ -208,17 +192,9 @@ Collection Date
 </label>
 
 
-<input
-
+<input 
 type="date"
-
-id="date"
-
-required
-
->
-
-
+id="date">
 
 
 
@@ -226,10 +202,87 @@ required
 
 <button type="submit">
 
-Save Collection
+Add Collection
 
 </button>
 
+
+
+</form>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- PROJECT -->
+
+<section class="panel">
+
+
+<h2>
+🏗 Add Organization Project
+</h2>
+
+
+
+
+<form id="projectForm">
+
+
+
+<label>
+Project Name
+</label>
+
+
+<input
+type="text"
+id="projectName"
+placeholder="Example: Gabay Turo sa Lingguwistika">
+
+
+
+
+
+<label>
+Project Budget
+</label>
+
+
+<input
+type="number"
+id="projectBudget"
+placeholder="Budget">
+
+
+
+
+
+<label>
+Project Description
+</label>
+
+
+<textarea 
+id="description"
+placeholder="Describe the project">
+</textarea>
+
+
+
+
+<button type="submit">
+
+Save Project
+
+</button>
 
 
 
@@ -247,20 +300,19 @@ Save Collection
 
 
 
-<!-- PROJECT FORM -->
+<!-- EXPENSE WITH RECEIPT -->
 
 <section class="panel">
 
 
 <h2>
-🏗 Add Project Budget
+💸 Add Expense With Receipt
 </h2>
 
 
 
 
-
-<form id="projectForm">
+<form id="expenseForm">
 
 
 
@@ -271,20 +323,10 @@ Project Name
 </label>
 
 
-
 <input
-
 type="text"
-
-id="projectName"
-
-placeholder="Example: Poetry Competition"
-
-required
-
->
-
-
+id="expenseProject"
+placeholder="Example: Poetry Competition">
 
 
 
@@ -292,23 +334,14 @@ required
 
 
 <label>
-Budget Allocation
+Expense Amount
 </label>
-
 
 
 <input
-
 type="number"
-
-id="projectBudget"
-
-placeholder="Enter budget"
-
-required
-
->
-
+id="expenseAmount"
+placeholder="Enter expense">
 
 
 
@@ -316,22 +349,30 @@ required
 
 
 <label>
-Project Description
+Expense Description
 </label>
-
 
 
 <textarea
-
-id="description"
-
-placeholder="Describe the project"
-
-required
-
-></textarea>
+id="expenseDescription"
+placeholder="Food, materials, certificates...">
+</textarea>
 
 
+
+
+
+
+
+<label>
+Upload Receipt
+</label>
+
+
+<input
+type="file"
+id="receiptFile"
+accept="image/*">
 
 
 
@@ -339,16 +380,14 @@ required
 
 <button type="submit">
 
-Save Project
+Save Expense
 
 </button>
 
 
 
 
-
 </form>
-
 
 
 </section>
@@ -366,7 +405,6 @@ Save Project
 <section class="panel">
 
 
-
 <h2>
 📋 Treasury Records
 </h2>
@@ -376,7 +414,6 @@ Save Project
 
 
 <table>
-
 
 
 <thead>
@@ -390,11 +427,9 @@ Type
 </th>
 
 
-
 <th>
 Details
 </th>
-
 
 
 <th>
@@ -402,8 +437,8 @@ Amount
 </th>
 
 
-</tr>
 
+</tr>
 
 
 </thead>
@@ -411,20 +446,14 @@ Amount
 
 
 
-
 <tbody id="records">
-
 
 
 </tbody>
 
 
 
-
-
 </table>
-
-
 
 
 </section>
@@ -441,9 +470,8 @@ Amount
 
 
 
+
 </div>
-
-
 
 
 
