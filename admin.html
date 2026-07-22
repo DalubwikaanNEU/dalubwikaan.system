@@ -52,8 +52,8 @@
                     📋 Records
                 </a>
 
-                <a href="#audit">
-                    📝 Audit Trail
+                <a href="#announcement">
+                    📢 Announcement
                 </a>
 
                 <a href="#" id="logout">
@@ -446,37 +446,81 @@
                 </div>
 
             </section>
-                        <!-- =========================
-                 AUDIT TRAIL
-            ========================== -->
-            <section class="panel" id="audit">
+                        
+<!-- =========================
+     ANNOUNCEMENT
+========================== -->
+<section class="panel" id="announcement">
 
-                <div class="panel-header">
+    <div class="panel-header">
 
-                    <h2>📝 Audit Trail</h2>
+        <h2>📢 Announcement Board</h2>
 
-                    <button
-                        type="button"
-                        id="clearAudit"
-                        class="secondary-btn">
-                        🗑 Clear Logs
-                    </button>
+    </div>
 
-                </div>
+    <p class="panel-description">
+        Post important announcements for Dalubwikaan members.
+    </p>
 
-                <p class="panel-description">
-                    All administrator activities are recorded here for transparency.
-                </p>
 
-                <div id="auditContainer">
+    <form id="announcementForm">
 
-                    <div class="empty-state">
-                        <p>No activity recorded.</p>
-                    </div>
 
-                </div>
+        <label for="announcementTitle">
+            Announcement Title
+        </label>
 
-            </section>
+        <input
+            type="text"
+            id="announcementTitle"
+            placeholder="Enter announcement title"
+            maxlength="100"
+            required
+        >
+
+
+        <label for="announcementMessage">
+            Message
+        </label>
+
+        <textarea
+            id="announcementMessage"
+            rows="5"
+            placeholder="Write your announcement..."
+            required
+        ></textarea>
+
+
+        <button type="submit">
+            📢 Post Announcement
+        </button>
+
+
+    </form>
+
+
+    <hr>
+
+
+    <h3>
+        📌 Posted Announcements
+    </h3>
+
+
+    <div id="announcementContainer">
+
+
+        <div class="empty-state">
+
+            <p>No announcements yet.</p>
+
+        </div>
+
+
+    </div>
+
+
+</section>
 
             <!-- =========================
                  FOOTER
