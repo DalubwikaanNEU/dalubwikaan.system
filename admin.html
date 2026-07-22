@@ -2,883 +2,509 @@
 <html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="UTF-8">
+    <title>Dalubwikaan Admin Treasury</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
 
-
-<title>
-Dalubwikaan Admin Treasury
-</title>
-
-
-<link rel="stylesheet" href="css/style.css">
-
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-
-
-
 
 <body>
 
+    <!-- =========================
+         LOADER
+    ========================== -->
+    <div id="loader">
+        <div class="loader-circle"></div>
+        <p>Loading Admin Panel...</p>
+    </div>
 
+    <div class="dashboard">
 
-<!-- LOADER -->
+        <!-- =========================
+             SIDEBAR
+        ========================== -->
+        <aside class="sidebar">
 
-<div id="loader">
+            <div class="sidebar-header">
+                <h2>📚 Dalubwikaan</h2>
+                <p>Treasurer Control Panel</p>
+            </div>
 
+            <nav>
 
-<div class="loader-circle"></div>
+                <a href="index.html">
+                    🏠 Dashboard
+                </a>
 
+                <a href="#" class="active">
+                    ⚙️ Admin Panel
+                </a>
 
-<p>
-Loading Admin Panel...
-</p>
+                <a href="#recordsSection">
+                    📋 Records
+                </a>
 
+                <a href="#audit">
+                    📝 Audit Trail
+                </a>
 
-</div>
+                <a href="#" id="logout">
+                    🚪 Logout
+                </a>
 
+            </nav>
 
+        </aside>
 
+        <!-- =========================
+             MAIN CONTENT
+        ========================== -->
+        <main class="main">
 
+            <header>
 
+                <div>
+                    <h1>Treasury Management</h1>
 
+                    <p>
+                        Manage Dalubwikaan Financial Records
+                        <br>
+                        Academic Year 2026–2027
+                    </p>
+                </div>
 
+                <button id="themeToggle" aria-label="Toggle Theme">
+                    🌙
+                </button>
 
+            </header>
+                        <!-- =========================
+                 TREASURER PROFILE
+            ========================== -->
+            <section class="panel">
 
-<div class="dashboard">
+                <h2>👤 Treasurer Information</h2>
 
+                <div class="profile-info">
 
+                    <p>
+                        <strong>Logged Account</strong>
+                    </p>
 
+                    <p id="adminEmail">
+                        Loading...
+                    </p>
 
+                    <hr>
 
+                    <p>
+                        <strong>Role:</strong>
+                        Authorized Financial Administrator
+                    </p>
 
+                    <p>
+                        <strong>Organization:</strong>
+                        Dalubwikaan
+                    </p>
 
-<!-- SIDEBAR -->
+                    <p>
+                        <strong>Academic Year:</strong>
+                        2026–2027
+                    </p>
 
-<aside class="sidebar">
+                </div>
 
+            </section>
 
-<h2>
-📚 Dalubwikaan
-</h2>
+            <!-- =========================
+                 DASHBOARD STATISTICS
+            ========================== -->
+            <section class="cards">
 
+                <div class="card">
 
-<p>
-Treasurer Control Panel
-</p>
+                    <h3>📋 Total Records</h3>
 
+                    <h2 id="recordCount">0</h2>
 
+                    <span>
+                        Stored Transactions
+                    </span>
 
+                </div>
 
+                <div class="card">
 
-<nav>
+                    <h3>💰 Collections</h3>
 
+                    <h2 id="collectionCount">0</h2>
 
-<a href="index.html">
+                    <span>
+                        Weekly Contributions
+                    </span>
 
-🏠 Dashboard
+                </div>
 
-</a>
+                <div class="card">
 
+                    <h3>🏗 Projects</h3>
 
+                    <h2 id="projectCount">0</h2>
 
-<a class="active">
+                    <span>
+                        Organization Programs
+                    </span>
 
-⚙ Admin Panel
+                </div>
 
-</a>
+                <div class="card">
 
+                    <h3>🧾 Expenses</h3>
 
+                    <h2 id="expenseCount">0</h2>
 
-<a href="#recordsSection">
+                    <span>
+                        Budget Allocation
+                    </span>
 
-📋 Records
+                </div>
 
-</a>
+            </section>
 
+            <!-- =========================
+                 WEEKLY COLLECTION FORM
+            ========================== -->
+            <section class="panel">
 
+                <h2>💰 Add Weekly Collection</h2>
 
-<a href="#audit">
+                <form id="collectionForm">
 
-📝 Audit Trail
+                    <label for="yearLevel">
+                        Year Level
+                    </label>
 
-</a>
+                    <select id="yearLevel" required>
 
+                        <option value="First Year">
+                            First Year
+                        </option>
 
+                        <option value="Second Year">
+                            Second Year
+                        </option>
 
-<a id="logout">
+                        <option value="Third Year">
+                            Third Year
+                        </option>
 
-🚪 Logout
+                        <option value="Fourth Year">
+                            Fourth Year
+                        </option>
 
-</a>
+                    </select>
 
+                    <label for="amount">
+                        Amount Collected
+                    </label>
 
-</nav>
+                    <input
+                        type="number"
+                        id="amount"
+                        placeholder="₱ Amount"
+                        min="1"
+                        required
+                    >
 
+                    <label for="date">
+                        Collection Date
+                    </label>
 
-</aside>
+                    <input
+                        type="date"
+                        id="date"
+                        required
+                    >
 
+                    <button type="submit">
+                        💾 Save Collection
+                    </button>
 
+                </form>
 
+            </section>
+                        <!-- =========================
+                 PROJECT FORM
+            ========================== -->
+            <section class="panel">
 
+                <h2>🏗 Add Organization Project</h2>
 
+                <form id="projectForm">
 
+                    <label for="projectName">
+                        Project Name
+                    </label>
 
+                    <input
+                        type="text"
+                        id="projectName"
+                        placeholder="Enter project name"
+                        maxlength="100"
+                        autocomplete="off"
+                        required
+                    >
 
+                    <label for="projectBudget">
+                        Project Budget
+                    </label>
 
-<!-- MAIN -->
+                    <input
+                        type="number"
+                        id="projectBudget"
+                        placeholder="₱ Budget"
+                        min="0"
+                        step="0.01"
+                        required
+                    >
 
-<main class="main">
+                    <label for="description">
+                        Project Description
+                    </label>
 
+                    <textarea
+                        id="description"
+                        rows="4"
+                        placeholder="Brief description of the project..."
+                    ></textarea>
 
+                    <button type="submit">
+                        💾 Save Project
+                    </button>
 
+                </form>
 
+            </section>
 
+            <!-- =========================
+                 EXPENSE FORM
+            ========================== -->
+            <section class="panel">
 
+                <h2>💸 Add Expense & Receipt</h2>
 
-<header>
+                <form id="expenseForm">
 
+                    <label for="expenseProject">
+                        Project Name
+                    </label>
 
-<div>
+                    <input
+                        type="text"
+                        id="expenseProject"
+                        placeholder="Enter project name"
+                        maxlength="100"
+                        autocomplete="off"
+                        required
+                    >
 
+                    <label for="expenseAmount">
+                        Expense Amount
+                    </label>
 
-<h1>
-Treasury Management
-</h1>
+                    <input
+                        type="number"
+                        id="expenseAmount"
+                        placeholder="₱ Amount"
+                        min="0"
+                        step="0.01"
+                        required
+                    >
 
+                    <label for="expenseDescription">
+                        Expense Description
+                    </label>
 
-<p>
-Manage Dalubwikaan financial records
-<br>
-Academic Year 2026-2027
-</p>
+                    <textarea
+                        id="expenseDescription"
+                        rows="4"
+                        placeholder="Enter expense details..."
+                    ></textarea>
 
+                    <label for="receiptFile">
+                        Receipt Image
+                    </label>
 
-</div>
+                    <input
+                        type="file"
+                        id="receiptFile"
+                        accept="image/*"
+                    >
 
+                    <div id="receiptPreview"></div>
 
+                    <button type="submit">
+                        💾 Save Expense
+                    </button>
 
-<button id="themeToggle">
+                </form>
 
-🌙
+            </section>
+                        <!-- =========================
+                 SEARCH RECORDS
+            ========================== -->
+            <section class="panel">
 
-</button>
+                <h2>🔎 Search Records</h2>
 
+                <input
+                    type="text"
+                    id="searchRecord"
+                    placeholder="Search by project, type, description, or amount..."
+                    autocomplete="off"
+                >
 
+            </section>
 
-</header>
+            <!-- =========================
+                 TREASURY RECORDS
+            ========================== -->
+            <section class="panel" id="recordsSection">
 
+                <h2>📋 Treasury Records</h2>
 
+                <div class="table-responsive">
 
+                    <table>
 
+                        <thead>
 
+                            <tr>
 
+                                <th>Type</th>
 
+                                <th>Details</th>
 
+                                <th>Amount</th>
 
-<!-- PROFILE -->
+                                <th>Action</th>
 
+                            </tr>
 
-<section class="panel">
+                        </thead>
 
+                        <tbody id="records">
 
-<h2>
-👤 Treasurer Information
-</h2>
+                            <tr>
 
+                                <td colspan="4" class="empty-state">
+                                    No records available.
+                                </td>
 
+                            </tr>
 
-<p>
+                        </tbody>
 
-Logged Account:
+                    </table>
 
-<br>
+                </div>
 
-<b id="adminEmail">
+            </section>
 
-Loading...
+            <!-- =========================
+                 RECORD SUMMARY
+            ========================== -->
+            <section class="panel">
 
-</b>
+                <h2>📊 Financial Summary</h2>
 
+                <div class="cards">
 
-<br><br>
+                    <div class="card">
+                        <h3>Total Collections</h3>
+                        <h2 id="totalCollections">₱0.00</h2>
+                    </div>
 
+                    <div class="card">
+                        <h3>Total Expenses</h3>
+                        <h2 id="totalExpenses">₱0.00</h2>
+                    </div>
 
-Authorized Financial Administrator
+                    <div class="card">
+                        <h3>Current Balance</h3>
+                        <h2 id="currentBalance">₱0.00</h2>
+                    </div>
 
-<br>
+                </div>
 
-Dalubwikaan Academic Year 2026-2027
+            </section>
+                        <!-- =========================
+                 AUDIT TRAIL
+            ========================== -->
+            <section class="panel" id="audit">
 
+                <div class="panel-header">
 
-</p>
+                    <h2>📝 Audit Trail</h2>
 
+                    <button
+                        type="button"
+                        id="clearAudit"
+                        class="secondary-btn">
+                        🗑 Clear Logs
+                    </button>
 
+                </div>
 
-</section>
+                <p class="panel-description">
+                    All administrator activities are recorded here for transparency.
+                </p>
 
+                <div id="auditContainer">
 
+                    <div class="empty-state">
+                        <p>No activity recorded.</p>
+                    </div>
 
+                </div>
 
+            </section>
 
+            <!-- =========================
+                 FOOTER
+            ========================== -->
+            <footer class="footer">
 
+                <p>
+                    © 2026 Dalubwikaan Treasury Management System
+                </p>
 
+                <small>
+                    Developed for Dalubwikaan Organization • Academic Year 2026–2027
+                </small>
 
+            </footer>
 
-<!-- STATS -->
+        </main>
 
-<section class="cards">
+    </div>
+        <!-- =========================
+         JAVASCRIPT FILES
+    ========================== -->
 
+    <!-- Theme (Dark / Light Mode) -->
+    <script src="js/theme.js"></script>
 
-
-<div class="card">
-
-<h3>
-📋 Total Records
-</h3>
-
-<h2 id="recordCount">
-
-0
-
-</h2>
-
-
-<span>
-Stored Transactions
-</span>
-
-
-</div>
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-💰 Collections
-</h3>
-
-
-<h2 id="collectionCount">
-
-0
-
-</h2>
-
-
-<span>
-Weekly Contributions
-
-</span>
-
-
-</div>
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-🏗 Projects
-
-</h3>
-
-
-<h2 id="projectCount">
-
-0
-
-</h2>
-
-
-<span>
-Organization Programs
-
-</span>
-
-
-</div>
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-🧾 Expenses
-
-</h3>
-
-
-<h2 id="expenseCount">
-
-0
-
-</h2>
-
-
-<span>
-Budget Allocation
-
-</span>
-
-
-</div>
-
-
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- COLLECTION FORM -->
-
-
-<section class="panel">
-
-
-<h2>
-💰 Add Weekly Collection
-</h2>
-
-
-
-
-<form id="collectionForm">
-
-
-
-<label>
-Year Level
-</label>
-
-
-
-<select id="yearLevel">
-
-
-<option value="First Year">
-First Year
-</option>
-
-
-<option value="Second Year">
-Second Year
-</option>
-
-
-<option value="Third Year">
-Third Year
-</option>
-
-
-<option value="Fourth Year">
-Fourth Year
-</option>
-
-
-
-</select>
-
-
-
-
-
-
-
-<label>
-Amount Collected
-</label>
-
-
-
-<input
-
-type="number"
-
-id="amount"
-
-placeholder="₱ Amount"
-
-required>
-
-
-
-
-<label>
-Collection Date
-</label>
-
-
-
-<input
-
-type="date"
-
-id="date"
-
-required>
-
-
-
-
-
-<button type="submit">
-
-Save Collection
-
-</button>
-
-
-
-</form>
-
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- PROJECT FORM -->
-
-
-<section class="panel">
-
-
-<h2>
-🏗 Add Organization Project
-</h2>
-
-
-
-
-
-<form id="projectForm">
-
-
-
-<label>
-Project Name
-</label>
-
-
-<input
-
-type="text"
-
-id="projectName"
-
-placeholder="Project name"
-
-required>
-
-
-
-
-<label>
-Project Budget
-</label>
-
-
-<input
-
-type="number"
-
-id="projectBudget"
-
-placeholder="₱ Budget"
-
-required>
-
-
-
-
-<label>
-Description
-</label>
-
-
-<textarea
-
-id="description"
-
-placeholder="Project description">
-
-</textarea>
-
-
-
-<button type="submit">
-
-Save Project
-
-</button>
-
-
-
-</form>
-
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- EXPENSE FORM -->
-
-
-<section class="panel">
-
-
-<h2>
-💸 Add Expense & Receipt
-</h2>
-
-
-
-
-<form id="expenseForm">
-
-
-
-<label>
-Project Name
-</label>
-
-
-<input
-
-type="text"
-
-id="expenseProject"
-
-placeholder="Project name"
-
-required>
-
-
-
-
-
-<label>
-Expense Amount
-</label>
-
-
-<input
-
-type="number"
-
-id="expenseAmount"
-
-placeholder="₱ Amount"
-
-required>
-
-
-
-
-
-<label>
-Description
-</label>
-
-
-<textarea
-
-id="expenseDescription"
-
-placeholder="Expense details">
-
-</textarea>
-
-
-
-
-
-<label>
-Receipt Image
-</label>
-
-
-
-<input
-
-type="file"
-
-id="receiptFile"
-
-accept="image/*">
-
-
-
-
-
-<div id="receiptPreview">
-
-</div>
-
-
-
-
-
-<button type="submit">
-
-Save Expense
-
-</button>
-
-
-
-
-</form>
-
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- SEARCH -->
-
-<section class="panel">
-
-
-<h2>
-🔎 Search Records
-</h2>
-
-
-
-<input
-
-type="text"
-
-id="searchRecord"
-
-placeholder="Search transactions..."
-
->
-
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- RECORDS -->
-
-
-<section class="panel" id="recordsSection">
-
-
-<h2>
-📋 Treasury Records
-</h2>
-
-
-
-
-<div style="overflow-x:auto">
-
-
-<table>
-
-
-<thead>
-
-
-<tr>
-
-
-<th>
-Type
-</th>
-
-
-<th>
-Details
-</th>
-
-
-<th>
-Amount
-</th>
-
-
-<th>
-Action
-</th>
-
-
-
-</tr>
-
-
-</thead>
-
-
-
-<tbody id="records">
-
-
-<tr>
-
-
-<td colspan="4">
-
-No records available.
-
-</td>
-
-
-</tr>
-
-
-</tbody>
-
-
-
-</table>
-
-
-</div>
-
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- AUDIT -->
-
-
-<section class="panel" id="audit">
-
-
-<h2>
-📝 Audit Trail
-</h2>
-
-
-
-
-<div id="auditContainer">
-
-
-<p>
-
-No activity recorded.
-
-</p>
-
-
-
-</div>
-
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<footer>
-
-
-<p>
-
-© 2026 Dalubwikaan Treasury System
-
-</p>
-
-
-</footer>
-
-
-
-
-
-</main>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<script src="js/theme.js"></script>
-
-
-<script type="module" src="js/admin.js"></script>
-
-
+    <!-- Admin Functions -->
+    <script type="module" src="js/admin.js"></script>
 
 </body>
 
