@@ -444,3 +444,426 @@ border-radius:20px;
 box-shadow:0 8px 20px rgba(0,0,0,.08);
 
 }
+/* =================================
+   PROJECT TRANSPARENCY PAGE
+================================= */
+
+
+.project-grid{
+
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:25px;
+    width:100%;
+
+}
+
+
+
+.project-card{
+
+    background:white;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+    transition:.3s;
+    border-top:5px solid #c89b3c;
+
+}
+
+
+
+.project-card:hover{
+
+    transform:translateY(-8px);
+
+}
+
+
+
+.project-card h2{
+
+    color:#3b2415;
+    margin-bottom:15px;
+    font-size:22px;
+
+}
+
+
+
+.project-card h3{
+
+    color:#c08a18;
+    margin-bottom:10px;
+
+}
+
+
+
+.project-card p{
+
+    color:#666;
+    line-height:1.6;
+
+}
+
+
+
+.status{
+
+    display:inline-block;
+    margin-top:20px;
+    padding:8px 18px;
+    border-radius:50px;
+    background:#3b2415;
+    color:white;
+    font-size:13px;
+    font-weight:600;
+
+}
+
+
+
+
+
+
+
+/* =================================
+   LOGIN PAGE
+================================= */
+
+
+.login-box{
+
+
+    width:400px;
+    background:white;
+    padding:40px;
+    border-radius:25px;
+    box-shadow:0 15px 40px rgba(0,0,0,.15);
+
+    
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+
+
+    text-align:center;
+
+
+}
+
+
+
+.login-box h1{
+
+
+    color:#3b2415;
+    margin-bottom:10px;
+
+
+}
+
+
+
+.login-box p{
+
+
+    color:#777;
+    margin-bottom:25px;
+
+
+}
+
+
+
+.login-box input{
+
+
+    width:100%;
+    padding:14px;
+    margin-bottom:15px;
+
+    border:1px solid #ddd;
+    border-radius:12px;
+
+    font-size:15px;
+
+
+}
+
+
+
+.login-box button{
+
+
+    width:100%;
+    padding:14px;
+
+    border:none;
+    border-radius:12px;
+
+    background:#3b2415;
+    color:white;
+
+    font-size:16px;
+    font-weight:600;
+
+    cursor:pointer;
+    transition:.3s;
+
+
+}
+
+
+
+.login-box button:hover{
+
+
+    background:#c89b3c;
+    color:#3b2415;
+
+
+}
+
+
+
+
+
+
+/* =================================
+   CHARTS
+================================= */
+
+
+.chart-container{
+
+
+    background:white;
+
+    padding:25px;
+
+    border-radius:20px;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+
+
+}
+
+
+
+
+
+
+/* =================================
+   FORM DESIGN
+================================= */
+
+
+form{
+
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+
+}
+
+
+
+form label{
+
+    font-weight:600;
+    color:#3b2415;
+
+}
+
+
+
+form input,
+form select,
+form textarea{
+
+
+    padding:13px;
+
+    border-radius:12px;
+
+    border:1px solid #ddd;
+
+    font-size:15px;
+
+
+}
+
+
+
+form textarea{
+
+    min-height:120px;
+    resize:none;
+
+}
+
+
+
+form button{
+
+
+    padding:14px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#3b2415;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+    transition:.3s;
+
+
+}
+
+
+
+form button:hover{
+
+
+    background:#c89b3c;
+
+    color:#3b2415;
+
+
+}
+
+
+
+
+
+
+/* =================================
+   DARK MODE SUPPORT
+================================= */
+
+
+.dark{
+
+
+    background:#121212;
+    color:white;
+
+
+}
+
+
+
+.dark .card,
+.dark .panel,
+.dark .project-card,
+.dark .chart-container,
+.dark .login-box{
+
+
+    background:#1f1f1f;
+    color:white;
+
+
+}
+
+
+
+.dark h1,
+.dark h2,
+.dark h3{
+
+
+    color:white;
+
+}
+
+
+
+.dark p{
+
+    color:#ccc;
+
+}
+
+
+
+
+
+
+/* =================================
+   MOBILE RESPONSIVE
+================================= */
+
+
+@media(max-width:1000px){
+
+
+.project-grid{
+
+    grid-template-columns:repeat(2,1fr);
+
+}
+
+
+}
+
+
+
+
+
+@media(max-width:700px){
+
+
+.dashboard{
+
+    display:block;
+
+}
+
+
+
+.sidebar{
+
+    width:100%;
+    height:auto;
+    position:relative;
+
+}
+
+
+
+.main{
+
+    margin-left:0;
+    width:100%;
+    padding:20px;
+
+}
+
+
+
+.project-grid{
+
+    grid-template-columns:1fr;
+
+}
+
+
+
+.login-box{
+
+    width:90%;
+
+}
+
+
+}
