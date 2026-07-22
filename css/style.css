@@ -1,7 +1,7 @@
 /* =========================================
 DALUBWIKAAN TREASURY SYSTEM
-STYLE VERSION 6.0
-POLISHED UI
+STYLE VERSION 7.0
+PREMIUM POLISHED UI
 ========================================= */
 
 
@@ -10,37 +10,28 @@ RESET
 ========================= */
 
 *{
-
     margin:0;
     padding:0;
     box-sizing:border-box;
     font-family:'Poppins',sans-serif;
-
 }
-
 
 
 html{
-
     scroll-behavior:smooth;
-
 }
-
 
 
 
 :root{
 
-
     --primary:#3b2415;
-
-    --primary-light:#5b3820;
+    --primary-light:#6b4226;
 
     --gold:#c89b3c;
+    --gold-light:#f1d27a;
 
-    --gold-light:#e7c66a;
-
-    --cream:#f6f2ea;
+    --cream:#f7f1e6;
 
     --white:#ffffff;
 
@@ -49,15 +40,13 @@ html{
     --gray:#777;
 
     --success:#198754;
-
     --danger:#b02a37;
-
     --info:#0d6efd;
 
+    --shadow:
+    0 10px 30px rgba(0,0,0,.08);
 
 }
-
-
 
 
 
@@ -69,41 +58,31 @@ BODY
 
 body{
 
-
     background:var(--cream);
 
     color:var(--text);
 
-    transition:.3s ease;
-
+    transition:.35s ease;
 
 }
-
-
 
 
 
 a{
 
-
     text-decoration:none;
 
     color:inherit;
 
-
 }
-
 
 
 
 button{
 
-
     font-family:inherit;
 
-
 }
-
 
 
 
@@ -111,20 +90,17 @@ button{
 
 
 /* =========================
-DASHBOARD LAYOUT
+LAYOUT
 ========================= */
 
 
 .dashboard{
 
-
     display:flex;
 
     min-height:100vh;
 
-
 }
-
 
 
 
@@ -136,7 +112,6 @@ SIDEBAR
 
 
 .sidebar{
-
 
     width:270px;
 
@@ -154,7 +129,7 @@ SIDEBAR
     linear-gradient(
         180deg,
         #3b2415,
-        #241508
+        #1f1208
     );
 
 
@@ -165,26 +140,50 @@ SIDEBAR
 
     box-shadow:
 
-    8px 0 25px rgba(0,0,0,.15);
+    8px 0 30px rgba(0,0,0,.2);
 
 
     z-index:100;
-
 
 
 }
 
 
 
-
 .sidebar h2{
 
-
-    font-size:26px;
+    font-size:27px;
 
     font-weight:700;
 
-    margin-bottom:8px;
+    letter-spacing:.5px;
+
+}
+
+
+
+.sidebar h2::after{
+
+
+    content:"";
+
+
+    display:block;
+
+
+    width:70px;
+
+
+    height:4px;
+
+
+    margin-top:12px;
+
+
+    background:var(--gold);
+
+
+    border-radius:50px;
 
 
 }
@@ -195,11 +194,16 @@ SIDEBAR
 .sidebar p{
 
 
-    color:#d9c29b;
+    margin-top:15px;
 
-    font-size:14px;
 
     margin-bottom:40px;
+
+
+    color:#dbc69d;
+
+
+    font-size:14px;
 
 
 }
@@ -213,12 +217,15 @@ SIDEBAR
 
     display:flex;
 
+
     align-items:center;
 
-    gap:10px;
+
+    gap:12px;
 
 
     padding:15px 18px;
+
 
     margin-bottom:12px;
 
@@ -226,13 +233,14 @@ SIDEBAR
     border-radius:15px;
 
 
+    transition:.3s ease;
+
+
     color:white;
 
 
-    transition:.3s;
-
-
 }
+
 
 
 
@@ -253,12 +261,14 @@ SIDEBAR
     color:var(--primary);
 
 
-    transform:translateX(8px);
+    transform:
+
+    translateX(8px);
 
 
     box-shadow:
 
-    0 8px 20px rgba(200,155,60,.3);
+    0 10px 25px rgba(200,155,60,.3);
 
 
 }
@@ -271,7 +281,7 @@ SIDEBAR
 
 
 /* =========================
-MAIN AREA
+MAIN CONTENT
 ========================= */
 
 
@@ -296,13 +306,14 @@ MAIN AREA
 
 
 
-
 header{
 
 
     display:flex;
 
+
     justify-content:space-between;
+
 
     align-items:center;
 
@@ -320,7 +331,9 @@ header h1{
 
     color:var(--primary);
 
+
     font-size:34px;
+
 
     font-weight:700;
 
@@ -330,12 +343,14 @@ header h1{
 
 
 
+
 header p{
 
 
-    color:var(--gray);
-
     margin-top:8px;
+
+
+    color:var(--gray);
 
 
 }
@@ -344,13 +359,13 @@ header p{
 
 
 
-
 #themeToggle{
 
 
-    width:48px;
+    width:50px;
 
-    height:48px;
+
+    height:50px;
 
 
     border-radius:50%;
@@ -363,6 +378,7 @@ header p{
 
 
     background:var(--primary);
+
 
     color:white;
 
@@ -377,14 +393,17 @@ header p{
 
 
 
+
 #themeToggle:hover{
 
 
     background:var(--gold);
 
+
     color:var(--primary);
 
-    transform:rotate(20deg);
+
+    transform:rotate(25deg) scale(1.1);
 
 
 }
@@ -395,7 +414,6 @@ SUMMARY CARDS
 
 .cards{
 
-
     display:grid;
 
     grid-template-columns:
@@ -405,8 +423,8 @@ SUMMARY CARDS
 
     margin-bottom:35px;
 
-
 }
+
 
 
 
@@ -414,18 +432,16 @@ SUMMARY CARDS
 .card{
 
 
-    background:white;
+    background:var(--white);
 
 
-    padding:28px;
+    padding:30px;
 
 
     border-radius:25px;
 
 
-    box-shadow:
-
-    0 10px 30px rgba(0,0,0,.08);
+    box-shadow:var(--shadow);
 
 
     border-left:
@@ -439,10 +455,11 @@ SUMMARY CARDS
     overflow:hidden;
 
 
-    transition:.35s;
+    transition:.35s ease;
 
 
 }
+
 
 
 
@@ -456,9 +473,16 @@ SUMMARY CARDS
     position:absolute;
 
 
-    width:90px;
+    width:120px;
 
-    height:90px;
+
+    height:120px;
+
+
+    right:-40px;
+
+
+    top:-40px;
 
 
     background:
@@ -467,11 +491,6 @@ SUMMARY CARDS
 
 
     border-radius:50%;
-
-
-    right:-30px;
-
-    top:-30px;
 
 
 }
@@ -490,7 +509,7 @@ SUMMARY CARDS
 
     box-shadow:
 
-    0 18px 40px rgba(0,0,0,.15);
+    0 20px 45px rgba(0,0,0,.15);
 
 
 }
@@ -499,14 +518,13 @@ SUMMARY CARDS
 
 
 
-
 .card h3{
 
 
-    color:#777;
-
-
     font-size:15px;
+
+
+    color:var(--gray);
 
 
 }
@@ -542,7 +560,7 @@ PANELS
 .panel{
 
 
-    background:white;
+    background:var(--white);
 
 
     padding:35px;
@@ -554,13 +572,10 @@ PANELS
     margin-bottom:35px;
 
 
-    box-shadow:
-
-    0 10px 30px rgba(0,0,0,.08);
+    box-shadow:var(--shadow);
 
 
 }
-
 
 
 
@@ -571,10 +586,10 @@ PANELS
     color:var(--primary);
 
 
-    margin-bottom:25px;
-
-
     font-size:25px;
+
+
+    margin-bottom:25px;
 
 
 }
@@ -585,8 +600,9 @@ PANELS
 
 
 
+
 /* =========================
-YEAR COLLECTION CARDS
+YEAR COLLECTION
 ========================= */
 
 
@@ -609,7 +625,6 @@ YEAR COLLECTION CARDS
 
 
 
-
 .year{
 
 
@@ -617,20 +632,36 @@ YEAR COLLECTION CARDS
 
     linear-gradient(
         145deg,
-        #fff,
-        #faf4e8
+        #ffffff,
+        #faf2df
     );
 
 
     padding:25px;
 
 
-    border-radius:20px;
+    border-radius:22px;
 
 
     box-shadow:
 
-    0 8px 20px rgba(0,0,0,.06);
+    0 8px 25px rgba(0,0,0,.07);
+
+
+    transition:.3s;
+
+
+}
+
+
+
+
+.year:hover{
+
+
+    transform:
+
+    translateY(-7px);
 
 
 }
@@ -650,11 +681,7 @@ YEAR COLLECTION CARDS
     color:var(--gold);
 
 
-    margin:15px 0;
-
-
 }
-
 
 
 
@@ -679,10 +706,8 @@ table{
     overflow:hidden;
 
 
-    border-radius:15px;
-
-
 }
+
 
 
 
@@ -690,7 +715,13 @@ table{
 thead{
 
 
-    background:var(--primary);
+    background:
+
+    linear-gradient(
+        135deg,
+        var(--primary),
+        var(--primary-light)
+    );
 
 
 }
@@ -701,16 +732,16 @@ thead{
 th{
 
 
+    padding:17px;
+
+
     color:white;
 
 
-    padding:16px;
+    text-align:left;
 
 
     font-size:14px;
-
-
-    text-align:left;
 
 
 }
@@ -718,10 +749,11 @@ th{
 
 
 
+
 td{
 
 
-    padding:16px;
+    padding:17px;
 
 
     border-bottom:
@@ -734,6 +766,7 @@ td{
 
 
 
+
 tbody tr{
 
 
@@ -741,6 +774,7 @@ tbody tr{
 
 
 }
+
 
 
 
@@ -762,8 +796,10 @@ tbody tr:hover{
 
 
 
-
 .verified{
+
+
+    display:inline-block;
 
 
     background:#d1f7dc;
@@ -772,7 +808,7 @@ tbody tr:hover{
     color:#146c43;
 
 
-    padding:6px 14px;
+    padding:7px 15px;
 
 
     border-radius:50px;
@@ -792,84 +828,9 @@ tbody tr:hover{
 
 
 
-/* =========================
-BUTTONS
-========================= */
-
-
-button,
-.view-btn{
-
-
-    background:
-
-    linear-gradient(
-        135deg,
-        var(--primary),
-        var(--primary-light)
-    );
-
-
-    color:white;
-
-
-    padding:13px 22px;
-
-
-    border:none;
-
-
-    border-radius:14px;
-
-
-    cursor:pointer;
-
-
-    transition:.3s;
-
-
-    font-weight:600;
-
-
-}
-
-
-
-
-
-
-button:hover,
-.view-btn:hover{
-
-
-    background:
-
-    linear-gradient(
-        135deg,
-        var(--gold),
-        var(--gold-light)
-    );
-
-
-    color:var(--primary);
-
-
-    transform:
-
-    translateY(-3px);
-
-
-}
-
-
-
-
-
-
-
 
 /* =========================
-PROJECT CARDS
+PROJECT GRID
 ========================= */
 
 
@@ -903,12 +864,7 @@ PROJECT CARDS
     padding:30px;
 
 
-    border-radius:25px;
-
-
-    box-shadow:
-
-    0 10px 30px rgba(0,0,0,.08);
+    border-radius:28px;
 
 
     border-top:
@@ -916,10 +872,55 @@ PROJECT CARDS
     6px solid var(--gold);
 
 
+    box-shadow:var(--shadow);
+
+
     transition:.35s;
 
 
+    position:relative;
+
+
+    overflow:hidden;
+
+
 }
+
+
+
+
+
+.project-card::before{
+
+
+    content:"";
+
+
+    position:absolute;
+
+
+    width:100px;
+
+
+    height:100px;
+
+
+    background:
+
+    rgba(200,155,60,.12);
+
+
+    border-radius:50%;
+
+
+    right:-30px;
+
+
+    top:-30px;
+
+
+}
+
 
 
 
@@ -929,15 +930,16 @@ PROJECT CARDS
 
     transform:
 
-    translateY(-8px);
+    translateY(-10px);
 
 
     box-shadow:
 
-    0 18px 40px rgba(0,0,0,.15);
+    0 20px 45px rgba(0,0,0,.15);
 
 
 }
+
 
 
 
@@ -961,144 +963,20 @@ PROJECT CARDS
 
 
 /* =========================
-RECEIPT DESIGN
-========================= */
-
-
-.expense-card{
-
-
-    background:white;
-
-
-    padding:25px;
-
-
-    border-radius:25px;
-
-
-    margin-bottom:20px;
-
-
-    box-shadow:
-
-    0 8px 25px rgba(0,0,0,.08);
-
-
-    border-left:
-
-    5px solid var(--gold);
-
-
-}
-
-
-
-
-.expense-card h3{
-
-
-    color:var(--primary);
-
-
-    margin-bottom:15px;
-
-
-}
-
-
-
-
-
-.receipt-box{
-
-
-    margin-top:20px;
-
-
-    background:#faf7f0;
-
-
-    padding:20px;
-
-
-    border-radius:20px;
-
-
-    text-align:center;
-
-
-}
-
-
-
-
-
-.receipt-image{
-
-
-    width:100%;
-
-
-    max-width:350px;
-
-
-    border-radius:15px;
-
-
-    box-shadow:
-
-    0 8px 20px rgba(0,0,0,.15);
-
-
-    transition:.3s;
-
-
-}
-
-
-
-
-
-.receipt-image:hover{
-
-
-    transform:scale(1.05);
-
-
-}
-
-
-
-
-
-
-.receipt-btn{
-
-
-    display:inline-block;
-
-
-    margin-top:15px;
-
-
-}
-
-
-
-
-
-
-
-/* =========================
-STATUS BADGES
+PROJECT STATUS BADGES
 ========================= */
 
 
 .status{
 
 
-    display:inline-block;
+    display:inline-flex;
+
+
+    align-items:center;
+
+
+    gap:6px;
 
 
     padding:8px 18px;
@@ -1113,10 +991,11 @@ STATUS BADGES
     font-weight:600;
 
 
-    margin:10px 0;
+    margin:12px 0;
 
 
 }
+
 
 
 
@@ -1150,6 +1029,7 @@ STATUS BADGES
 
 
 
+
 .status.planning{
 
 
@@ -1160,6 +1040,14 @@ STATUS BADGES
 
 
 }
+
+
+
+
+
+
+
+
 /* =========================
 PROJECT PROGRESS BAR
 ========================= */
@@ -1171,13 +1059,13 @@ PROJECT PROGRESS BAR
     margin-top:25px;
 
 
-    background:#faf7f0;
+    background:#faf5eb;
 
 
-    padding:18px;
+    padding:20px;
 
 
-    border-radius:20px;
+    border-radius:22px;
 
 
 }
@@ -1191,7 +1079,7 @@ PROJECT PROGRESS BAR
     display:block;
 
 
-    margin-top:10px;
+    margin-top:12px;
 
 
     color:#777;
@@ -1205,15 +1093,13 @@ PROJECT PROGRESS BAR
 
 
 
-
-
 .progress-bar{
 
 
     width:100%;
 
 
-    height:16px;
+    height:18px;
 
 
     background:#ddd;
@@ -1237,16 +1123,16 @@ PROJECT PROGRESS BAR
     height:100%;
 
 
+    border-radius:50px;
+
+
     background:
 
     linear-gradient(
         90deg,
         var(--gold),
-        #f3d98b
+        var(--gold-light)
     );
-
-
-    border-radius:50px;
 
 
     transition:
@@ -1262,7 +1148,6 @@ PROJECT PROGRESS BAR
 
 
 
-
 .progress-fill::after{
 
 
@@ -1272,16 +1157,10 @@ PROJECT PROGRESS BAR
     position:absolute;
 
 
-    top:0;
-
-
-    left:0;
+    inset:0;
 
 
     width:40%;
-
-
-    height:100%;
 
 
     background:
@@ -1291,7 +1170,7 @@ PROJECT PROGRESS BAR
 
     animation:
 
-    progressMove 2s infinite;
+    shine 2s infinite;
 
 
 }
@@ -1299,12 +1178,14 @@ PROJECT PROGRESS BAR
 
 
 
-@keyframes progressMove{
+
+
+@keyframes shine{
 
 
     from{
 
-        transform:translateX(-120%);
+        transform:translateX(-150%);
 
     }
 
@@ -1325,7 +1206,6 @@ PROJECT PROGRESS BAR
 
 
 
-
 /* =========================
 FINANCIAL STATUS
 ========================= */
@@ -1334,7 +1214,7 @@ FINANCIAL STATUS
 .success-status{
 
 
-    color:#198754;
+    color:var(--success);
 
 
     font-weight:700;
@@ -1348,7 +1228,7 @@ FINANCIAL STATUS
 .danger-status{
 
 
-    color:#b02a37;
+    color:var(--danger);
 
 
     font-weight:700;
@@ -1364,7 +1244,664 @@ FINANCIAL STATUS
 
 
 /* =========================
-CHART CONTAINER
+BUTTON STYLE
+========================= */
+
+
+button,
+.view-btn,
+.receipt-btn{
+
+
+    background:
+
+    linear-gradient(
+        135deg,
+        var(--primary),
+        var(--primary-light)
+    );
+
+
+    color:white;
+
+
+    padding:13px 22px;
+
+
+    border:none;
+
+
+    border-radius:14px;
+
+
+    cursor:pointer;
+
+
+    transition:.3s;
+
+
+    font-weight:600;
+
+
+    display:inline-block;
+
+
+}
+
+
+
+
+button:hover,
+.view-btn:hover,
+.receipt-btn:hover{
+
+
+    background:
+
+    linear-gradient(
+        135deg,
+        var(--gold),
+        var(--gold-light)
+    );
+
+
+    color:var(--primary);
+
+
+    transform:
+
+    translateY(-3px);
+
+
+}
+/* =========================
+EXPENSE CARD DESIGN
+========================= */
+
+
+.expense-card{
+
+
+    background:white;
+
+
+    padding:28px;
+
+
+    border-radius:25px;
+
+
+    margin-bottom:22px;
+
+
+    border-left:
+
+    6px solid var(--gold);
+
+
+    box-shadow:var(--shadow);
+
+
+    transition:.3s;
+
+
+}
+
+
+
+
+
+.expense-card:hover{
+
+
+    transform:
+
+    translateY(-6px);
+
+
+    box-shadow:
+
+    0 18px 35px rgba(0,0,0,.15);
+
+
+}
+
+
+
+
+.expense-header{
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+    gap:10px;
+
+
+    font-size:20px;
+
+
+    color:var(--primary);
+
+
+    margin-bottom:18px;
+
+
+}
+
+
+
+
+
+.expense-body p{
+
+
+    margin-bottom:12px;
+
+
+    line-height:1.6;
+
+
+}
+
+
+
+
+
+
+
+/* =========================
+RECEIPT PREVIEW SYSTEM
+========================= */
+
+
+.receipt-preview-card{
+
+
+    margin-top:20px;
+
+
+    background:
+
+    linear-gradient(
+        145deg,
+        #fff,
+        #faf3e3
+    );
+
+
+    padding:25px;
+
+
+    border-radius:25px;
+
+
+    box-shadow:
+
+    0 10px 25px rgba(0,0,0,.08);
+
+
+    text-align:center;
+
+
+}
+
+
+
+
+
+.receipt-header{
+
+
+    font-size:20px;
+
+
+    font-weight:700;
+
+
+    color:var(--primary);
+
+
+    margin-bottom:20px;
+
+
+}
+
+
+
+
+
+.receipt-preview-image{
+
+
+    width:100%;
+
+
+    max-width:320px;
+
+
+    border-radius:18px;
+
+
+    box-shadow:
+
+    0 10px 25px rgba(0,0,0,.2);
+
+
+    transition:.3s;
+
+
+}
+
+
+
+
+
+.receipt-preview-image:hover{
+
+
+    transform:
+
+    scale(1.05);
+
+
+}
+
+
+
+
+
+
+
+.remove-receipt{
+
+
+    margin-top:18px;
+
+
+    background:
+
+    linear-gradient(
+        135deg,
+        #b02a37,
+        #dc3545
+    );
+
+
+}
+
+
+
+
+
+.remove-receipt:hover{
+
+
+    color:white;
+
+
+    background:#b02a37;
+
+
+}
+
+
+
+
+
+
+
+
+/* =========================
+RECEIPT VIEW BOX
+========================= */
+
+
+.receipt-box{
+
+
+    margin-top:20px;
+
+
+    background:#faf7f0;
+
+
+    padding:25px;
+
+
+    border-radius:22px;
+
+
+    text-align:center;
+
+
+}
+
+
+
+
+.receipt-image{
+
+
+    width:100%;
+
+
+    max-width:350px;
+
+
+    border-radius:18px;
+
+
+    box-shadow:
+
+    0 10px 25px rgba(0,0,0,.18);
+
+
+}
+
+
+
+
+
+.receipt-image:hover{
+
+
+    transform:scale(1.05);
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =========================
+ANNOUNCEMENT BOARD
+========================= */
+
+
+.announcement-card{
+
+
+    background:white;
+
+
+    padding:28px;
+
+
+    border-radius:25px;
+
+
+    margin-bottom:22px;
+
+
+    border-left:
+
+    6px solid var(--gold);
+
+
+    box-shadow:var(--shadow);
+
+
+    transition:.3s;
+
+
+}
+
+
+
+
+
+.announcement-card:hover{
+
+
+    transform:
+
+    translateY(-7px);
+
+
+}
+
+
+
+
+.announcement-card h3{
+
+
+    color:var(--primary);
+
+
+    margin-bottom:12px;
+
+
+    font-size:20px;
+
+
+}
+
+
+
+
+
+.announcement-card p{
+
+
+    color:#555;
+
+
+    line-height:1.7;
+
+
+}
+
+
+
+
+
+.announcement-card small{
+
+
+    display:block;
+
+
+    margin-top:15px;
+
+
+    color:#888;
+
+
+}
+
+
+
+
+
+
+
+
+/* =========================
+EMPTY STATE
+========================= */
+
+
+.empty-state{
+
+
+    background:white;
+
+
+    padding:45px;
+
+
+    border-radius:25px;
+
+
+    text-align:center;
+
+
+    color:#777;
+
+
+    box-shadow:var(--shadow);
+
+
+    font-size:18px;
+
+
+}
+
+
+
+
+
+
+
+
+/* =========================
+FORM DESIGN
+========================= */
+
+
+input,
+select,
+textarea{
+
+
+    width:100%;
+
+
+    padding:15px 18px;
+
+
+    margin-bottom:18px;
+
+
+    border-radius:15px;
+
+
+    border:
+
+    1px solid #ddd;
+
+
+    outline:none;
+
+
+    background:white;
+
+
+    transition:.3s;
+
+
+    font-size:14px;
+
+
+}
+
+
+
+
+input:focus,
+select:focus,
+textarea:focus{
+
+
+    border-color:var(--gold);
+
+
+    box-shadow:
+
+    0 0 15px rgba(200,155,60,.25);
+
+
+}
+
+
+
+
+
+textarea{
+
+
+    resize:none;
+
+
+    min-height:120px;
+
+
+}
+
+
+
+
+
+
+
+/* =========================
+SEARCH BAR
+========================= */
+
+
+#searchRecord{
+
+
+    width:100%;
+
+
+    max-width:450px;
+
+
+    padding:16px 22px;
+
+
+    border-radius:50px;
+
+
+    border:
+
+    1px solid #ddd;
+
+
+    margin-bottom:25px;
+
+
+    outline:none;
+
+
+}
+
+
+
+
+
+#searchRecord:focus{
+
+
+    border-color:var(--gold);
+
+
+    box-shadow:
+
+    0 0 15px rgba(200,155,60,.25);
+
+
+}
+
+
+
+
+
+
+
+/* =========================
+CHART AREA
 ========================= */
 
 
@@ -1380,139 +1917,13 @@ CHART CONTAINER
     border-radius:25px;
 
 
-    box-shadow:
-
-    0 10px 30px rgba(0,0,0,.08);
+    box-shadow:var(--shadow);
 
 
     margin-bottom:30px;
 
 
 }
-
-
-
-
-
-
-
-
-/* =========================
-LOGIN PAGE
-========================= */
-
-
-.login-box{
-
-
-    width:420px;
-
-
-    background:white;
-
-
-    padding:45px;
-
-
-    border-radius:30px;
-
-
-    box-shadow:
-
-    0 20px 50px rgba(0,0,0,.15);
-
-
-    position:absolute;
-
-
-    top:50%;
-
-
-    left:50%;
-
-
-    transform:
-
-    translate(-50%,-50%);
-
-
-}
-
-
-
-
-
-.login-box h1{
-
-
-    color:var(--primary);
-
-
-    text-align:center;
-
-
-    margin-bottom:25px;
-
-
-}
-
-
-
-
-
-.login-box input,
-
-
-.login-box button{
-
-
-    width:100%;
-
-
-    padding:15px;
-
-
-    margin-bottom:18px;
-
-
-    border-radius:15px;
-
-
-}
-
-
-
-
-
-
-.login-box input{
-
-
-    border:1px solid #ddd;
-
-
-    outline:none;
-
-
-}
-
-
-
-
-
-.login-box input:focus{
-
-
-    border-color:var(--gold);
-
-
-    box-shadow:
-
-    0 0 10px rgba(200,155,60,.3);
-
-
-}
-
 
 
 
@@ -1540,11 +1951,8 @@ LOADER
     linear-gradient(
         135deg,
         #3b2415,
-        #241508
+        #1f1208
     );
-
-
-    color:white;
 
 
     display:flex;
@@ -1559,28 +1967,13 @@ LOADER
     flex-direction:column;
 
 
+    color:white;
+
+
     z-index:9999;
 
 
 }
-
-
-
-
-
-
-#loader p{
-
-
-    margin-top:20px;
-
-
-    font-size:18px;
-
-
-}
-
-
 
 
 
@@ -1616,6 +2009,19 @@ LOADER
 
 
 
+#loader p{
+
+
+    margin-top:20px;
+
+
+    font-size:18px;
+
+
+}
+
+
+
 
 @keyframes spin{
 
@@ -1628,18 +2034,8 @@ LOADER
 
 
 }
-
-
-
-
-
-
-
-
 /* =========================
-DARK MODE FIX
-IMPORTANT:
-JS USES .dark
+DARK MODE SYSTEM
 ========================= */
 
 
@@ -1647,7 +2043,6 @@ body.dark{
 
 
     background:#121212;
-
 
     color:white;
 
@@ -1657,13 +2052,17 @@ body.dark{
 
 
 
+
 body.dark .card,
 body.dark .panel,
-body.dark .chart-container,
 body.dark .project-card,
 body.dark .expense-card,
+body.dark .announcement-card,
+body.dark .chart-container,
+body.dark .year,
+body.dark .empty-state,
 body.dark .login-box,
-body.dark .year{
+body.dark .receipt-preview-card{
 
 
     background:#1f1f1f;
@@ -1681,13 +2080,15 @@ body.dark .year{
 
 body.dark h1,
 body.dark h2,
-body.dark h3{
+body.dark h3,
+body.dark strong{
 
 
     color:white;
 
 
 }
+
 
 
 
@@ -1697,21 +2098,11 @@ body.dark p,
 body.dark small{
 
 
-    color:#ddd;
+    color:#d6d6d6;
 
 
 }
 
-
-
-
-body.dark table{
-
-
-    color:white;
-
-
-}
 
 
 
@@ -1728,7 +2119,7 @@ body.dark td{
 
 
 
-body.dark tr:hover{
+body.dark tbody tr:hover{
 
 
     background:#292929;
@@ -1740,271 +2131,13 @@ body.dark tr:hover{
 
 
 
-
-
-body.dark .progress-container{
-
-
-    background:#292929;
-
-
-}
-
-
-
-
-body.dark .receipt-box{
-
-
-    background:#292929;
-
-
-}
-/* =========================
-ANNOUNCEMENT BOARD
-========================= */
-
-
-.announcement-card{
-
-
-    background:white;
-
-
-    padding:25px;
-
-
-    border-radius:22px;
-
-
-    margin-bottom:20px;
-
-
-    border-left:
-
-    6px solid var(--gold);
-
-
-    box-shadow:
-
-    0 8px 25px rgba(0,0,0,.08);
-
-
-    transition:.3s;
-
-
-}
-
-
-
-
-.announcement-card:hover{
-
-
-    transform:
-
-    translateY(-5px);
-
-
-    box-shadow:
-
-    0 15px 35px rgba(0,0,0,.12);
-
-
-}
-
-
-
-
-.announcement-card h3{
-
-
-    color:var(--primary);
-
-
-    margin-bottom:12px;
-
-
-}
-
-
-
-
-
-.announcement-card p{
-
-
-    line-height:1.7;
-
-
-    color:#555;
-
-
-}
-
-
-
-
-
-.announcement-card small{
-
-
-    display:block;
-
-
-    margin-top:15px;
-
-
-    color:#888;
-
-
-}
-
-
-
-
-
-
-
-body.dark .announcement-card{
-
-
-    background:#1f1f1f;
-
-
-}
-
-
-
-
-
-
-
-/* =========================
-EMPTY STATE
-========================= */
-
-
-.empty-state{
-
-
-    background:white;
-
-
-    padding:40px;
-
-
-    border-radius:25px;
-
-
-    text-align:center;
-
-
-    color:#777;
-
-
-    box-shadow:
-
-    0 8px 25px rgba(0,0,0,.08);
-
-
-}
-
-
-
-
-.empty-state p{
-
-
-    font-size:18px;
-
-
-}
-
-
-
-
-
-
-
-body.dark .empty-state{
-
-
-    background:#1f1f1f;
-
-
-    color:white;
-
-
-}
-
-
-
-
-
-
-
-
-/* =========================
-SEARCH BAR
-========================= */
-
-
-#searchRecord{
-
-
-    width:100%;
-
-
-    max-width:400px;
-
-
-    padding:15px 20px;
-
-
-    border-radius:50px;
-
-
-    border:
-
-    1px solid #ddd;
-
-
-    outline:none;
-
-
-    margin-bottom:25px;
-
-
-    background:white;
-
-
-}
-
-
-
-
-
-#searchRecord:focus{
-
-
-    border-color:var(--gold);
-
-
-    box-shadow:
-
-    0 0 15px rgba(200,155,60,.25);
-
-
-}
-
-
-
-
+body.dark input,
+body.dark textarea,
+body.dark select,
 body.dark #searchRecord{
 
 
-    background:#1f1f1f;
+    background:#242424;
 
 
     color:white;
@@ -2015,6 +2148,108 @@ body.dark #searchRecord{
 
 }
 
+
+
+
+
+
+body.dark .progress-container,
+body.dark .receipt-box{
+
+
+    background:#292929;
+
+
+}
+
+
+
+
+
+body.dark .receipt-preview-card{
+
+
+    background:#242424;
+
+
+}
+
+
+
+
+
+body.dark .announcement-card p{
+
+
+    color:#ccc;
+
+
+}
+
+
+
+
+
+
+
+/* =========================
+LOGIN PAGE
+========================= */
+
+
+.login-box{
+
+
+    width:420px;
+
+
+    background:white;
+
+
+    padding:45px;
+
+
+    border-radius:30px;
+
+
+    box-shadow:
+
+    0 20px 50px rgba(0,0,0,.18);
+
+
+    position:absolute;
+
+
+    top:50%;
+
+
+    left:50%;
+
+
+    transform:
+
+    translate(-50%,-50%);
+
+
+}
+
+
+
+
+
+.login-box h1{
+
+
+    text-align:center;
+
+
+    color:var(--primary);
+
+
+    margin-bottom:30px;
+
+
+}
 
 
 
@@ -2037,6 +2272,8 @@ SCROLLBAR
 
 
 
+
+
 ::-webkit-scrollbar-track{
 
 
@@ -2044,6 +2281,8 @@ SCROLLBAR
 
 
 }
+
+
 
 
 
@@ -2058,7 +2297,7 @@ SCROLLBAR
     );
 
 
-    border-radius:20px;
+    border-radius:50px;
 
 
 }
@@ -2069,9 +2308,92 @@ SCROLLBAR
 
 
 
+/* =========================
+FADE ANIMATION
+========================= */
+
+
+.fade-in{
+
+
+    animation:
+
+    fadeIn .5s ease;
+
+
+}
+
+
+
+
+
+@keyframes fadeIn{
+
+
+    from{
+
+
+        opacity:0;
+
+
+        transform:
+
+        translateY(20px);
+
+
+    }
+
+
+
+    to{
+
+
+        opacity:1;
+
+
+        transform:
+
+        translateY(0);
+
+
+    }
+
+
+}
+
+
+
+
+
+
 
 /* =========================
-TABLET RESPONSIVE
+GLOBAL CARD ANIMATION
+========================= */
+
+
+.card,
+.panel,
+.project-card,
+.expense-card,
+.announcement-card{
+
+
+    animation:
+
+    fadeIn .5s ease;
+
+
+}
+
+
+
+
+
+
+
+/* =========================
+RESPONSIVE TABLET
 ========================= */
 
 
@@ -2117,18 +2439,15 @@ TABLET RESPONSIVE
 
 
 
+
 }
 
 
 
 
 
-
-
-
-
 /* =========================
-MOBILE RESPONSIVE
+MOBILE VERSION
 ========================= */
 
 
@@ -2143,7 +2462,6 @@ MOBILE RESPONSIVE
 
 
 }
-
 
 
 
@@ -2164,6 +2482,7 @@ MOBILE RESPONSIVE
 
 
 }
+
 
 
 
@@ -2198,7 +2517,6 @@ MOBILE RESPONSIVE
 
 
 
-
 header{
 
 
@@ -2220,7 +2538,7 @@ header{
 header h1{
 
 
-    font-size:26px;
+    font-size:25px;
 
 
 }
@@ -2232,7 +2550,9 @@ header h1{
 .cards{
 
 
-    grid-template-columns:1fr;
+    grid-template-columns:
+
+    1fr;
 
 
 }
@@ -2240,10 +2560,13 @@ header h1{
 
 
 
+
 .year-container{
 
 
-    grid-template-columns:1fr;
+    grid-template-columns:
+
+    1fr;
 
 
 }
@@ -2255,7 +2578,9 @@ header h1{
 .project-grid{
 
 
-    grid-template-columns:1fr;
+    grid-template-columns:
+
+    1fr;
 
 
 }
@@ -2267,10 +2592,11 @@ header h1{
 .panel{
 
 
-    padding:20px;
+    padding:22px;
 
 
 }
+
 
 
 
@@ -2293,7 +2619,8 @@ table{
 
 
 
-.project-card{
+.project-card,
+.expense-card{
 
 
     padding:22px;
@@ -2305,18 +2632,7 @@ table{
 
 
 
-.expense-card{
-
-
-    padding:20px;
-
-
-}
-
-
-
-
-
+.receipt-preview-image,
 .receipt-image{
 
 
@@ -2371,6 +2687,7 @@ header h1{
 
 
 
+
 .card h2{
 
 
@@ -2378,6 +2695,7 @@ header h1{
 
 
 }
+
 
 
 
@@ -2400,87 +2718,9 @@ header h1{
 
 
 
-
 /* =========================
-UTILITY ANIMATIONS
+FINAL DALUBWIKAAN TOUCH
 ========================= */
-
-
-.fade-in{
-
-
-    animation:
-
-    fade .5s ease;
-
-
-}
-
-
-
-
-
-@keyframes fade{
-
-
-    from{
-
-
-        opacity:0;
-
-
-        transform:
-
-        translateY(15px);
-
-
-    }
-
-
-
-    to{
-
-
-        opacity:1;
-
-
-        transform:
-
-        translateY(0);
-
-
-    }
-
-
-}
-
-
-
-
-
-
-
-
-/* =========================
-FINAL TOUCH
-========================= */
-
-
-.project-card,
-.expense-card,
-.card,
-.panel,
-.announcement-card{
-
-
-    animation:
-
-    fade .4s ease;
-
-
-}
-
-
 
 
 strong{
@@ -2490,6 +2730,7 @@ strong{
 
 
 }
+
 
 
 
@@ -2506,35 +2747,105 @@ body.dark strong{
 
 
 
+.project-card,
+.expense-card,
+.card,
+.panel,
+.announcement-card{
 
 
-/* =========================
-DALUBWIKAAN BRAND EFFECT
-========================= */
-
-
-.sidebar h2::after{
-
-
-    content:"";
-
-
-    display:block;
-
-
-    width:60px;
-
-
-    height:4px;
-
-
-    margin-top:10px;
-
-
-    background:var(--gold);
-
-
-    border-radius:20px;
+    cursor:pointer;
 
 
 }
+
+
+
+
+
+
+.project-card:hover,
+.expense-card:hover{
+
+
+    border-color:var(--gold);
+
+
+}
+
+
+
+
+
+
+
+/* GOLD HIGHLIGHT EFFECT */
+
+
+.gold-text{
+
+
+    color:var(--gold);
+
+
+    font-weight:700;
+
+
+}
+
+
+
+
+
+
+
+/* SUCCESS / DANGER LABELS */
+
+
+.success-status{
+
+
+    background:#d1f7dc;
+
+
+    padding:8px 15px;
+
+
+    border-radius:50px;
+
+
+    display:inline-block;
+
+
+}
+
+
+
+
+.danger-status{
+
+
+    background:#f8d7da;
+
+
+    padding:8px 15px;
+
+
+    border-radius:50px;
+
+
+    display:inline-block;
+
+
+}
+
+
+
+
+
+
+
+/* =========================
+END OF VERSION 7.0
+DALUBWIKAAN TREASURY UI
+========================= */
