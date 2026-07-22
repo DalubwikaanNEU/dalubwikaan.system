@@ -1,6 +1,7 @@
 // =================================
 // DALUBWIKAAN TREASURY DASHBOARD
 // FIREBASE REAL-TIME + ANALYTICS + PDF
+// POLISHED VERSION 3.0
 // =================================
 
 
@@ -10,7 +11,9 @@ import { db } from "./firebase.js";
 import {
 
 collection,
-onSnapshot
+onSnapshot,
+query,
+orderBy
 
 }
 
@@ -62,6 +65,52 @@ projects:[]
 
 
 
+// ===============================
+// HELPER FUNCTION
+// ===============================
+
+
+function setText(id,value){
+
+
+const el =
+document.getElementById(id);
+
+
+
+if(el){
+
+el.textContent=value;
+
+}
+
+
+}
+
+
+
+
+
+
+function peso(value){
+
+
+return "₱" +
+
+Number(value || 0)
+
+.toLocaleString();
+
+
+}
+
+
+
+
+
+
+
+
 
 // ===============================
 // COLLECTIONS
@@ -72,11 +121,23 @@ function loadCollections(){
 
 
 
-onSnapshot(
+const q = query(
 
 collection(db,"collections"),
 
+orderBy(
+"createdAt",
+"desc"
+)
 
+);
+
+
+
+
+onSnapshot(
+
+q,
 
 (snapshot)=>{
 
@@ -107,7 +168,9 @@ let yearTotals = {
 
 
 let table =
-document.getElementById("transactionTable");
+document.getElementById(
+"transactionTable"
+);
 
 
 
@@ -121,8 +184,6 @@ table.innerHTML="";
 
 
 
-
-
 let records=[];
 
 
@@ -130,28 +191,13 @@ let records=[];
 snapshot.forEach((doc)=>{
 
 
-let data = doc.data();
-
-
-
-records.push(data);
-
+records.push(
+doc.data()
+);
 
 
 });
 
-
-
-
-// latest first
-
-records.sort((a,b)=>{
-
-
-return new Date(b.date)-new Date(a.date);
-
-
-});
 
 
 
@@ -174,7 +220,10 @@ totalFunds += amount;
 
 
 
-if(yearTotals[data.year] !== undefined){
+if(
+yearTotals[data.year]
+!== undefined
+){
 
 yearTotals[data.year]+=amount;
 
@@ -211,7 +260,7 @@ ${data.year || "N/A"}
 
 <td>
 
-₱${amount.toLocaleString()}
+${peso(amount)}
 
 </td>
 
@@ -228,12 +277,11 @@ Completed
 </tr>
 
 
-
 `;
 
 
-}
 
+}
 
 
 
@@ -262,7 +310,10 @@ No collection records yet.
 
 `;
 
+
+
 }
+
 
 
 
@@ -285,16 +336,14 @@ yearTotals;
 
 
 
-// UPDATE DASHBOARD
-
-
 setText(
 
 "totalFunds",
 
-"₱"+totalFunds.toLocaleString()
+peso(totalFunds)
 
 );
+
 
 
 
@@ -303,7 +352,7 @@ setText(
 
 "firstYear",
 
-"₱"+yearTotals["First Year"].toLocaleString()
+peso(yearTotals["First Year"])
 
 );
 
@@ -313,7 +362,7 @@ setText(
 
 "secondYear",
 
-"₱"+yearTotals["Second Year"].toLocaleString()
+peso(yearTotals["Second Year"])
 
 );
 
@@ -323,7 +372,7 @@ setText(
 
 "thirdYear",
 
-"₱"+yearTotals["Third Year"].toLocaleString()
+peso(yearTotals["Third Year"])
 
 );
 
@@ -333,7 +382,7 @@ setText(
 
 "fourthYear",
 
-"₱"+yearTotals["Fourth Year"].toLocaleString()
+peso(yearTotals["Fourth Year"])
 
 );
 
@@ -359,10 +408,14 @@ hideLoader();
 }
 
 
-
 catch(error){
 
-console.log(error);
+
+console.error(
+"Collection Error:",
+error
+);
+
 
 }
 
@@ -374,40 +427,46 @@ console.log(error);
 );
 
 
+
 }
 
-
-
-
-
-
-
-
-
 // ===============================
-// PROJECTS + EXPENSES
+// PROJECTS
 // ===============================
 
 
 function loadProjects(){
 
 
+const q = query(
+
+collection(
+db,
+"projects"
+),
+
+orderBy(
+"createdAt",
+"desc"
+)
+
+);
+
+
+
 
 onSnapshot(
 
-collection(db,"projects"),
-
-
+q,
 
 (snapshot)=>{
 
 
-let expenses=0;
-
-
-
 let table =
-document.getElementById("projectTable");
+
+document.getElementById(
+"projectTable"
+);
 
 
 
@@ -425,20 +484,21 @@ reportData.projects=[];
 
 
 
-
-snapshot.forEach((doc)=>{
-
-
-let data=doc.data();
+snapshot.forEach(
+(docSnap)=>{
 
 
-
-let budget =
-Number(data.budget)||0;
+const data =
+docSnap.data();
 
 
 
-expenses += budget;
+const budget =
+
+Number(
+data.budget || 0
+);
+
 
 
 
@@ -450,6 +510,7 @@ reportData.projects.push(data);
 
 
 if(table){
+
 
 
 table.innerHTML += `
@@ -468,7 +529,7 @@ ${data.name || "Unnamed Project"}
 
 <td>
 
-₱${budget.toLocaleString()}
+${peso(budget)}
 
 </td>
 
@@ -476,7 +537,7 @@ ${data.name || "Unnamed Project"}
 
 <td>
 
-${data.description || ""}
+${data.description || "No description"}
 
 </td>
 
@@ -488,11 +549,14 @@ ${data.description || ""}
 
 `;
 
+
+
 }
 
 
 
 });
+
 
 
 
@@ -502,54 +566,36 @@ ${data.description || ""}
 if(snapshot.empty && table){
 
 
-table.innerHTML=`
+
+table.innerHTML = `
+
 
 <tr>
 
 <td colspan="3">
 
-No projects recorded.
+No projects available.
 
 </td>
 
 </tr>
 
+
 `;
+
+
 
 }
 
 
 
-
-window.currentExpenses =
-expenses;
-
-
-
-reportData.expenses =
-expenses;
-
-
-
-
-setText(
-
-"totalExpenses",
-
-"₱"+expenses.toLocaleString()
-
-);
-
-
-
-updateBalance();
 
 
 updateBudgetChart();
 
 
-}
 
+}
 
 );
 
@@ -565,28 +611,57 @@ updateBudgetChart();
 
 
 // ===============================
-// EXPENSE RECEIPTS
+// EXPENSE TRANSPARENCY
+// RECEIPTS
 // ===============================
+
 
 
 function loadExpenses(){
 
 
+
+const q = query(
+
+collection(
+db,
+"expenses"
+),
+
+orderBy(
+"createdAt",
+"desc"
+)
+
+);
+
+
+
+
+
 onSnapshot(
 
-collection(db,"expenses"),
-
-
+q,
 
 (snapshot)=>{
 
 
-let container =
-document.getElementById("expenseTable");
+
+const container =
+
+document.getElementById(
+"expensePreview"
+);
 
 
 
-if(!container)return;
+
+
+if(!container)
+
+return;
+
+
 
 
 
@@ -596,52 +671,402 @@ container.innerHTML="";
 
 
 
-snapshot.forEach((doc)=>{
+
+let totalExpenses = 0;
 
 
-let data=doc.data();
+
+
+
+
+
+snapshot.forEach(
+(docSnap)=>{
+
+
+
+const data =
+docSnap.data();
+
+
+
+const amount =
+
+Number(
+data.amount || 0
+);
+
+
+
+totalExpenses += amount;
+
+
+
+
+
+
+
+let receiptHTML = "";
+
+
+
+
+
+if(
+data.receipt
+){
+
+
+
+receiptHTML = `
+
+
+<div class="receipt-box">
+
+
+<img
+
+src="${data.receipt}"
+
+alt="Receipt"
+
+class="receipt-image"
+
+>
+
+
+
+<br>
+
+
+<a
+
+href="${data.receipt}"
+
+target="_blank"
+
+class="view-btn"
+
+>
+
+🧾 Open Receipt
+
+</a>
+
+
+</div>
+
+
+
+`;
+
+
+
+}
+
+else{
+
+
+receiptHTML = `
+
+
+<p>
+
+📄 No receipt uploaded.
+
+</p>
+
+
+`;
+
+
+
+}
+
+
+
+
 
 
 
 container.innerHTML += `
 
 
-<tr>
+<div class="expense-card">
 
 
-<td>
+<h3>
 
-${data.project}
+💸 ${data.project || "Unnamed Expense"}
 
-</td>
-
-
-
-<td>
-
-₱${Number(data.amount).toLocaleString()}
-
-</td>
+</h3>
 
 
 
-<td>
 
-<a href="${data.receipt}" target="_blank">
+<p>
 
-View Receipt
+<strong>
+Amount:
+</strong>
 
-</a>
+${peso(amount)}
 
-</td>
+</p>
 
 
 
-</tr>
+
+<p>
+
+${data.description || "No description"}
+
+</p>
+
+
+
+
+
+${receiptHTML}
+
+
+
+</div>
 
 
 
 `;
+
+
+
+
+});
+
+
+
+
+
+
+window.currentExpenses =
+totalExpenses;
+
+
+
+reportData.expenses =
+totalExpenses;
+
+
+
+
+setText(
+
+"totalExpenses",
+
+peso(totalExpenses)
+
+);
+
+
+
+updateBalance();
+
+
+
+updateBudgetChart();
+
+
+
+
+if(snapshot.empty){
+
+
+
+container.innerHTML = `
+
+
+<p>
+
+No expense records available.
+
+</p>
+
+
+`;
+
+
+
+}
+
+
+
+
+}
+
+);
+
+
+}
+
+
+// ===============================
+// ANNOUNCEMENT BOARD
+// ===============================
+
+
+
+function loadAnnouncements(){
+
+
+
+const container =
+
+document.getElementById(
+"announcementContainer"
+);
+
+
+
+
+
+if(!container)
+
+return;
+
+
+
+
+
+
+
+const q = query(
+
+collection(
+db,
+"announcements"
+),
+
+orderBy(
+"createdAt",
+"desc"
+)
+
+);
+
+
+
+
+
+
+
+onSnapshot(
+
+q,
+
+(snapshot)=>{
+
+
+
+
+
+if(snapshot.empty){
+
+
+
+container.innerHTML = `
+
+
+<div class="empty-state">
+
+
+<p>
+
+📢 No announcements yet.
+
+</p>
+
+
+</div>
+
+
+`;
+
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+
+container.innerHTML = "";
+
+
+
+
+
+snapshot.forEach(
+(docSnap)=>{
+
+
+
+const data =
+docSnap.data();
+
+
+
+
+
+
+container.innerHTML += `
+
+
+
+<div class="announcement-card">
+
+
+
+<h3>
+
+📢 ${data.title || "Announcement"}
+
+</h3>
+
+
+
+
+<p>
+
+${data.message || ""}
+
+</p>
+
+
+
+
+
+<small>
+
+Posted by:
+
+${data.user || "Administrator"}
+
+</small>
+
+
+
+</div>
+
+
+
+`;
+
+
 
 
 
@@ -650,6 +1075,7 @@ View Receipt
 
 
 }
+
 
 
 );
@@ -671,15 +1097,18 @@ View Receipt
 // ===============================
 
 
+
 function updateBalance(){
 
 
 
-let balance =
+const balance =
 
 window.totalFunds -
 
 window.currentExpenses;
+
+
 
 
 
@@ -688,11 +1117,13 @@ balance;
 
 
 
+
+
 setText(
 
 "remainingBalance",
 
-"₱"+balance.toLocaleString()
+peso(balance)
 
 );
 
@@ -709,84 +1140,125 @@ setText(
 
 
 // ===============================
-// SAFE TEXT UPDATE
+// PROGRESS BAR
 // ===============================
 
-
-function setText(id,value){
-
-
-let el =
-document.getElementById(id);
-
-
-
-if(el){
-
-el.innerHTML=value;
-
-}
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// PROGRESS
-// ===============================
 
 
 function updateProgress(data){
 
 
 
-let max=Math.max(
+const max = Math.max(
+
 
 data["First Year"],
 
+
 data["Second Year"],
+
 
 data["Third Year"],
 
+
 data["Fourth Year"]
+
+
 
 );
 
 
 
-if(max===0)return;
+
+
+if(max === 0)
+
+return;
 
 
 
 
-document.getElementById("firstProgress").style.width=
-
-(data["First Year"]/max*100)+"%";
 
 
-
-document.getElementById("secondProgress").style.width=
-
-(data["Second Year"]/max*100)+"%";
+const progress = {
 
 
+firstProgress:
 
-document.getElementById("thirdProgress").style.width=
-
-(data["Third Year"]/max*100)+"%";
+data["First Year"],
 
 
 
-document.getElementById("fourthProgress").style.width=
+secondProgress:
 
-(data["Fourth Year"]/max*100)+"%";
+data["Second Year"],
+
+
+
+thirdProgress:
+
+data["Third Year"],
+
+
+
+fourthProgress:
+
+data["Fourth Year"]
+
+
+};
+
+
+
+
+
+
+Object.keys(progress)
+
+.forEach(id=>{
+
+
+
+const element =
+
+document.getElementById(id);
+
+
+
+
+if(element){
+
+
+
+element.style.width =
+
+
+(
+progress[id]
+
+/
+
+max
+
+*
+
+100
+
+)
+
++
+
+"%";
+
+
+
+}
+
+
+
+});
+
+
 
 
 }
@@ -804,21 +1276,36 @@ document.getElementById("fourthProgress").style.width=
 // ===============================
 
 
+
 function createCollectionChart(data){
 
 
-let canvas =
-document.getElementById("collectionChart");
+
+const canvas =
+
+document.getElementById(
+"collectionChart"
+);
 
 
 
-if(!canvas)return;
+
+
+if(!canvas)
+
+return;
+
+
+
+
 
 
 
 if(collectionChart){
 
+
 collectionChart.destroy();
+
 
 }
 
@@ -826,10 +1313,18 @@ collectionChart.destroy();
 
 
 
-collectionChart=new Chart(canvas,{
+
+
+collectionChart = new Chart(
+
+canvas,
+
+{
 
 
 type:"bar",
+
+
 
 
 data:{
@@ -842,10 +1337,16 @@ labels:Object.keys(data),
 datasets:[{
 
 
-label:"Collected Funds",
+label:
+
+"Collected Funds",
 
 
-data:Object.values(data)
+
+data:
+
+Object.values(data)
+
 
 
 }]
@@ -855,16 +1356,24 @@ data:Object.values(data)
 
 
 
+
 options:{
 
 
 responsive:true
 
+
+
 }
 
 
 
-});
+}
+
+);
+
+
+
 
 
 }
@@ -878,26 +1387,40 @@ responsive:true
 
 
 // ===============================
-// PIE CHART
+// BUDGET CHART
 // ===============================
+
 
 
 function updateBudgetChart(){
 
 
 
-let canvas =
-document.getElementById("budgetChart");
+const canvas =
+
+document.getElementById(
+"budgetChart"
+);
 
 
 
-if(!canvas)return;
+
+
+if(!canvas)
+
+return;
+
+
+
+
 
 
 
 if(budgetChart){
 
+
 budgetChart.destroy();
+
 
 }
 
@@ -905,10 +1428,18 @@ budgetChart.destroy();
 
 
 
-budgetChart=new Chart(canvas,{
+
+
+budgetChart = new Chart(
+
+canvas,
+
+{
 
 
 type:"doughnut",
+
+
 
 
 data:{
@@ -924,19 +1455,26 @@ labels:[
 
 
 
+
 datasets:[{
+
 
 data:[
 
+
 window.currentExpenses,
+
 
 Math.max(
 
-window.totalFunds-window.currentExpenses,
+window.totalFunds -
+
+window.currentExpenses,
 
 0
 
 )
+
 
 ]
 
@@ -944,7 +1482,9 @@ window.totalFunds-window.currentExpenses,
 }]
 
 
+
 },
+
 
 
 
@@ -954,38 +1494,43 @@ options:{
 responsive:true
 
 
-}
-
-
-
-});
-
-
 
 }
 
 
 
+}
+
+);
 
 
 
 
+
+}
 
 
 // ===============================
-// PDF REPORT
+// PDF TREASURY REPORT
 // ===============================
 
 
-let button =
-document.getElementById("generateReport");
+
+const reportButton =
+
+document.getElementById(
+"generateReport"
+);
 
 
 
-if(button){
 
 
-button.onclick=()=>{
+if(reportButton){
+
+
+
+reportButton.onclick = ()=>{
 
 
 
@@ -998,18 +1543,25 @@ jsPDF
 
 
 
-let doc=new jsPDF();
+
+const pdf =
+
+new jsPDF();
 
 
 
-let y=20;
+
+let y = 20;
 
 
 
-doc.setFontSize(18);
 
 
-doc.text(
+pdf.setFontSize(18);
+
+
+
+pdf.text(
 
 "DALUBWIKAAN TREASURY REPORT",
 
@@ -1021,15 +1573,19 @@ y
 
 
 
-y+=15;
+
+
+y += 15;
 
 
 
-doc.setFontSize(12);
+
+
+pdf.setFontSize(12);
 
 
 
-doc.text(
+pdf.text(
 
 "Academic Year 2026-2027",
 
@@ -1041,66 +1597,23 @@ y
 
 
 
-y+=15;
 
 
-
-doc.text(
-
-"Generated: "+
-new Date().toLocaleDateString(),
-
-20,
-
-y
-
-);
+y += 15;
 
 
 
 
-y+=20;
 
+pdf.text(
 
+"Generated: "
 
-doc.text(
++
 
-"Total Funds: ₱"+
-reportData.funds.toLocaleString(),
+new Date()
 
-20,
-
-y
-
-);
-
-
-
-y+=10;
-
-
-
-doc.text(
-
-"Expenses: ₱"+
-reportData.expenses.toLocaleString(),
-
-20,
-
-y
-
-);
-
-
-
-y+=10;
-
-
-
-doc.text(
-
-"Balance: ₱"+
-reportData.remaining.toLocaleString(),
+.toLocaleDateString(),
 
 20,
 
@@ -1111,11 +1624,90 @@ y
 
 
 
-y+=20;
 
 
 
-doc.text(
+y += 20;
+
+
+
+
+
+pdf.text(
+
+"Total Funds: "
+
++
+
+peso(reportData.funds),
+
+20,
+
+y
+
+);
+
+
+
+
+
+y += 10;
+
+
+
+
+
+pdf.text(
+
+"Total Expenses: "
+
++
+
+peso(reportData.expenses),
+
+20,
+
+y
+
+);
+
+
+
+
+
+y += 10;
+
+
+
+
+
+pdf.text(
+
+"Remaining Balance: "
+
++
+
+peso(reportData.remaining),
+
+20,
+
+y
+
+);
+
+
+
+
+
+
+
+y += 20;
+
+
+
+
+
+pdf.text(
 
 "Projects:",
 
@@ -1127,19 +1719,25 @@ y
 
 
 
-y+=10;
+
+
+y += 10;
 
 
 
 
-reportData.projects.forEach(project=>{
 
 
-doc.text(
 
-project.name+
-" - ₱"+
-Number(project.budget).toLocaleString(),
+reportData.projects.forEach(
+
+(project)=>{
+
+
+
+pdf.text(
+
+`${project.name} - ${peso(project.budget)}`,
 
 20,
 
@@ -1148,7 +1746,10 @@ y
 );
 
 
-y+=10;
+
+
+
+y += 10;
 
 
 
@@ -1158,7 +1759,9 @@ y+=10;
 
 
 
-doc.save(
+
+
+pdf.save(
 
 "Dalubwikaan_Treasury_Report.pdf"
 
@@ -1169,6 +1772,7 @@ doc.save(
 };
 
 
+
 }
 
 
@@ -1180,22 +1784,34 @@ doc.save(
 
 
 // ===============================
-// LOADING
+// LOADER
 // ===============================
+
 
 
 function hideLoader(){
 
 
-let loader =
-document.getElementById("loader");
+
+const loader =
+
+document.getElementById(
+"loader"
+);
+
+
+
 
 
 if(loader){
 
+
+
 loader.style.display="none";
 
+
 }
+
 
 
 }
@@ -1209,18 +1825,267 @@ loader.style.display="none";
 
 
 // ===============================
-// START
+// THEME SYSTEM
 // ===============================
 
 
-window.onload = () => {
 
-    alert("Dashboard Loaded");
+const themeButton =
 
-    loadCollections();
+document.getElementById(
+"themeToggle"
+);
 
-    loadProjects();
 
-    loadExpenses();
+
+
+
+if(themeButton){
+
+
+
+const saved =
+
+localStorage.getItem(
+"theme"
+);
+
+
+
+
+
+if(saved === "dark"){
+
+
+
+document.body.classList.add(
+"dark"
+);
+
+
+
+themeButton.textContent =
+"☀";
+
+
+
+}
+
+
+
+
+
+
+themeButton.onclick = ()=>{
+
+
+
+document.body.classList.toggle(
+"dark"
+);
+
+
+
+
+
+
+const dark =
+
+document.body.classList.contains(
+"dark"
+);
+
+
+
+
+
+
+localStorage.setItem(
+
+"theme",
+
+dark
+
+?
+
+"dark"
+
+:
+
+"light"
+
+);
+
+
+
+
+
+themeButton.textContent =
+
+dark
+
+?
+
+"☀"
+
+:
+
+"🌙";
+
+
 
 };
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// SYSTEM START
+// ===============================
+
+
+
+window.addEventListener(
+
+"load",
+
+()=>{
+
+
+
+loadCollections();
+
+
+
+loadProjects();
+
+
+
+loadExpenses();
+
+
+
+loadAnnouncements();
+
+
+
+
+
+setTimeout(()=>{
+
+
+hideLoader();
+
+
+
+},800);
+
+
+
+}
+
+);
+
+
+
+
+
+
+
+
+
+// ===============================
+// GLOBAL ERROR HANDLER
+// ===============================
+
+
+
+window.addEventListener(
+
+"error",
+
+(event)=>{
+
+
+
+console.error(
+
+"Dashboard Error:",
+
+event.error
+
+);
+
+
+
+}
+
+);
+
+
+
+
+
+window.addEventListener(
+
+"unhandledrejection",
+
+(event)=>{
+
+
+
+console.error(
+
+"Promise Error:",
+
+event.reason
+
+);
+
+
+
+}
+
+);
+
+
+
+
+
+
+console.log(`
+
+=================================
+
+DALUBWIKAAN TREASURY DASHBOARD
+
+VERSION 3.0
+
+
+✓ Firebase Realtime
+
+✓ Announcement Board
+
+✓ Expense Receipt Preview
+
+✓ Analytics
+
+✓ PDF Report
+
+✓ Dark Mode
+
+
+SYSTEM READY
+
+=================================
+
+`);
