@@ -1,27 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
 
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 
 <title>
 Dalubwikaan Admin Treasury
 </title>
 
 
+
+
 <link rel="stylesheet" href="css/style.css">
 
 
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 
 
 </head>
 
 
 
+
+
+
 <body>
+
+
+
+
+
+
+
+<!-- LOADER -->
+
+<div id="loader">
+
+
+<div class="loader-circle"></div>
+
+
+<p>
+Loading Admin Panel...
+</p>
+
+
+</div>
+
+
+
+
+
+
 
 
 
@@ -31,19 +69,32 @@ Dalubwikaan Admin Treasury
 
 
 
+
+
+
 <!-- SIDEBAR -->
+
 
 <aside class="sidebar">
 
 
+
 <h2>
+
 📚 Dalubwikaan
+
 </h2>
 
 
+
 <p>
-Treasurer Panel
+
+Treasurer Control Panel
+
 </p>
+
+
+
 
 
 
@@ -51,11 +102,14 @@ Treasurer Panel
 <nav>
 
 
+
 <a href="index.html">
 
 🏠 Dashboard
 
 </a>
+
+
 
 
 
@@ -67,6 +121,32 @@ Treasurer Panel
 
 
 
+
+
+
+<a href="#records">
+
+📋 Records
+
+</a>
+
+
+
+
+
+
+<a href="#audit">
+
+📝 Audit Trail
+
+</a>
+
+
+
+
+
+
+
 <a id="logout">
 
 🚪 Logout
@@ -75,7 +155,12 @@ Treasurer Panel
 
 
 
+
 </nav>
+
+
+
+
 
 
 </aside>
@@ -88,9 +173,12 @@ Treasurer Panel
 
 
 
-<!-- MAIN CONTENT -->
+<!-- MAIN -->
+
 
 <main class="main">
+
+
 
 
 
@@ -99,19 +187,39 @@ Treasurer Panel
 <header>
 
 
+
 <div>
 
+
+
 <h1>
+
 Treasury Management
+
 </h1>
 
 
+
 <p>
-Manage collections, projects, and expenses
+
+Manage collections, projects, expenses, and reports
+
 </p>
 
 
+
 </div>
+
+
+
+
+
+<button id="themeToggle">
+
+🌙
+
+</button>
+
 
 
 
@@ -125,46 +233,224 @@ Manage collections, projects, and expenses
 
 
 
-<!-- ADD COLLECTION -->
+<!-- ADMIN PROFILE -->
+
 
 <section class="panel">
 
 
 <h2>
-💰 Add Weekly Collection
+
+👤 Treasurer Information
+
 </h2>
+
+
+
+<p>
+
+Authorized Financial Administrator
+
+<br>
+
+Dalubwikaan Academic Year 2026-2027
+
+</p>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- QUICK STATS -->
+
+
+<section class="cards">
+
+
+
+
+
+<div class="card">
+
+
+<h3>
+
+💰 Collections Added
+
+</h3>
+
+
+<h2 id="collectionCount">
+
+0
+
+</h2>
+
+
+<span>
+
+Weekly Contributions
+
+</span>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h3>
+
+🏗 Projects
+
+</h3>
+
+
+<h2 id="projectCount">
+
+0
+
+</h2>
+
+
+<span>
+
+Organization Programs
+
+</span>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h3>
+
+🧾 Expenses
+
+</h3>
+
+
+<h2 id="expenseCount">
+
+0
+
+</h2>
+
+
+<span>
+
+Budget Usage
+
+</span>
+
+
+</div>
+
+
+
+
+
+<div class="card">
+
+
+<h3>
+
+📝 Audit Logs
+
+</h3>
+
+
+<h2 id="auditCount">
+
+0
+
+</h2>
+
+
+<span>
+
+Recorded Activities
+
+</span>
+
+
+</div>
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- COLLECTION -->
+
+
+<section class="panel">
+
+
+<h2>
+
+💰 Add Weekly Collection
+
+</h2>
+
+
 
 
 
 <form id="collectionForm">
 
 
+
+
+
 <label>
+
 Year Level
+
 </label>
+
 
 
 <select id="yearLevel">
 
 
-<option>
-First Year
-</option>
+<option>First Year</option>
 
+<option>Second Year</option>
 
-<option>
-Second Year
-</option>
+<option>Third Year</option>
 
-
-<option>
-Third Year
-</option>
-
-
-<option>
-Fourth Year
-</option>
+<option>Fourth Year</option>
 
 
 </select>
@@ -173,28 +459,43 @@ Fourth Year
 
 
 
+
+
 <label>
+
 Amount Collected
+
 </label>
 
 
-<input 
+
+<input
+
 type="number"
+
 id="amount"
-placeholder="Enter amount">
 
+placeholder="Enter amount collected"
 
+required>
 
 
 
 <label>
+
 Collection Date
+
 </label>
 
 
-<input 
+
+<input
+
 type="date"
-id="date">
+
+id="date"
+
+required>
 
 
 
@@ -202,13 +503,16 @@ id="date">
 
 <button type="submit">
 
-Add Collection
+Save Collection
 
 </button>
 
 
 
+
+
 </form>
+
 
 
 </section>
@@ -223,12 +527,17 @@ Add Collection
 
 <!-- PROJECT -->
 
+
 <section class="panel">
 
 
 <h2>
+
 🏗 Add Organization Project
+
 </h2>
+
+
 
 
 
@@ -237,43 +546,73 @@ Add Collection
 
 
 
+
+
 <label>
+
 Project Name
+
 </label>
 
 
+
 <input
+
 type="text"
+
 id="projectName"
-placeholder="Example: Gabay Turo sa Lingguwistika">
+
+placeholder="Example: Gabay Turo sa Lingguwistika"
+
+required>
+
+
 
 
 
 
 
 <label>
+
 Project Budget
+
 </label>
+
 
 
 <input
+
 type="number"
+
 id="projectBudget"
-placeholder="Budget">
+
+placeholder="Enter budget"
+
+required>
+
+
 
 
 
 
 
 <label>
+
 Project Description
+
 </label>
 
 
-<textarea 
+
+<textarea
+
 id="description"
-placeholder="Describe the project">
+
+placeholder="Project details">
+
 </textarea>
+
+
 
 
 
@@ -286,7 +625,10 @@ Save Project
 
 
 
+
+
 </form>
+
 
 
 
@@ -300,14 +642,18 @@ Save Project
 
 
 
-<!-- EXPENSE WITH RECEIPT -->
+<!-- EXPENSE -->
+
 
 <section class="panel">
 
 
 <h2>
-💸 Add Expense With Receipt
+
+💸 Add Expense & Receipt
+
 </h2>
+
 
 
 
@@ -318,15 +664,26 @@ Save Project
 
 
 
+
 <label>
+
 Project Name
+
 </label>
 
 
+
 <input
+
 type="text"
+
 id="expenseProject"
-placeholder="Example: Poetry Competition">
+
+placeholder="Example: Poetry Competition"
+
+required>
+
+
 
 
 
@@ -334,14 +691,24 @@ placeholder="Example: Poetry Competition">
 
 
 <label>
+
 Expense Amount
+
 </label>
+
 
 
 <input
+
 type="number"
+
 id="expenseAmount"
-placeholder="Enter expense">
+
+placeholder="Amount"
+
+required>
+
+
 
 
 
@@ -349,13 +716,19 @@ placeholder="Enter expense">
 
 
 <label>
+
 Expense Description
+
 </label>
+
 
 
 <textarea
+
 id="expenseDescription"
-placeholder="Food, materials, certificates...">
+
+placeholder="Materials, food, certificates...">
+
 </textarea>
 
 
@@ -364,15 +737,34 @@ placeholder="Food, materials, certificates...">
 
 
 
+
 <label>
+
 Upload Receipt
+
 </label>
 
 
+
 <input
+
 type="file"
+
 id="receiptFile"
+
 accept="image/*">
+
+
+
+
+
+
+
+<div id="receiptPreview">
+
+</div>
+
+
 
 
 
@@ -387,7 +779,49 @@ Save Expense
 
 
 
+
+
+
 </form>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- SEARCH -->
+
+
+<section class="panel">
+
+
+<h2>
+
+🔎 Search Records
+
+</h2>
+
+
+
+
+<input
+
+type="text"
+
+id="searchRecords"
+
+placeholder="Search collection, project, expense..."
+
+>
+
+
 
 
 </section>
@@ -402,12 +836,16 @@ Save Expense
 
 <!-- RECORDS -->
 
-<section class="panel">
+
+<section class="panel" id="records">
 
 
 <h2>
+
 📋 Treasury Records
+
 </h2>
+
 
 
 
@@ -423,17 +861,35 @@ Save Expense
 
 
 <th>
+
 Type
+
 </th>
 
 
+
 <th>
+
 Details
+
 </th>
 
 
+
+
 <th>
+
 Amount
+
+</th>
+
+
+
+
+<th>
+
+Action
+
 </th>
 
 
@@ -441,7 +897,10 @@ Amount
 </tr>
 
 
+
 </thead>
+
+
 
 
 
@@ -449,11 +908,27 @@ Amount
 <tbody id="records">
 
 
+<tr>
+
+
+<td colspan="4">
+
+No records available.
+
+</td>
+
+
+</tr>
+
+
 </tbody>
 
 
 
+
+
 </table>
+
 
 
 </section>
@@ -466,7 +941,71 @@ Amount
 
 
 
+<!-- AUDIT TRAIL -->
+
+
+<section class="panel" id="audit">
+
+
+<h2>
+
+📝 Audit Trail
+
+</h2>
+
+
+
+
+
+<div id="auditContainer">
+
+
+<p>
+
+No activity recorded.
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<footer>
+
+
+<p>
+
+© 2026 Dalubwikaan Treasury System
+
+</p>
+
+
+</footer>
+
+
+
+
+
+
+
 </main>
+
+
+
 
 
 
@@ -479,11 +1018,19 @@ Amount
 
 
 
+
+
+<script src="js/theme.js"></script>
+
+
 <script type="module" src="js/admin.js"></script>
 
 
 
+
+
 </body>
+
 
 
 </html>
