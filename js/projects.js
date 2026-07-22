@@ -1,7 +1,8 @@
 // =================================
 // DALUBWIKAAN PROJECT TRANSPARENCY
-// VERSION 2.0
-// PROJECT STATUS + BUDGET PROGRESS
+// VERSION 3.0
+// PROJECT STATUS + BUDGET MONITORING
+// FINANCIAL UTILIZATION TRACKER
 // =================================
 
 
@@ -12,7 +13,9 @@ import {
 
 collection,
 onSnapshot,
-getDocs
+getDocs,
+query,
+orderBy
 
 }
 
@@ -22,6 +25,10 @@ from
 
 
 
+
+// =================================
+// ELEMENT
+// =================================
 
 
 const container =
@@ -33,8 +40,13 @@ document.getElementById(
 
 
 
+// =================================
+// HELPERS
+// =================================
+
 
 function peso(value){
+
 
 return "₱" +
 
@@ -44,8 +56,9 @@ Number(value || 0)
 "en-PH"
 );
 
-}
 
+
+}
 
 
 
@@ -56,8 +69,11 @@ Number(value || 0)
 function statusBadge(status){
 
 
-if(status === "Completed"){
+switch(status){
 
+
+
+case "Completed":
 
 return `
 
@@ -71,12 +87,8 @@ return `
 
 
 
-}
 
-
-
-if(status === "Ongoing"){
-
+case "Ongoing":
 
 return `
 
@@ -90,10 +102,8 @@ return `
 
 
 
-}
 
-
-
+default:
 
 return `
 
@@ -111,21 +121,156 @@ return `
 
 
 
+}
 
 
 
 
+
+
+
+
+
+function financialStatus(
+budget,
+spent
+){
+
+
+
+const balance =
+
+budget - spent;
+
+
+
+
+
+
+if(balance < 0){
+
+
+return `
+
+<div class="danger-status">
+
+🔴 Abonado:
+
+${peso(
+Math.abs(balance)
+)}
+
+</div>
+
+`;
+
+
+
+}
+
+
+
+
+
+
+return `
+
+<div class="success-status">
+
+🟢 Remaining:
+
+${peso(balance)}
+
+</div>
+
+`;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function calculateProgress(
+budget,
+spent
+){
+
+
+if(
+budget <= 0
+)
+
+return 0;
+
+
+
+
+
+let progress =
+
+(spent / budget) * 100;
+
+
+
+
+
+
+if(progress > 100)
+
+progress = 100;
+
+
+
+
+
+
+return Math.round(progress);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =================================
+// LOAD PROJECTS
+// =================================
 
 
 async function loadProjects(){
 
 
 
-if(!container)return;
+if(!container)
+
+return;
 
 
 
 
+
+
+
+try{
+
+
+
+// ===============================
+// LOAD EXPENSES
+// ===============================
 
 
 const expenseSnapshot =
@@ -143,7 +288,10 @@ db,
 
 
 
-let expenses = {};
+let expenseMap = {};
+
+
+
 
 
 
@@ -152,14 +300,27 @@ let expenses = {};
 expenseSnapshot.forEach(doc=>{
 
 
-const data = doc.data();
+
+const expense =
+
+doc.data();
 
 
 
-if(!expenses[data.project]){
 
 
-expenses[data.project]=0;
+
+const projectName =
+
+expense.project;
+
+
+
+
+if(!expenseMap[projectName]){
+
+
+expenseMap[projectName]=0;
 
 
 }
@@ -168,12 +329,13 @@ expenses[data.project]=0;
 
 
 
-expenses[data.project]
+
+expenseMap[projectName]
 
 +=
 
 Number(
-data.amount || 0
+expense.amount || 0
 );
 
 
@@ -188,12 +350,35 @@ data.amount || 0
 
 
 
-onSnapshot(
+// ===============================
+// REAL TIME PROJECTS
+// ===============================
+
+
+const projectQuery = query(
 
 collection(
 db,
 "projects"
 ),
+
+orderBy(
+"createdAt",
+"desc"
+)
+
+);
+
+
+
+
+
+
+
+
+onSnapshot(
+
+projectQuery,
 
 (snapshot)=>{
 
@@ -206,12 +391,55 @@ container.innerHTML="";
 
 
 
-
-snapshot.forEach((doc)=>{
-
+if(snapshot.empty){
 
 
-const project = doc.data();
+
+container.innerHTML=`
+
+<div class="empty-state">
+
+📂 No projects available.
+
+</div>
+
+`;
+
+
+
+return;
+
+
+
+}
+
+
+
+
+
+
+
+
+snapshot.forEach(doc=>{
+
+
+
+const project =
+
+doc.data();
+
+
+
+
+
+
+
+const name =
+
+project.name ||
+
+"Unnamed Project";
+
 
 
 
@@ -229,9 +457,10 @@ project.budget || 0
 
 
 
+
 const spent =
 
-expenses[project.name]
+expenseMap[name]
 
 ||
 
@@ -243,38 +472,22 @@ expenses[project.name]
 
 
 
-let percentage =
-
-(budget === 0)
-
-?
-
-0
-
-:
-
-(spent / budget) * 100;
-
-
-
-
-
-
-
-if(percentage > 100){
-
-percentage = 100;
-
-}
-
-
-
-
-
-
 const remaining =
 
 budget - spent;
+
+
+
+
+
+
+
+const progress =
+
+calculateProgress(
+budget,
+spent
+);
 
 
 
@@ -294,66 +507,13 @@ project.status ||
 
 
 
-
-let financial;
-
-
-
-if(remaining < 0){
-
-
-
-financial = `
-
-<p class="danger-status">
-
-🔴 Abonado:
-
-${peso(
-Math.abs(remaining)
-)}
-
-</p>
-
-`;
-
-
-
-}
-
-else{
-
-
-
-financial = `
-
-<p class="success-status">
-
-🟢 Remaining:
-
-${peso(remaining)}
-
-</p>
-
-`;
-
-
-
-}
-
-
-
-
-
-
-
-
-
 const card =
 
 document.createElement(
 "div"
 );
+
+
 
 
 
@@ -367,21 +527,27 @@ card.className=
 
 
 
+
+
 card.innerHTML = `
+
+
+
+<div class="project-header">
 
 
 <h2>
 
-${project.name}
+${name}
 
 </h2>
 
 
 
-
-
 ${statusBadge(status)}
 
+
+</div>
 
 
 
@@ -391,39 +557,50 @@ ${statusBadge(status)}
 <div class="budget-info">
 
 
-<p>
+
+<div>
 
 <strong>
-Allocated Budget:
+Allocated Budget
 </strong>
 
-<br>
+
+<p>
 
 ${peso(budget)}
 
 </p>
 
+</div>
 
 
+
+
+
+<div>
+
+<strong>
+Actual Expenses
+</strong>
 
 
 <p>
-
-<strong>
-Actual Expenses:
-</strong>
-
-<br>
 
 ${peso(spent)}
 
 </p>
 
 
+</div>
 
 
 
-${financial}
+
+
+${financialStatus(
+budget,
+spent
+)}
 
 
 </div>
@@ -434,7 +611,8 @@ ${financial}
 
 
 
-<p>
+
+<p class="description">
 
 ${project.description ||
 
@@ -450,34 +628,62 @@ ${project.description ||
 
 
 
+<div class="progress-section">
 
-<div class="progress-container">
+
+
+<p>
+
+Financial Utilization:
+
+<strong>
+
+${progress}%
+
+</strong>
+
+
+</p>
+
+
+
+
 
 
 <div class="progress-bar">
 
 
-<div 
+<div
 
 class="progress-fill"
 
-style="width:${percentage}%">
+style="width:${progress}%">
 
 </div>
 
 
 </div>
+
 
 
 
 
 <small>
 
-Budget Utilization:
+${progress >= 100
 
-${percentage.toFixed(0)}%
+?
+
+"Budget fully utilized"
+
+:
+
+"Monitoring expenses..."
+
+}
 
 </small>
+
 
 
 </div>
@@ -499,31 +705,9 @@ container.appendChild(card);
 
 
 
-
-
 });
 
 
-
-
-
-if(snapshot.empty){
-
-
-
-container.innerHTML = `
-
-<div class="empty-state">
-
-No projects available.
-
-</div>
-
-`;
-
-
-
-}
 
 
 
@@ -539,9 +723,82 @@ No projects available.
 
 
 
+catch(error){
 
 
 
+console.error(
+
+"Project Transparency Error:",
+
+error
+
+);
+
+
+
+
+
+container.innerHTML = `
+
+
+<div class="empty-state">
+
+⚠ Unable to load projects.
+
+</div>
+
+
+`;
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =================================
+// START SYSTEM
+// =================================
 
 
 loadProjects();
+
+
+
+
+
+
+console.log(`
+
+================================
+
+DALUBWIKAAN PROJECT TRANSPARENCY v3.0
+
+
+✓ Project Status
+
+✓ Budget Monitoring
+
+✓ Expense Tracking
+
+✓ Progress Visualization
+
+✓ Abonado Detection
+
+
+SYSTEM READY
+
+================================
+
+`);
