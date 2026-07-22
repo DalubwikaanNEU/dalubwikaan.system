@@ -13,6 +13,7 @@ import {
 collection,
 addDoc,
 getDocs,
+getDoc,
 deleteDoc,
 doc,
 serverTimestamp,
@@ -103,34 +104,37 @@ loader.style.display="none";
 // ===============================
 
 
-onAuthStateChanged(auth,(user)=>{
+onAuthStateChanged(auth, async (user) => {
 
-
-if(!user){
-
-
-window.location.href="login.html";
-
-return;
-
-
+if (!user) {
+    window.location.href = "login.html";
+    return;
 }
 
+// Check kung nasa admins collection
+const adminDoc = await getDoc(doc(db, "admins", user.uid));
 
-currentUser=user;
+if (!adminDoc.exists()) {
 
+    alert("Access denied. You are not an authorized administrator.");
 
+    await signOut(auth);
 
-let email=
-document.getElementById("adminEmail");
+    window.location.href = "login.html";
 
-
-if(email){
-
-email.innerHTML=user.email;
-
+    return;
 }
 
+currentUser = user;
+
+const email = document.getElementById("adminEmail");
+
+if (email) {
+    email.textContent = user.email;
+}
+
+// Load dashboard pagkatapos ma-verify ang admin
+refresh();
 
 });
 
