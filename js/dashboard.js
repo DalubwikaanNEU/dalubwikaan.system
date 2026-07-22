@@ -1,110 +1,122 @@
-// =============================
+// =================================
 // DALUBWIKAAN TREASURY DASHBOARD
-// DASHBOARD SCRIPT
-// =============================
+// FIREBASE LIVE VERSION
+// =================================
 
 
 
-// NUMBER COUNTER ANIMATION
-
-function animateNumber(element, target){
-
-    let current = 0;
-
-    let speed = target / 80;
+import {db} from "./firebase.js";
 
 
-    let counter = setInterval(()=>{
+
+import {
 
 
-        current += speed;
-
-
-        if(current >= target){
-
-            current = target;
-            clearInterval(counter);
-
-        }
-
-
-        element.innerHTML =
-        "₱" + Math.floor(current).toLocaleString();
-
-
-    },20);
+collection,
+getDocs
 
 
 }
 
+from
+
+"https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 
 
-// APPLY ANIMATION TO FUND CARDS
-
-
-document.addEventListener("DOMContentLoaded",()=>{
-
-
-const moneyCards =
-document.querySelectorAll(".card h2");
 
 
 
-const values=[
 
-25000,
-150,
-8000,
-17000
-
-];
+async function loadDashboard(){
 
 
 
-moneyCards.forEach((card,index)=>{
+let totalFunds = 0;
 
-
-if(index === 1){
-
-let current=0;
-
-let target=values[index];
-
-
-let counter=setInterval(()=>{
-
-current+=3;
-
-
-if(current>=target){
-
-current=target;
-clearInterval(counter);
-
-}
-
-
-card.innerHTML =
-Math.floor(current);
-
-
-},20);
+let totalExpenses = 0;
 
 
 
-}
-
-else{
+let yearTotals = {
 
 
-animateNumber(
-card,
-values[index]
+"First Year":0,
+
+"Second Year":0,
+
+"Third Year":0,
+
+"Fourth Year":0
+
+
+};
+
+
+
+
+
+
+// GET COLLECTIONS
+
+
+let collectionSnapshot =
+await getDocs(
+collection(db,"collections")
 );
 
 
+
+
+
+collectionSnapshot.forEach((doc)=>{
+
+
+let data = doc.data();
+
+
+
+totalFunds += data.amount;
+
+
+
+if(yearTotals[data.year] !== undefined){
+
+
+yearTotals[data.year] += data.amount;
+
+
 }
+
+
+});
+
+
+
+
+
+
+
+
+
+// GET PROJECT EXPENSES
+
+
+let projectSnapshot =
+await getDocs(
+collection(db,"projects")
+);
+
+
+
+projectSnapshot.forEach((doc)=>{
+
+
+let data = doc.data();
+
+
+
+totalExpenses += data.budget;
 
 
 
@@ -112,47 +124,92 @@ values[index]
 
 
 
-});
+
+
+
+
+// UPDATE CARDS
+
+
+
+document
+.getElementById("totalFunds")
+.innerHTML =
+"₱"+totalFunds.toLocaleString();
+
+
+
+
+
+document
+.getElementById("totalExpenses")
+.innerHTML =
+"₱"+totalExpenses.toLocaleString();
+
+
+
+
+
+document
+.getElementById("remainingBalance")
+.innerHTML =
+
+"₱"+
+(totalFunds-totalExpenses)
+.toLocaleString();
 
 
 
 
 
 
+// TEMP MEMBER COUNT
 
-// =============================
-// DARK MODE PREPARATION
-// =============================
-
-
-const themeButton =
-document.querySelector("header button");
+document
+.getElementById("totalMembers")
+.innerHTML =
+"150";
 
 
 
-themeButton.addEventListener("click",()=>{
-
-
-document.body.classList.toggle("dark");
 
 
 
-if(document.body.classList.contains("dark")){
+// UPDATE YEAR LEVEL
 
 
-themeButton.innerHTML="☀️";
+
+let years =
+document.querySelectorAll(".year p");
+
+
+
+years[0].innerHTML =
+"₱"+yearTotals["First Year"].toLocaleString();
+
+
+
+years[1].innerHTML =
+"₱"+yearTotals["Second Year"].toLocaleString();
+
+
+
+years[2].innerHTML =
+"₱"+yearTotals["Third Year"].toLocaleString();
+
+
+
+years[3].innerHTML =
+"₱"+yearTotals["Fourth Year"].toLocaleString();
+
+
+
 
 
 }
 
-else{
-
-
-themeButton.innerHTML="🌙";
-
-
-}
 
 
 
-});
+
+loadDashboard();
