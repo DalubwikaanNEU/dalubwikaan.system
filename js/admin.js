@@ -1,11 +1,11 @@
 // =================================
 // DALUBWIKAAN ADMIN PANEL
-// FIREBASE + AUTH VERSION
+// FIREBASE + AUTH + STORAGE VERSION
 // =================================
 
 
 
-import { db } from "./firebase.js";
+import { db, storage } from "./firebase.js";
 
 
 
@@ -21,6 +21,26 @@ serverTimestamp
 from
 
 "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+
+
+
+
+import {
+
+
+ref,
+uploadBytes,
+getDownloadURL
+
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
+
+
 
 
 
@@ -43,13 +63,15 @@ from
 
 
 
+
+
+
 // ===============================
 // AUTHENTICATION CHECK
 // ===============================
 
 
 const auth = getAuth();
-
 
 
 
@@ -78,7 +100,6 @@ window.location.href="login.html";
 // ===============================
 // LOGOUT
 // ===============================
-
 
 
 const logoutBtn =
@@ -121,24 +142,23 @@ window.location.href="login.html";
 // ===============================
 
 
-document
-.getElementById("collectionForm")
-.addEventListener("submit", async function(e){
+const collectionForm =
+document.getElementById("collectionForm");
 
+
+
+if(collectionForm){
+
+
+collectionForm.addEventListener("submit",async function(e){
 
 
 e.preventDefault();
 
 
 
-
-
 let year =
-document
-.getElementById("yearLevel")
-.value;
-
-
+document.getElementById("yearLevel").value;
 
 
 
@@ -149,21 +169,14 @@ document.getElementById("amount").value
 
 
 
-
-
 let date =
-document
-.getElementById("date")
-.value;
-
-
+document.getElementById("date").value;
 
 
 
 
 
 try{
-
 
 
 await addDoc(
@@ -175,18 +188,13 @@ collection(db,"collections"),
 
 year:year,
 
-
 amount:amount,
-
 
 date:date,
 
-
 type:"Collection",
 
-
-createdAt:
-serverTimestamp()
+createdAt:serverTimestamp()
 
 
 }
@@ -196,12 +204,9 @@ serverTimestamp()
 
 
 
-
-
 alert(
 "Collection Added Successfully!"
 );
-
 
 
 
@@ -220,9 +225,7 @@ loadRecords();
 catch(error){
 
 
-
 console.error(error);
-
 
 
 alert(
@@ -230,12 +233,14 @@ alert(
 );
 
 
-
 }
 
 
 
 });
+
+
+}
 
 
 
@@ -250,10 +255,15 @@ alert(
 // ===============================
 
 
-document
-.getElementById("projectForm")
-.addEventListener("submit", async function(e){
+const projectForm =
+document.getElementById("projectForm");
 
+
+
+if(projectForm){
+
+
+projectForm.addEventListener("submit",async function(e){
 
 
 e.preventDefault();
@@ -261,41 +271,26 @@ e.preventDefault();
 
 
 
-
-
 let name =
-document
-.getElementById("projectName")
-.value;
-
-
+document.getElementById("projectName").value;
 
 
 
 let budget =
 Number(
-document
-.getElementById("projectBudget")
-.value
+document.getElementById("projectBudget").value
 );
 
 
 
-
-
 let description =
-document
-.getElementById("description")
-.value;
-
-
+document.getElementById("description").value;
 
 
 
 
 
 try{
-
 
 
 await addDoc(
@@ -307,18 +302,13 @@ collection(db,"projects"),
 
 name:name,
 
-
 budget:budget,
-
 
 description:description,
 
-
 type:"Project",
 
-
-createdAt:
-serverTimestamp()
+createdAt:serverTimestamp()
 
 
 }
@@ -328,13 +318,9 @@ serverTimestamp()
 
 
 
-
-
 alert(
 "Project Added Successfully!"
 );
-
-
 
 
 
@@ -353,9 +339,7 @@ loadRecords();
 catch(error){
 
 
-
 console.error(error);
-
 
 
 alert(
@@ -363,12 +347,182 @@ alert(
 );
 
 
+}
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// ADD EXPENSE + RECEIPT
+// ===============================
+
+
+
+const expenseForm =
+document.getElementById("expenseForm");
+
+
+
+if(expenseForm){
+
+
+expenseForm.addEventListener("submit",async function(e){
+
+
+e.preventDefault();
+
+
+
+
+let project =
+document.getElementById("expenseProject").value;
+
+
+
+let amount =
+Number(
+document.getElementById("expenseAmount").value
+);
+
+
+
+let description =
+document.getElementById("expenseDescription").value;
+
+
+
+let file =
+document.getElementById("receiptFile").files[0];
+
+
+
+
+
+try{
+
+
+let receiptURL = "";
+
+
+
+// upload receipt if available
+
+if(file){
+
+
+let storageRef =
+ref(
+
+storage,
+
+"receipts/"+Date.now()+"_"+file.name
+
+);
+
+
+
+await uploadBytes(
+
+storageRef,
+
+file
+
+);
+
+
+
+receiptURL =
+await getDownloadURL(storageRef);
+
+
+}
+
+
+
+
+
+
+
+await addDoc(
+
+collection(db,"expenses"),
+
+{
+
+
+project:project,
+
+amount:amount,
+
+description:description,
+
+receipt:receiptURL,
+
+date:new Date().toLocaleDateString(),
+
+type:"Expense",
+
+createdAt:serverTimestamp()
+
+
+}
+
+
+);
+
+
+
+
+
+alert(
+"Expense Saved Successfully!"
+);
+
+
+
+this.reset();
+
+
+
+loadRecords();
+
+
+
+}
+
+
+
+catch(error){
+
+
+console.error(error);
+
+
+alert(
+"Expense upload failed"
+);
+
 
 }
 
 
 
 });
+
+
+}
 
 
 
@@ -381,7 +535,6 @@ alert(
 // ===============================
 // DISPLAY RECORDS
 // ===============================
-
 
 
 async function loadRecords(){
@@ -406,14 +559,17 @@ table.innerHTML="";
 
 
 
-// COLLECTION RECORDS
+
+
+// COLLECTIONS
 
 
 let collectionData =
 await getDocs(
-collection(db,"collections")
-);
 
+collection(db,"collections")
+
+);
 
 
 
@@ -428,7 +584,6 @@ doc.data();
 
 
 
-
 table.innerHTML += `
 
 
@@ -436,9 +591,7 @@ table.innerHTML += `
 
 
 <td>
-
 Collection
-
 </td>
 
 
@@ -454,7 +607,6 @@ ${data.date}
 </small>
 
 </td>
-
 
 
 
@@ -481,15 +633,16 @@ ${data.date}
 
 
 
-// PROJECT RECORDS
 
+// PROJECTS
 
 
 let projectData =
 await getDocs(
-collection(db,"projects")
-);
 
+collection(db,"projects")
+
+);
 
 
 
@@ -504,7 +657,6 @@ doc.data();
 
 
 
-
 table.innerHTML += `
 
 
@@ -512,25 +664,20 @@ table.innerHTML += `
 
 
 <td>
-
 Project
-
 </td>
 
 
 
 <td>
 
-<b>
-${data.name}
-</b>
+<b>${data.name}</b>
 
 <br>
 
 <small>
 ${data.description}
 </small>
-
 
 </td>
 
@@ -556,6 +703,98 @@ ${data.description}
 
 
 
+
+
+
+
+// EXPENSES
+
+
+let expenseData =
+await getDocs(
+
+collection(db,"expenses")
+
+);
+
+
+
+
+
+expenseData.forEach((doc)=>{
+
+
+let data =
+doc.data();
+
+
+
+
+table.innerHTML += `
+
+
+<tr>
+
+
+<td>
+Expense
+</td>
+
+
+
+<td>
+
+<b>${data.project}</b>
+
+<br>
+
+<small>
+${data.description}</small>
+
+
+<br>
+
+
+${
+data.receipt
+
+?
+
+`<a href="${data.receipt}" target="_blank">
+View Receipt
+</a>`
+
+:
+
+"No Receipt"
+
+}
+
+
+
+</td>
+
+
+
+<td>
+
+₱${Number(data.amount).toLocaleString()}
+
+</td>
+
+
+</tr>
+
+
+`;
+
+
+
+});
+
+
+
+
 }
 
 
@@ -566,7 +805,9 @@ ${data.description}
 
 
 
-// LOAD WHEN OPENING PAGE
+// ===============================
+// INITIAL LOAD
+// ===============================
 
 
 loadRecords();
