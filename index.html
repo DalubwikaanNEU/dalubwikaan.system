@@ -43,6 +43,7 @@ Treasury Portal
 
 
 
+
 <nav>
 
 
@@ -75,7 +76,6 @@ Treasury Portal
 </nav>
 
 
-
 </aside>
 
 
@@ -97,6 +97,7 @@ Treasury Portal
 
 <div>
 
+
 <h1>
 Treasury Dashboard
 </h1>
@@ -110,6 +111,7 @@ Academic Year 2026-2027
 
 
 </div>
+
 
 
 
@@ -130,7 +132,6 @@ Academic Year 2026-2027
 
 
 <!-- SUMMARY CARDS -->
-
 
 <section class="cards">
 
@@ -160,8 +161,8 @@ Total Collections
 
 
 
-
 <div class="card">
+
 
 <h3>
 Total Members
@@ -185,8 +186,8 @@ Registered Members
 
 
 
-
 <div class="card">
+
 
 <h3>
 Expenses
@@ -210,8 +211,8 @@ Project Allocation
 
 
 
-
 <div class="card">
+
 
 <h3>
 Remaining Balance
@@ -233,7 +234,6 @@ Available Funds
 
 
 
-
 </section>
 
 
@@ -246,18 +246,17 @@ Available Funds
 
 <!-- COLLECTION BREAKDOWN -->
 
+
 <section class="panel" id="collections">
 
 
 <h2>
-Collection Breakdown
+💰 Collection Breakdown
 </h2>
 
 
 
 <div class="year-container">
-
-
 
 
 
@@ -274,20 +273,15 @@ First Year
 </p>
 
 
-
 <div class="progress">
 
-<span id="firstProgress" style="width:0%">
+<span id="firstProgress">
 </span>
 
 </div>
 
 
-
 </div>
-
-
-
 
 
 
@@ -308,16 +302,13 @@ Second Year
 
 <div class="progress">
 
-<span id="secondProgress" style="width:0%">
+<span id="secondProgress">
 </span>
 
 </div>
 
 
-
 </div>
-
-
 
 
 
@@ -338,19 +329,15 @@ Third Year
 </p>
 
 
-
 <div class="progress">
 
-<span id="thirdProgress" style="width:0%">
+<span id="thirdProgress">
 </span>
 
 </div>
 
 
-
 </div>
-
-
 
 
 
@@ -373,16 +360,13 @@ Fourth Year
 
 <div class="progress">
 
-<span id="fourthProgress" style="width:0%">
+<span id="fourthProgress">
 </span>
 
 </div>
 
 
-
 </div>
-
-
 
 
 
@@ -400,16 +384,62 @@ Fourth Year
 
 
 
-<!-- TRANSACTION TABLE -->
+<!-- FINANCIAL ANALYTICS -->
+
+
+<section class="panel" id="reports">
+
+
+<h2>
+📊 Financial Analytics
+</h2>
+
+
+
+<div class="chart-container">
+
+
+<canvas id="collectionChart"></canvas>
+
+
+</div>
+
+
+
+
+<br>
+
+
+
+<div class="chart-container">
+
+
+<canvas id="budgetChart"></canvas>
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- COLLECTION HISTORY -->
 
 
 <section class="panel">
 
 
 <h2>
-Recent Collections
+📋 Recent Collections
 </h2>
-
 
 
 
@@ -420,7 +450,6 @@ Recent Collections
 
 
 <tr>
-
 
 <th>
 Date
@@ -442,7 +471,6 @@ Status
 </th>
 
 
-
 </tr>
 
 
@@ -450,14 +478,10 @@ Status
 
 
 
-
-
 <tbody id="transactionTable">
 
 
 </tbody>
-
-
 
 
 
@@ -475,20 +499,20 @@ Status
 
 
 
-<!-- PROJECT PREVIEW -->
+<!-- PROJECTS -->
 
 
 <section class="panel" id="projects">
 
 
 <h2>
-Recent Projects
+🏗 Recent Projects & Budget Allocation
 </h2>
 
 
 
-<table>
 
+<table>
 
 
 <thead>
@@ -515,7 +539,6 @@ Description
 </tr>
 
 
-
 </thead>
 
 
@@ -540,6 +563,56 @@ Description
 
 
 
+
+<!-- TRANSPARENCY MESSAGE -->
+
+
+<section class="panel">
+
+
+<h2>
+📌 Transparency Statement
+</h2>
+
+
+
+<p>
+
+Ang Dalubwikaan Treasury Portal ay ginawa upang
+itaguyod ang transparency at accountability sa
+pangongolekta at paggamit ng pondo ng organisasyon.
+
+</p>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<footer>
+
+
+<p>
+
+© 2026 Dalubwikaan | Treasury Transparency Portal
+
+</p>
+
+
+</footer>
+
+
+
+
+
+
 </main>
 
 
@@ -549,12 +622,19 @@ Description
 
 
 
+<!-- CHART JS -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
+
+<!-- FIREBASE DASHBOARD -->
 
 <script type="module" src="js/dashboard.js"></script>
 
 
 
 </body>
-
 
 </html>
