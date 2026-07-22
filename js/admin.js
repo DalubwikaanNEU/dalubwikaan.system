@@ -311,7 +311,7 @@ message
 
 const announcementForm =
 document.getElementById(
-"announcementForm"
+"announcementContainer"
 );
 
 
