@@ -1,12 +1,10 @@
 // =================================
 // DALUBWIKAAN TREASURY DASHBOARD
-// FIREBASE REAL-TIME + ANALYTICS + PDF REPORT
+// FIREBASE REAL-TIME + ANALYTICS + PDF
 // =================================
 
 
-
 import { db } from "./firebase.js";
-
 
 
 import {
@@ -19,6 +17,7 @@ onSnapshot
 from
 
 "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
 
 
 
@@ -50,8 +49,9 @@ expenses:0,
 
 remaining:0,
 
-years:{}
+years:{},
 
+projects:[]
 
 };
 
@@ -64,19 +64,24 @@ years:{}
 
 
 // ===============================
-// LOAD COLLECTIONS
+// COLLECTIONS
 // ===============================
 
 
 function loadCollections(){
 
 
+
 onSnapshot(
 
 collection(db,"collections"),
 
+
+
 (snapshot)=>{
 
+
+try{
 
 
 let totalFunds = 0;
@@ -116,6 +121,12 @@ table.innerHTML="";
 
 
 
+
+
+let records=[];
+
+
+
 snapshot.forEach((doc)=>{
 
 
@@ -123,8 +134,37 @@ let data = doc.data();
 
 
 
+records.push(data);
+
+
+
+});
+
+
+
+
+// latest first
+
+records.sort((a,b)=>{
+
+
+return new Date(b.date)-new Date(a.date);
+
+
+});
+
+
+
+
+
+
+records.forEach((data)=>{
+
+
+
 let amount =
-Number(data.amount);
+Number(data.amount)||0;
+
 
 
 
@@ -134,12 +174,11 @@ totalFunds += amount;
 
 
 
-if(yearTotals[data.year]){
+if(yearTotals[data.year] !== undefined){
 
 yearTotals[data.year]+=amount;
 
 }
-
 
 
 
@@ -150,34 +189,51 @@ if(table){
 
 table.innerHTML += `
 
+
 <tr>
 
+
 <td>
-${data.date}
+
+${data.date || "N/A"}
+
 </td>
 
 
+
 <td>
-${data.year}
+
+${data.year || "N/A"}
+
 </td>
 
 
+
 <td>
+
 ₱${amount.toLocaleString()}
+
 </td>
+
 
 
 <td class="paid">
+
 Completed
+
 </td>
+
 
 
 </tr>
 
 
+
 `;
 
+
 }
+
 
 
 
@@ -189,80 +245,103 @@ Completed
 
 
 
-window.totalFunds = totalFunds;
+if(records.length===0 && table){
 
 
+table.innerHTML=`
 
-reportData.funds = totalFunds;
+<tr>
 
+<td colspan="4">
 
+No collection records yet.
 
-reportData.years = yearTotals;
+</td>
 
+</tr>
 
+`;
 
-
-
-
-// UPDATE CARDS
-
-
-document
-.getElementById("totalFunds")
-.innerHTML =
-
-"₱"+totalFunds.toLocaleString();
+}
 
 
 
 
-
-
-// UPDATE YEAR CARDS
-
-
-document
-.getElementById("firstYear")
-.innerHTML =
-
-"₱"+yearTotals["First Year"].toLocaleString();
+window.totalFunds =
+totalFunds;
 
 
 
+reportData.funds =
+totalFunds;
 
-document
-.getElementById("secondYear")
-.innerHTML =
 
-"₱"+yearTotals["Second Year"].toLocaleString();
+
+reportData.years =
+yearTotals;
 
 
 
 
-document
-.getElementById("thirdYear")
-.innerHTML =
-
-"₱"+yearTotals["Third Year"].toLocaleString();
 
 
+// UPDATE DASHBOARD
 
 
-document
-.getElementById("fourthYear")
-.innerHTML =
+setText(
 
-"₱"+yearTotals["Fourth Year"].toLocaleString();
+"totalFunds",
+
+"₱"+totalFunds.toLocaleString()
+
+);
 
 
+
+
+setText(
+
+"firstYear",
+
+"₱"+yearTotals["First Year"].toLocaleString()
+
+);
+
+
+
+setText(
+
+"secondYear",
+
+"₱"+yearTotals["Second Year"].toLocaleString()
+
+);
+
+
+
+setText(
+
+"thirdYear",
+
+"₱"+yearTotals["Third Year"].toLocaleString()
+
+);
+
+
+
+setText(
+
+"fourthYear",
+
+"₱"+yearTotals["Fourth Year"].toLocaleString()
+
+);
 
 
 
 
 
 updateProgress(yearTotals);
-
-
 
 
 createCollectionChart(yearTotals);
@@ -273,7 +352,19 @@ updateBalance();
 
 
 
-updateBudgetChart();
+hideLoader();
+
+
+
+}
+
+
+
+catch(error){
+
+console.log(error);
+
+}
 
 
 
@@ -294,22 +385,24 @@ updateBudgetChart();
 
 
 // ===============================
-// LOAD PROJECT EXPENSES
+// PROJECTS + EXPENSES
 // ===============================
 
 
 function loadProjects(){
 
 
+
 onSnapshot(
 
 collection(db,"projects"),
 
+
+
 (snapshot)=>{
 
 
-
-let expenses = 0;
+let expenses=0;
 
 
 
@@ -327,20 +420,29 @@ table.innerHTML="";
 
 
 
+reportData.projects=[];
+
+
+
+
 
 snapshot.forEach((doc)=>{
 
 
-let data = doc.data();
+let data=doc.data();
 
 
 
 let budget =
-Number(data.budget);
+Number(data.budget)||0;
 
 
 
 expenses += budget;
+
+
+
+reportData.projects.push(data);
 
 
 
@@ -352,28 +454,42 @@ if(table){
 
 table.innerHTML += `
 
+
 <tr>
 
+
 <td>
-${data.name}
+
+${data.name || "Unnamed Project"}
+
 </td>
 
 
+
 <td>
+
 ₱${budget.toLocaleString()}
+
 </td>
+
 
 
 <td>
-${data.description}
+
+${data.description || ""}
+
 </td>
+
 
 
 </tr>
 
+
+
 `;
 
 }
+
 
 
 });
@@ -382,22 +498,47 @@ ${data.description}
 
 
 
-window.currentExpenses = expenses;
+
+if(snapshot.empty && table){
+
+
+table.innerHTML=`
+
+<tr>
+
+<td colspan="3">
+
+No projects recorded.
+
+</td>
+
+</tr>
+
+`;
+
+}
 
 
 
-reportData.expenses = expenses;
+
+window.currentExpenses =
+expenses;
+
+
+
+reportData.expenses =
+expenses;
 
 
 
 
-document
-.getElementById("totalExpenses")
-.innerHTML =
+setText(
 
-"₱"+expenses.toLocaleString();
+"totalExpenses",
 
+"₱"+expenses.toLocaleString()
 
+);
 
 
 
@@ -405,7 +546,6 @@ updateBalance();
 
 
 updateBudgetChart();
-
 
 
 }
@@ -425,39 +565,136 @@ updateBudgetChart();
 
 
 // ===============================
-// BALANCE CALCULATOR
+// EXPENSE RECEIPTS
+// ===============================
+
+
+function loadExpenses(){
+
+
+onSnapshot(
+
+collection(db,"expenses"),
+
+
+
+(snapshot)=>{
+
+
+let container =
+document.getElementById("expenseTable");
+
+
+
+if(!container)return;
+
+
+
+
+container.innerHTML="";
+
+
+
+
+snapshot.forEach((doc)=>{
+
+
+let data=doc.data();
+
+
+
+container.innerHTML += `
+
+
+<tr>
+
+
+<td>
+
+${data.project}
+
+</td>
+
+
+
+<td>
+
+₱${Number(data.amount).toLocaleString()}
+
+</td>
+
+
+
+<td>
+
+<a href="${data.receipt}" target="_blank">
+
+View Receipt
+
+</a>
+
+</td>
+
+
+
+</tr>
+
+
+
+`;
+
+
+
+});
+
+
+
+}
+
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// BALANCE
 // ===============================
 
 
 function updateBalance(){
 
 
+
 let balance =
 
 window.totalFunds -
+
 window.currentExpenses;
 
 
 
-reportData.remaining = balance;
+reportData.remaining =
+balance;
 
 
 
+setText(
 
-let element =
-document.getElementById("remainingBalance");
+"remainingBalance",
 
+"₱"+balance.toLocaleString()
 
-
-if(element){
-
-
-element.innerHTML =
-
-"₱"+balance.toLocaleString();
-
-
-}
+);
 
 
 
@@ -472,7 +709,37 @@ element.innerHTML =
 
 
 // ===============================
-// PROGRESS BAR
+// SAFE TEXT UPDATE
+// ===============================
+
+
+function setText(id,value){
+
+
+let el =
+document.getElementById(id);
+
+
+
+if(el){
+
+el.innerHTML=value;
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// PROGRESS
 // ===============================
 
 
@@ -480,7 +747,7 @@ function updateProgress(data){
 
 
 
-let max = Math.max(
+let max=Math.max(
 
 data["First Year"],
 
@@ -494,40 +761,30 @@ data["Fourth Year"]
 
 
 
-if(max===0) return;
+if(max===0)return;
 
 
 
-document
-.getElementById("firstProgress")
-.style.width =
+
+document.getElementById("firstProgress").style.width=
 
 (data["First Year"]/max*100)+"%";
 
 
 
-
-document
-.getElementById("secondProgress")
-.style.width =
+document.getElementById("secondProgress").style.width=
 
 (data["Second Year"]/max*100)+"%";
 
 
 
-
-document
-.getElementById("thirdProgress")
-.style.width =
+document.getElementById("thirdProgress").style.width=
 
 (data["Third Year"]/max*100)+"%";
 
 
 
-
-document
-.getElementById("fourthProgress")
-.style.width =
+document.getElementById("fourthProgress").style.width=
 
 (data["Fourth Year"]/max*100)+"%";
 
@@ -543,12 +800,11 @@ document
 
 
 // ===============================
-// COLLECTION BAR CHART
+// COLLECTION CHART
 // ===============================
 
 
 function createCollectionChart(data){
-
 
 
 let canvas =
@@ -556,7 +812,7 @@ document.getElementById("collectionChart");
 
 
 
-if(!canvas) return;
+if(!canvas)return;
 
 
 
@@ -570,27 +826,16 @@ collectionChart.destroy();
 
 
 
-collectionChart = new Chart(canvas,{
+collectionChart=new Chart(canvas,{
 
 
 type:"bar",
 
 
-
 data:{
 
 
-labels:[
-
-"First Year",
-
-"Second Year",
-
-"Third Year",
-
-"Fourth Year"
-
-],
+labels:Object.keys(data),
 
 
 
@@ -600,17 +845,7 @@ datasets:[{
 label:"Collected Funds",
 
 
-data:[
-
-data["First Year"],
-
-data["Second Year"],
-
-data["Third Year"],
-
-data["Fourth Year"]
-
-]
+data:Object.values(data)
 
 
 }]
@@ -625,13 +860,11 @@ options:{
 
 responsive:true
 
-
 }
 
 
 
 });
-
 
 
 }
@@ -645,7 +878,7 @@ responsive:true
 
 
 // ===============================
-// BUDGET PIE CHART
+// PIE CHART
 // ===============================
 
 
@@ -658,7 +891,7 @@ document.getElementById("budgetChart");
 
 
 
-if(!canvas) return;
+if(!canvas)return;
 
 
 
@@ -671,11 +904,11 @@ budgetChart.destroy();
 
 
 
-budgetChart = new Chart(canvas,{
+
+budgetChart=new Chart(canvas,{
 
 
-type:"pie",
-
+type:"doughnut",
 
 
 data:{
@@ -685,7 +918,7 @@ labels:[
 
 "Expenses",
 
-"Remaining Balance"
+"Remaining"
 
 ],
 
@@ -698,8 +931,11 @@ data:[
 window.currentExpenses,
 
 Math.max(
+
 window.totalFunds-window.currentExpenses,
+
 0
+
 )
 
 ]
@@ -721,6 +957,7 @@ responsive:true
 }
 
 
+
 });
 
 
@@ -736,7 +973,7 @@ responsive:true
 
 
 // ===============================
-// PDF REPORT GENERATOR
+// PDF REPORT
 // ===============================
 
 
@@ -748,7 +985,7 @@ document.getElementById("generateReport");
 if(button){
 
 
-button.addEventListener("click",()=>{
+button.onclick=()=>{
 
 
 
@@ -756,22 +993,16 @@ const {
 
 jsPDF
 
-}
-
-=
-window.jspdf;
+}=window.jspdf;
 
 
 
-let doc =
-new jsPDF();
 
-
+let doc=new jsPDF();
 
 
 
 let y=20;
-
 
 
 
@@ -787,8 +1018,6 @@ doc.text(
 y
 
 );
-
-
 
 
 
@@ -829,8 +1058,8 @@ y
 
 
 
-y+=20;
 
+y+=20;
 
 
 
@@ -870,7 +1099,7 @@ y+=10;
 
 doc.text(
 
-"Remaining: ₱"+
+"Balance: ₱"+
 reportData.remaining.toLocaleString(),
 
 20,
@@ -881,13 +1110,14 @@ y
 
 
 
+
 y+=20;
 
 
 
 doc.text(
 
-"Collection Breakdown:",
+"Projects:",
 
 20,
 
@@ -901,15 +1131,15 @@ y+=10;
 
 
 
-Object.keys(reportData.years)
-.forEach(year=>{
+
+reportData.projects.forEach(project=>{
 
 
 doc.text(
 
-year+
-": ₱"+
-reportData.years[year].toLocaleString(),
+project.name+
+" - ₱"+
+Number(project.budget).toLocaleString(),
 
 20,
 
@@ -918,11 +1148,12 @@ y
 );
 
 
-
 y+=10;
 
 
+
 });
+
 
 
 
@@ -935,7 +1166,7 @@ doc.save(
 
 
 
-});
+};
 
 
 }
@@ -949,10 +1180,43 @@ doc.save(
 
 
 // ===============================
-// START SYSTEM
+// LOADING
+// ===============================
+
+
+function hideLoader(){
+
+
+let loader =
+document.getElementById("loader");
+
+
+if(loader){
+
+loader.style.display="none";
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// START
 // ===============================
 
 
 loadCollections();
 
+
 loadProjects();
+
+
+loadExpenses();
