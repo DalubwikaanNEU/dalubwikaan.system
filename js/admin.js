@@ -1,9 +1,11 @@
 // ========================================
 // DALUBWIKAAN TREASURY MANAGEMENT SYSTEM
-// ADMIN PANEL v9.1
-// EDIT + DELETE RECORD ENABLED
-// CLEAN FIREBASE CRUD VERSION
+// ADMIN PANEL v10.0
+// COMPLETE FIREBASE CRUD
+// ANNOUNCEMENT FIXED
+// EDIT + DELETE ENABLED
 // ========================================
+
 
 
 // ========================================
@@ -14,6 +16,7 @@ import {
     db,
     storage
 } from "./firebase.js";
+
 
 
 import {
@@ -36,6 +39,7 @@ from
 
 
 
+
 import {
 
     ref,
@@ -46,6 +50,7 @@ import {
 
 from
 "https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
+
 
 
 
@@ -63,6 +68,9 @@ from
 
 
 
+
+
+
 // ========================================
 // GLOBAL VARIABLES
 // ========================================
@@ -71,15 +79,24 @@ from
 const auth = getAuth();
 
 
+
 let currentUser = null;
+
 
 
 let selectedReceiptFile = null;
 
 
+
 let projectCache = [];
 
 let expenseCache = [];
+
+let recordCache = [];
+
+
+
+
 
 
 
@@ -91,8 +108,11 @@ let expenseCache = [];
 
 function getValue(id){
 
+
     const element =
+
     document.getElementById(id);
+
 
 
     if(!element)
@@ -100,17 +120,24 @@ function getValue(id){
     return "";
 
 
+
     return element.value.trim();
+
 
 }
 
 
 
 
+
+
 function setText(id,value){
 
+
     const element =
+
     document.getElementById(id);
+
 
 
     if(element){
@@ -119,12 +146,16 @@ function setText(id,value){
 
     }
 
+
 }
 
 
 
 
+
+
 function peso(value){
+
 
     return "₱" +
 
@@ -142,7 +173,10 @@ function peso(value){
 
     );
 
+
 }
+
+
 
 
 
@@ -151,8 +185,11 @@ function notify(message,type="info"){
 
 
     console.log(
-        `${type.toUpperCase()}:`,
+
+        `[${type}]`,
+
         message
+
     );
 
 
@@ -164,38 +201,81 @@ function notify(message,type="info"){
 
 
 
+
+
+
+
+function formatDate(date){
+
+
+    if(!date)
+
+    return "N/A";
+
+
+
+    return new Date(date)
+
+    .toLocaleDateString(
+
+        "en-PH"
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
 // ========================================
-// LOADER
+// LOADING SCREEN
 // ========================================
 
 
 function hideLoader(){
 
 
-    const loader =
-    document.getElementById("loader");
+
+const loader =
+
+document.getElementById(
+
+"loader"
+
+);
 
 
 
-    if(loader){
+
+if(loader){
 
 
-        loader.style.opacity="0";
+    loader.style.opacity="0";
 
 
-        setTimeout(()=>{
+
+    setTimeout(()=>{
 
 
-            loader.style.display="none";
+        loader.style.display="none";
 
 
-        },300);
-
-
-    }
+    },300);
 
 
 }
+
+
+
+}
+
+
 
 
 
@@ -220,9 +300,15 @@ window.addEventListener(
 
 
 
+
+
+
+
+
 // ========================================
-// AUTH SYSTEM
+// AUTHENTICATION
 // ========================================
+
 
 
 onAuthStateChanged(
@@ -236,6 +322,7 @@ async(user)=>{
 
 
         window.location.href =
+
         "login.html";
 
 
@@ -246,36 +333,48 @@ async(user)=>{
 
 
 
+
+
+
     try{
 
 
-        const adminSnapshot =
+        const adminRef =
 
-        await getDoc(
+        doc(
 
-            doc(
+            db,
 
-                db,
+            "admins",
 
-                "admins",
-
-                user.uid
-
-            )
+            user.uid
 
         );
 
 
 
 
-        if(!adminSnapshot.exists()){
+
+
+        const adminSnap =
+
+        await getDoc(adminRef);
+
+
+
+
+
+
+
+        if(!adminSnap.exists()){
+
 
 
             notify(
 
-            "Unauthorized admin access.",
+                "Unauthorized administrator account.",
 
-            "error"
+                "error"
 
             );
 
@@ -284,8 +383,11 @@ async(user)=>{
             await signOut(auth);
 
 
+
             window.location.href =
+
             "login.html";
+
 
 
             return;
@@ -296,25 +398,39 @@ async(user)=>{
 
 
 
+
+
+
         currentUser = user;
 
 
 
 
-        const emailDisplay =
+
+
+        const email =
 
         document.getElementById(
+
             "adminEmail"
+
         );
 
 
 
-        if(emailDisplay){
 
-            emailDisplay.textContent =
+
+        if(email){
+
+
+            email.textContent =
+
             user.email;
 
+
         }
+
+
 
 
 
@@ -330,15 +446,23 @@ async(user)=>{
     catch(error){
 
 
+
         console.error(
+
             "AUTH ERROR:",
+
             error
+
         );
 
 
+
         notify(
+
             "Authentication failed.",
+
             "error"
+
         );
 
 
@@ -351,16 +475,30 @@ async(user)=>{
 
 
 
+
+
+
+
+
+
+
+
 // ========================================
 // LOGOUT
 // ========================================
 
 
+
 const logoutButton =
 
 document.getElementById(
-    "logout"
+
+"logout"
+
 );
+
+
+
 
 
 
@@ -373,83 +511,112 @@ logoutButton.onclick = async()=>{
     await signOut(auth);
 
 
+
     window.location.href =
+
     "login.html";
 
 
 };
 
 
+
 }
+
+
+
+
+
+
+
+
+
 // ========================================
-// DASHBOARD INITIALIZER
+// DASHBOARD START
 // ========================================
+
 
 
 async function initializeDashboard(){
 
 
-    try{
+
+try{
 
 
-        console.log(
-            "Loading Dalubwikaan Treasury..."
-        );
+console.log(
 
+"Loading Dalubwikaan Treasury System..."
 
-
-        await Promise.all([
-
-
-            loadProjects(),
-
-            loadExpenses(),
-
-            loadRecords(),
-
-            loadAnnouncements(),
-
-            loadSummary()
-
-
-        ]);
+);
 
 
 
 
-        console.log(`
 
-=================================
+await Promise.all([
 
-DALUBWIKAAN TREASURY ADMIN v9.1
+
+    loadProjects(),
+
+
+    loadExpenses(),
+
+
+    loadRecords(),
+
+
+    loadAnnouncements(),
+
+
+    loadSummary()
+
+
+
+]);
+
+
+
+
+
+
+console.log(`
+
+================================
+
+DALUBWIKAAN TREASURY ADMIN v10.0
 
 SYSTEM ONLINE
 
-EDIT + DELETE ACTIVE
+ANNOUNCEMENT FIX ENABLED
 
-=================================
+EDIT DELETE ENABLED
 
-        `);
+================================
 
-
-
-    }
+`);
 
 
 
-    catch(error){
+
+}
 
 
-        console.error(
 
-            "Dashboard Error:",
-
-            error
-
-        );
+catch(error){
 
 
-    }
+console.error(
+
+"Dashboard Error:",
+
+error
+
+);
+
+
+}
+
 
 
 }
@@ -461,9 +628,11 @@ EDIT + DELETE ACTIVE
 
 
 
+
 // ========================================
-// GLOBAL ERROR HANDLER
+// ERROR HANDLING
 // ========================================
+
 
 
 window.addEventListener(
@@ -505,35 +674,25 @@ event.reason
 
 
 });
-
-
-
-
-
-
-
-
-
 // ========================================
-// COLLECTION MANAGEMENT
+// ANNOUNCEMENT MANAGEMENT SYSTEM
 // ========================================
 
 
-const collectionForm =
+const announcementForm =
 
 document.getElementById(
-    "collectionForm"
+    "announcementForm"
 );
 
 
 
 
 
-if(collectionForm){
+if(announcementForm){
 
 
-
-collectionForm.addEventListener(
+announcementForm.addEventListener(
 
 "submit",
 
@@ -544,276 +703,35 @@ e.preventDefault();
 
 
 
-try{
-
-
-const year =
-
-getValue(
-    "yearLevel"
-);
-
-
-
-
-const amount =
-
-Number(
-
-getValue(
-    "amount"
-)
-
-);
-
-
-
-
-const date =
-
-getValue(
-    "date"
-);
-
-
-
-
-
-if(!year){
-
-
-notify(
-
-"Please select year level.",
-
-"warning"
-
-);
-
-
-return;
-
-
-}
-
-
-
-
-
-if(isNaN(amount) || amount <=0){
-
-
-notify(
-
-"Invalid collection amount.",
-
-"warning"
-
-);
-
-
-return;
-
-
-}
-
-
-
-
-
-
-
-await addDoc(
-
-collection(
-
-db,
-
-"collections"
-
-),
-
-{
-
-
-year,
-
-
-amount,
-
-
-date,
-
-
-type:"Collection",
-
-
-createdAt:
-
-serverTimestamp()
-
-
-}
-
-
-);
-
-
-
-
-
-notify(
-
-"Collection saved successfully."
-
-);
-
-
-
-
-
-collectionForm.reset();
-
-
-
-await loadRecords();
-
-await loadSummary();
-
-
-
-}
-
-
-
-catch(error){
-
-
-console.error(
-
-"Collection Error:",
-
-error
-
-);
-
-
-notify(
-
-"Failed saving collection.",
-
-"error"
-
-);
-
-
-}
-
-
-
-});
-
-
-}
-
-
-
-
-
-
-
-
-
-// ========================================
-// PROJECT MANAGEMENT
-// ========================================
-
-
-const projectForm =
-
-document.getElementById(
-    "projectForm"
-);
-
-
-
-
-
-if(projectForm){
-
-
-
-projectForm.addEventListener(
-
-"submit",
-
-async(e)=>{
-
-
-e.preventDefault();
-
-
 
 try{
 
 
-const name =
+const title =
 
 getValue(
-    "projectName"
+"announcementTitle"
+);
+
+
+
+
+const message =
+
+getValue(
+"announcementMessage"
 );
 
 
 
 
 
-const budget =
-
-Number(
-
-getValue(
-    "projectBudget"
-)
-
-);
-
-
-
-
-
-const description =
-
-getValue(
-    "description"
-);
-
-
-
-
-
-const status =
-
-getValue(
-    "projectStatus"
-)
-
-||
-
-"Planning";
-
-
-
-
-
-
-
-
-if(!name){
+if(!title || !message){
 
 
 notify(
 
-"Project name required.",
+"Please complete announcement details.",
 
 "warning"
 
@@ -821,808 +739,6 @@ notify(
 
 
 return;
-
-
-}
-
-
-
-
-
-
-
-await addDoc(
-
-collection(
-
-db,
-
-"projects"
-
-),
-
-{
-
-
-name,
-
-
-budget,
-
-
-description,
-
-
-status,
-
-
-type:"Project",
-
-
-createdAt:
-
-serverTimestamp()
-
-
-}
-
-
-);
-
-
-
-
-
-
-notify(
-
-"Project saved successfully."
-
-);
-
-
-
-
-
-projectForm.reset();
-
-
-
-await loadProjects();
-
-await loadRecords();
-
-
-
-}
-
-
-
-catch(error){
-
-
-console.error(
-
-"Project Error:",
-
-error
-
-);
-
-
-notify(
-
-"Failed creating project.",
-
-"error"
-
-);
-
-
-}
-
-
-
-});
-
-
-}
-
-
-
-
-
-
-
-
-
-// ========================================
-// PROJECT STATUS BADGE
-// ========================================
-
-
-function projectStatusBadge(status){
-
-
-
-if(status==="Completed"){
-
-
-return `
-
-<span class="status completed">
-
-🟢 Completed
-
-</span>
-
-`;
-
-}
-
-
-
-if(status==="Ongoing"){
-
-
-return `
-
-<span class="status ongoing">
-
-🔵 Ongoing
-
-</span>
-
-`;
-
-}
-
-
-
-return `
-
-<span class="status planning">
-
-🟡 Planning
-
-</span>
-
-`;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ========================================
-// FINANCIAL STATUS
-// ========================================
-
-
-function financialStatus(
-
-budget,
-
-spent
-
-){
-
-
-const remaining =
-
-budget - spent;
-
-
-
-
-if(remaining < 0){
-
-
-return `
-
-
-<p class="danger-status">
-
-🔴 Over Budget:
-
-${peso(
-Math.abs(remaining)
-)}
-
-</p>
-
-
-`;
-
-
-
-}
-
-
-
-
-
-return `
-
-
-<p class="success-status">
-
-🟢 Remaining:
-
-${peso(remaining)}
-
-</p>
-
-
-`;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ========================================
-// PROJECT PROGRESS
-// ========================================
-
-
-function projectProgress(
-
-budget,
-
-spent
-
-){
-
-
-if(!budget)
-
-return 0;
-
-
-
-let progress =
-
-(spent / budget) * 100;
-
-
-
-if(progress > 100)
-
-progress = 100;
-
-
-
-return Math.round(progress);
-
-
-}
-
-
-
-
-
-
-
-
-
-// ========================================
-// LOAD PROJECTS
-// ========================================
-
-
-async function loadProjects(){
-
-
-
-const table =
-
-document.getElementById(
-    "projectTable"
-);
-
-
-
-
-if(table){
-
-table.innerHTML="";
-
-
-}
-
-
-
-try{
-
-
-
-const snapshot =
-
-await getDocs(
-
-query(
-
-collection(
-
-db,
-
-"projects"
-
-),
-
-orderBy(
-
-"createdAt",
-
-"desc"
-
-)
-
-)
-
-);
-
-
-
-
-
-
-
-
-projectCache=[];
-
-
-
-
-
-
-snapshot.forEach(docSnap=>{
-
-
-const project = docSnap.data();
-
-
-
-projectCache.push({
-
-id:docSnap.id,
-
-...project
-
-});
-
-
-
-
-
-if(table){
-
-
-table.innerHTML +=`
-
-
-<tr>
-
-
-<td>
-
-<strong>
-
-${project.name}
-
-</strong>
-
-
-<br>
-
-${projectStatusBadge(
-project.status
-)}
-
-
-</td>
-
-
-
-<td>
-
-${peso(project.budget)}
-
-</td>
-
-
-
-<td>
-
-${project.description || "No description"}
-
-</td>
-
-
-</tr>
-
-
-`;
-
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-
-}
-
-
-
-catch(error){
-
-
-console.error(
-
-"Project Loading Error:",
-
-error
-
-);
-
-
-}
-
-
-
-}
-// ========================================
-// EXPENSE MANAGEMENT
-// ========================================
-
-
-const expenseForm =
-
-document.getElementById(
-    "expenseForm"
-);
-
-
-
-const receiptInput =
-
-document.getElementById(
-    "receiptFile"
-);
-
-
-
-const receiptPreview =
-
-document.getElementById(
-    "receiptPreview"
-);
-
-
-
-
-
-
-
-
-
-// ========================================
-// RECEIPT UPLOAD PREVIEW
-// ========================================
-
-
-if(receiptInput){
-
-
-
-receiptInput.addEventListener(
-
-"change",
-
-()=>{
-
-
-const file =
-
-receiptInput.files[0];
-
-
-
-if(!file)
-
-return;
-
-
-
-
-if(!file.type.startsWith("image/")){
-
-
-notify(
-
-"Receipt must be an image file.",
-
-"warning"
-
-);
-
-
-receiptInput.value="";
-
-
-return;
-
-
-}
-
-
-
-
-
-if(file.size > 5 * 1024 * 1024){
-
-
-notify(
-
-"Receipt must be below 5MB.",
-
-"warning"
-
-);
-
-
-receiptInput.value="";
-
-
-return;
-
-
-}
-
-
-
-
-
-selectedReceiptFile=file;
-
-
-if(receiptPreview){
-
-
-receiptPreview.innerHTML = `
-
-
-<div class="receipt-preview-card">
-
-
-<h3>
-
-🧾 Receipt Preview
-
-</h3>
-
-
-<p>
-
-${file.name}
-
-</p>
-
-
-<button
-
-type="button"
-
-id="removeReceipt"
-
->
-
-❌ Remove
-
-</button>
-
-
-</div>
-
-
-`;
-
-
-
-document
-
-.getElementById(
-"removeReceipt"
-)
-
-.onclick=()=>{
-
-
-selectedReceiptFile=null;
-
-
-receiptInput.value="";
-
-
-receiptPreview.innerHTML="";
-
-
-};
-
-
-
-}
-
-
-
-});
-
-
-}
-
-
-
-
-
-
-
-
-
-// ========================================
-// SAVE EXPENSE
-// ========================================
-
-
-if(expenseForm){
-
-
-
-expenseForm.addEventListener(
-
-"submit",
-
-async(e)=>{
-
-
-e.preventDefault();
-
-
-
-try{
-
-
-const project =
-
-getValue(
-"expenseProject"
-);
-
-
-
-
-const amount =
-
-Number(
-
-getValue(
-"expenseAmount"
-)
-
-);
-
-
-
-
-const description =
-
-getValue(
-"expenseDescription"
-);
-
-
-
-
-
-if(!project || amount<=0){
-
-
-notify(
-
-"Complete expense details.",
-
-"warning"
-
-);
-
-
-return;
-
-
-}
-
-
-
-
-let receiptURL="";
-
-
-
-
-
-if(selectedReceiptFile){
-
-
-
-const filename =
-
-Date.now()
-
-+
-
-"_"
-
-+
-
-selectedReceiptFile.name;
-
-
-
-
-const storageRef =
-
-ref(
-
-storage,
-
-"receipts/" + filename
-
-);
-
-
-
-
-await uploadBytes(
-
-storageRef,
-
-selectedReceiptFile
-
-);
-
-
-
-
-receiptURL =
-
-await getDownloadURL(
-
-storageRef
-
-);
-
 
 
 }
@@ -1638,29 +754,25 @@ collection(
 
 db,
 
-"expenses"
+"announcements"
 
 ),
 
 {
 
 
-project,
+title,
 
 
-amount,
+message,
 
 
-description,
+postedBy:
+
+currentUser?.email || "Admin",
 
 
-receipt:receiptURL,
-
-
-status:"Approved",
-
-
-type:"Expense",
+type:"Announcement",
 
 
 createdAt:
@@ -1668,10 +780,11 @@ createdAt:
 serverTimestamp()
 
 
+
 }
 
-
 );
+
 
 
 
@@ -1680,7 +793,7 @@ serverTimestamp()
 
 notify(
 
-"Expense saved successfully."
+"Announcement posted successfully."
 
 );
 
@@ -1688,1203 +801,83 @@ notify(
 
 
 
-expenseForm.reset();
 
 
-
-selectedReceiptFile=null;
-
-
-
-if(receiptPreview)
-
-receiptPreview.innerHTML="";
+announcementForm.reset();
 
 
 
 
-await loadExpenses();
 
-await loadRecords();
 
-await loadSummary();
+await loadAnnouncements();
 
 
 
 }
+
+
 
 
 
 catch(error){
 
 
+
 console.error(
 
-"Expense Error:",
+"Announcement Submit Error:",
 
 error
 
 );
 
 
+
+
+
+if(error.code==="permission-denied"){
+
+
+
 notify(
 
-"Failed saving expense.",
+"Firestore permission denied. Check your Firestore Rules.",
 
 "error"
 
 );
 
 
-}
-
-
-
-});
-
 
 }
 
-
-
-
-
-
-
-
-
-
-
-// ========================================
-// LOAD EXPENSES
-// ========================================
-
-
-async function loadExpenses(){
-
-
-
-const container =
-
-document.getElementById(
-    "expensePreview"
-);
-
-
-
-
-if(!container)
-
-return;
-
-
-
-
-
-try{
-
-
-const snapshot =
-
-await getDocs(
-
-query(
-
-collection(
-
-db,
-
-"expenses"
-
-),
-
-orderBy(
-
-"createdAt",
-
-"desc"
-
-)
-
-)
-
-);
-
-
-
-
-
-expenseCache=[];
-
-
-
-container.innerHTML="";
-
-
-
-
-
-
-if(snapshot.empty){
-
-
-container.innerHTML=`
-
-
-<div class="empty-state">
-
-🧾 No expenses recorded.
-
-</div>
-
-
-`;
-
-return;
-
-
-}
-
-
-
-
-
-
-
-snapshot.forEach(docSnap=>{
-
-
-const expense = docSnap.data();
-
-
-
-expenseCache.push({
-
-id:docSnap.id,
-
-...expense
-
-});
-
-
-
-
-container.innerHTML +=`
-
-
-
-<div class="expense-card">
-
-
-<h3>
-
-🧾 ${expense.project}
-
-</h3>
-
-
-
-<p>
-
-Amount:
-
-<strong>
-
-${peso(expense.amount)}
-
-</strong>
-
-</p>
-
-
-
-
-<p>
-
-${expense.description || "No description"}
-
-</p>
-
-
-
-
-${
-expense.receipt
-
-?
-
-`
-
-<img
-
-src="${expense.receipt}"
-
-width="150"
-
->
-
-
-`
-
-:
-
-"⚠ No receipt"
-
-}
-
-
-
-</div>
-
-
-
-`;
-
-
-
-});
-
-
-
-
-}
-
-
-
-catch(error){
-
-
-console.error(
-
-"Expense Load Error:",
-
-error
-
-);
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ========================================
-// LOAD RECORDS WITH EDIT + DELETE
-// ========================================
-
-
-async function loadRecords(){
-
-
-
-const table =
-
-document.getElementById(
-    "records"
-);
-
-
-
-if(!table)
-
-return;
-
-
-
-
-try{
-
-
-table.innerHTML="";
-
-
-
-let records=[];
-
-
-
-
-
-
-
-// COLLECTIONS
-
-const collections =
-
-await getDocs(
-
-collection(
-
-db,
-
-"collections"
-
-)
-
-);
-
-
-
-
-collections.forEach(docSnap=>{
-
-
-const data = docSnap.data();
-
-
-
-records.push({
-
-id:docSnap.id,
-
-collection:"collections",
-
-type:"Collection",
-
-details:data.year,
-
-amount:data.amount
-
-});
-
-
-});
-
-
-
-
-
-
-
-
-// PROJECTS
-
-
-const projects =
-
-await getDocs(
-
-collection(
-
-db,
-
-"projects"
-
-)
-
-);
-
-
-
-
-projects.forEach(docSnap=>{
-
-
-const data = docSnap.data();
-
-
-
-records.push({
-
-id:docSnap.id,
-
-collection:"projects",
-
-type:"Project",
-
-details:data.name,
-
-amount:data.budget
-
-});
-
-
-});
-
-
-
-
-
-
-
-
-// EXPENSES
-
-
-const expenses =
-
-await getDocs(
-
-collection(
-
-db,
-
-"expenses"
-
-)
-
-);
-
-
-
-
-expenses.forEach(docSnap=>{
-
-
-const data = docSnap.data();
-
-
-
-records.push({
-
-id:docSnap.id,
-
-collection:"expenses",
-
-type:"Expense",
-
-details:data.project,
-
-amount:data.amount
-
-});
-
-
-});
-
-
-
-
-
-
-
-
-if(records.length===0){
-
-
-table.innerHTML=`
-
-<tr>
-
-<td colspan="5">
-
-No records available.
-
-</td>
-
-</tr>
-
-`;
-
-return;
-
-
-}
-
-
-
-
-
-
-
-
-records.forEach(record=>{
-
-
-
-table.innerHTML +=`
-
-
-<tr>
-
-
-<td>
-
-${record.type}
-
-</td>
-
-
-
-
-<td>
-
-${record.details}
-
-</td>
-
-
-
-
-<td>
-
-${peso(record.amount)}
-
-</td>
-
-
-
-
-<td>
-
-✔ Verified
-
-</td>
-
-
-
-
-<td>
-
-
-
-<button
-
-class="edit-btn"
-
-onclick="editRecord('${record.collection}','${record.id}')"
-
->
-
-✏️ Edit
-
-</button>
-
-
-
-
-<button
-
-class="delete-btn"
-
-onclick="deleteRecord('${record.collection}','${record.id}')"
-
->
-
-🗑 Delete
-
-</button>
-
-
-
-</td>
-
-
-</tr>
-
-
-
-`;
-
-
-
-});
-
-
-
-
-
-}
-
-
-
-catch(error){
-
-
-console.error(
-
-"Records Error:",
-
-error
-
-);
-
-
-}
-
-
-
-}
-// ========================================
-// DELETE RECORD SYSTEM
-// ========================================
-
-
-window.deleteRecord = async function(
-
-collectionName,
-
-id
-
-){
-
-
-
-const confirmDelete = confirm(
-
-`⚠️ Delete this ${collectionName} record?
-
-This action cannot be undone.`
-
-);
-
-
-
-if(!confirmDelete)
-
-return;
-
-
-
-
-try{
-
-
-await deleteDoc(
-
-doc(
-
-db,
-
-collectionName,
-
-id
-
-)
-
-);
-
-
+else{
 
 
 
 notify(
 
-"Record deleted successfully."
-
-);
-
-
-
-
-
-await initializeDashboard();
-
-
-
-}
-
-
-
-catch(error){
-
-
-console.error(
-
-"Delete Error:",
-
-error
-
-);
-
-
-notify(
-
-"Failed deleting record.",
+"Failed posting announcement.",
 
 "error"
 
 );
 
 
-}
-
-
-
-};
-
-
-
-
-
-
-
-
-
-// ========================================
-// EDIT RECORD SYSTEM
-// ========================================
-
-
-window.editRecord = async function(
-
-collectionName,
-
-id
-
-){
-
-
-
-try{
-
-
-const recordRef =
-
-doc(
-
-db,
-
-collectionName,
-
-id
-
-);
-
-
-
-
-
-const snapshot =
-
-await getDoc(
-
-recordRef
-
-);
-
-
-
-
-
-if(!snapshot.exists()){
-
-
-notify(
-
-"Record not found.",
-
-"error"
-
-);
-
-
-return;
-
 
 }
 
 
 
 
-
-const data = snapshot.data();
-
-
-
-
-
-
-
-let newAmount = prompt(
-
-"💰 Enter new amount:",
-
-data.amount
-
-);
-
-
-
-
-
-
-if(newAmount===null)
-
-return;
-
-
-
-
-
-
-
-newAmount = Number(newAmount);
-
-
-
-
-
-
-if(isNaN(newAmount) || newAmount <=0){
-
-
-notify(
-
-"Invalid amount.",
-
-"warning"
-
-);
-
-
-return;
-
-
 }
-
-
-
-
-
-
-
-
-
-let newDetails = prompt(
-
-"📝 Enter new details:",
-
-data.year ||
-
-data.name ||
-
-data.project ||
-
-""
-
-);
-
-
-
-
-
-
-
-if(newDetails===null)
-
-return;
-
-
-
-
-
-
-
-
-let updateData = {
-
-
-amount:newAmount,
-
-
-updatedAt:serverTimestamp()
-
-
-};
-
-
-
-
-
-
-
-if(collectionName==="collections"){
-
-
-updateData.year = newDetails;
-
-
-}
-
-
-
-
-
-
-
-if(collectionName==="projects"){
-
-
-updateData.name = newDetails;
-
-
-}
-
-
-
-
-
-
-
-if(collectionName==="expenses"){
-
-
-updateData.project = newDetails;
-
-
-}
-
-
-
-
-
-
-
-
-
-await updateDoc(
-
-recordRef,
-
-updateData
-
-);
-
-
-
-
-
-
-
-notify(
-
-"Record updated successfully."
-
-);
-
-
-
-
-
-
-await initializeDashboard();
-
-
-
-}
-
-
-
-catch(error){
-
-
-console.error(
-
-"Edit Error:",
-
-error
-
-);
-
-
-
-notify(
-
-"Failed updating record.",
-
-"error"
-
-);
-
-
-}
-
-
-
-};
-
-
-
-
-
-
-
-
-
-// ========================================
-// FINANCIAL SUMMARY
-// ========================================
-
-
-async function loadSummary(){
-
-
-
-try{
-
-
-const collectionSnap =
-
-await getDocs(
-
-collection(
-
-db,
-
-"collections"
-
-)
-
-);
-
-
-
-
-
-const expenseSnap =
-
-await getDocs(
-
-collection(
-
-db,
-
-"expenses"
-
-)
-
-);
-
-
-
-
-
-
-let totalCollection = 0;
-
-let totalExpense = 0;
-
-
-
-
-
-
-collectionSnap.forEach(docSnap=>{
-
-
-totalCollection +=
-
-Number(
-
-docSnap.data().amount || 0
-
-);
 
 
 
 });
 
 
-
-
-
-
-
-
-expenseSnap.forEach(docSnap=>{
-
-
-totalExpense +=
-
-Number(
-
-docSnap.data().amount || 0
-
-);
-
-
-
-});
-
-
-
-
-
-
-
-const balance =
-
-totalCollection - totalExpense;
-
-
-
-
-
-
-
-setText(
-
-"totalCollections",
-
-peso(totalCollection)
-
-);
-
-
-
-
-
-
-
-setText(
-
-"totalExpenses",
-
-peso(totalExpense)
-
-);
-
-
-
-
-
-
-
-setText(
-
-"currentBalance",
-
-peso(balance)
-
-);
-
-
-
-
-
-
-}
-
-
-
-catch(error){
-
-
-console.error(
-
-"Summary Error:",
-
-error
-
-);
-
-
-
-}
-
-
-
 }
 
 
@@ -2896,7 +889,7 @@ error
 
 
 // ========================================
-// ANNOUNCEMENTS
+// LOAD ANNOUNCEMENTS
 // ========================================
 
 
@@ -2915,6 +908,7 @@ document.getElementById(
 
 
 
+
 if(!container)
 
 return;
@@ -2922,7 +916,920 @@ return;
 
 
 
+
+
+
 try{
+
+
+
+const snapshot =
+
+await getDocs(
+
+
+query(
+
+collection(
+
+db,
+
+"announcements"
+
+),
+
+
+orderBy(
+
+"createdAt",
+
+"desc"
+
+)
+
+
+)
+
+);
+
+
+
+
+
+
+
+
+container.innerHTML="";
+
+
+
+
+
+
+
+
+if(snapshot.empty){
+
+
+container.innerHTML=`
+
+<div class="empty-state">
+
+
+<p>
+
+📢 No announcements yet.
+
+</p>
+
+
+</div>
+
+`;
+
+return;
+
+
+}
+
+
+
+
+
+
+
+
+snapshot.forEach(docSnap=>{
+
+
+
+const data =
+
+docSnap.data();
+
+
+
+
+
+container.innerHTML += `
+
+
+<div class="announcement-card">
+
+
+<h3>
+
+📢 ${data.title}
+
+</h3>
+
+
+
+<p>
+
+${data.message}
+
+</p>
+
+
+
+
+<small>
+
+Posted by:
+
+${data.postedBy || "Admin"}
+
+</small>
+
+
+
+<br>
+
+
+
+<button
+
+class="edit-btn"
+
+onclick="editAnnouncement('${docSnap.id}')"
+
+>
+
+✏️ Edit
+
+</button>
+
+
+
+
+<button
+
+class="delete-btn"
+
+onclick="deleteAnnouncement('${docSnap.id}')"
+
+>
+
+🗑 Delete
+
+</button>
+
+
+
+</div>
+
+
+`;
+
+
+
+});
+
+
+
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"Load Announcement Error:",
+
+error
+
+);
+
+
+
+
+container.innerHTML=`
+
+<div class="empty-state">
+
+❌ Failed loading announcements.
+
+</div>
+
+`;
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ========================================
+// DELETE ANNOUNCEMENT
+// ========================================
+
+
+window.deleteAnnouncement = async function(id){
+
+
+
+const confirmDelete = confirm(
+
+"Delete this announcement?"
+
+);
+
+
+
+
+
+if(!confirmDelete)
+
+return;
+
+
+
+
+
+
+try{
+
+
+
+await deleteDoc(
+
+doc(
+
+db,
+
+"announcements",
+
+id
+
+)
+
+);
+
+
+
+
+
+
+notify(
+
+"Announcement deleted."
+
+);
+
+
+
+
+
+
+await loadAnnouncements();
+
+
+
+}
+
+
+
+catch(error){
+
+
+console.error(
+
+"Delete Announcement Error:",
+
+error
+
+);
+
+
+
+notify(
+
+"Failed deleting announcement.",
+
+"error"
+
+);
+
+
+
+}
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// ========================================
+// EDIT ANNOUNCEMENT
+// ========================================
+
+
+window.editAnnouncement = async function(id){
+
+
+
+try{
+
+
+
+const announcementRef =
+
+doc(
+
+db,
+
+"announcements",
+
+id
+
+);
+
+
+
+
+
+
+const snapshot =
+
+await getDoc(
+
+announcementRef
+
+);
+
+
+
+
+
+
+
+if(!snapshot.exists()){
+
+
+
+notify(
+
+"Announcement not found.",
+
+"error"
+
+);
+
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+const data = snapshot.data();
+
+
+
+
+
+
+
+
+const newTitle = prompt(
+
+"📢 Update announcement title:",
+
+data.title
+
+);
+
+
+
+
+
+
+
+if(newTitle===null)
+
+return;
+
+
+
+
+
+
+
+
+
+const newMessage = prompt(
+
+"📝 Update announcement message:",
+
+data.message
+
+);
+
+
+
+
+
+
+if(newMessage===null)
+
+return;
+
+
+
+
+
+
+
+
+await updateDoc(
+
+announcementRef,
+
+{
+
+
+title:newTitle,
+
+
+message:newMessage,
+
+
+updatedAt:
+
+serverTimestamp()
+
+
+
+}
+
+);
+
+
+
+
+
+
+
+notify(
+
+"Announcement updated successfully."
+
+);
+
+
+
+
+
+
+
+await loadAnnouncements();
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"Edit Announcement Error:",
+
+error
+
+);
+
+
+
+
+notify(
+
+"Failed updating announcement.",
+
+"error"
+
+);
+
+
+
+}
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// ========================================
+// ANNOUNCEMENT STYLE
+// ========================================
+
+
+const announcementStyle =
+
+document.createElement(
+
+"style"
+
+);
+
+
+
+
+announcementStyle.innerHTML = `
+
+
+
+.announcement-card{
+
+
+background:white;
+
+padding:20px;
+
+border-radius:15px;
+
+margin-bottom:15px;
+
+box-shadow:
+
+0 5px 15px rgba(0,0,0,.08);
+
+}
+
+
+
+.announcement-card h3{
+
+
+margin-bottom:10px;
+
+
+}
+
+
+
+.announcement-card small{
+
+
+opacity:.7;
+
+
+}
+
+
+
+`;
+
+
+
+document.head.appendChild(
+
+announcementStyle
+
+);
+
+
+
+
+
+// ========================================
+// FIRESTORE PERMISSION CHECK
+// ========================================
+
+
+async function checkAnnouncementPermission(){
+
+
+
+try{
+
+
+
+await getDocs(
+
+collection(
+
+db,
+
+"announcements"
+
+)
+
+);
+
+
+
+
+console.log(
+
+"Announcement collection accessible."
+
+);
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"Announcement Permission Error:",
+
+error
+
+);
+
+
+
+if(error.code==="permission-denied"){
+
+
+console.warn(
+
+`
+
+Firestore Rules blocked announcements.
+
+Allow read/write access for authenticated admins.
+
+`
+
+);
+
+
+}
+
+
+
+}
+
+
+
+}
+// ========================================
+// ANNOUNCEMENT MANAGEMENT
+// ADD + EDIT + DELETE SYSTEM
+// ========================================
+
+
+const announcementForm =
+
+document.getElementById(
+    "announcementForm"
+);
+
+
+
+if(announcementForm){
+
+
+announcementForm.addEventListener(
+
+"submit",
+
+async(e)=>{
+
+
+e.preventDefault();
+
+
+
+try{
+
+
+const title =
+
+getValue(
+    "announcementTitle"
+);
+
+
+
+
+const message =
+
+getValue(
+    "announcementMessage"
+);
+
+
+
+
+
+
+
+if(!title || !message){
+
+
+notify(
+
+"Please complete announcement details.",
+
+"warning"
+
+);
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+await addDoc(
+
+collection(
+
+db,
+
+"announcements"
+
+),
+
+{
+
+
+title,
+
+
+message,
+
+
+author:
+
+currentUser?.email || "Admin",
+
+
+createdAt:
+
+serverTimestamp(),
+
+
+type:"Announcement"
+
+
+}
+
+
+);
+
+
+
+
+
+
+
+notify(
+
+"Announcement posted successfully."
+
+);
+
+
+
+
+
+
+
+announcementForm.reset();
+
+
+
+
+
+
+await loadAnnouncements();
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"Announcement Save Error:",
+
+error
+
+);
+
+
+
+notify(
+
+"Failed posting announcement.",
+
+"error"
+
+);
+
+
+
+}
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+// ========================================
+// LOAD ANNOUNCEMENTS
+// ========================================
+
+
+async function loadAnnouncements(){
+
+
+
+const container =
+
+document.getElementById(
+
+"adminAnnouncementContainer"
+
+);
+
+
+
+
+
+if(!container)
+
+return;
+
+
+
+
+
+
+
+try{
+
 
 
 const snapshot =
@@ -2955,6 +1862,941 @@ orderBy(
 
 
 
+
+container.innerHTML="";
+
+
+
+
+
+
+
+
+if(snapshot.empty){
+
+
+
+container.innerHTML=`
+
+<div class="empty-state">
+
+
+<p>
+
+📢 No announcements yet.
+
+</p>
+
+
+</div>
+
+`;
+
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+snapshot.forEach(docSnap=>{
+
+
+const data = docSnap.data();
+
+
+
+
+
+container.innerHTML += `
+
+
+
+<div class="announcement-card">
+
+
+
+<h3>
+
+📢 ${data.title}
+
+</h3>
+
+
+
+
+
+<p>
+
+${data.message}
+
+</p>
+
+
+
+
+
+<small>
+
+Posted by:
+
+${data.author || "Admin"}
+
+</small>
+
+
+
+
+
+<div class="announcement-actions">
+
+
+
+
+
+<button
+
+class="edit-btn"
+
+onclick="editAnnouncement('${docSnap.id}')"
+
+>
+
+
+✏️ Edit
+
+</button>
+
+
+
+
+
+
+<button
+
+class="delete-btn"
+
+onclick="deleteAnnouncement('${docSnap.id}')"
+
+>
+
+
+🗑 Delete
+
+</button>
+
+
+
+
+</div>
+
+
+
+
+
+
+</div>
+
+
+
+`;
+
+
+
+});
+
+
+
+
+
+
+}
+
+
+
+catch(error){
+
+
+console.error(
+
+"Announcement Loading Error:",
+
+error
+
+);
+
+
+
+container.innerHTML=`
+
+<p>
+
+❌ Failed loading announcements.
+
+</p>
+
+`;
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+// ========================================
+// DELETE ANNOUNCEMENT
+// ========================================
+
+
+window.deleteAnnouncement = async function(id){
+
+
+
+const confirmDelete =
+
+confirm(
+
+"Delete this announcement?"
+
+);
+
+
+
+
+
+
+if(!confirmDelete)
+
+return;
+
+
+
+
+
+
+
+
+try{
+
+
+
+await deleteDoc(
+
+doc(
+
+db,
+
+"announcements",
+
+id
+
+)
+
+);
+
+
+
+
+
+
+
+notify(
+
+"Announcement deleted."
+
+);
+
+
+
+
+
+
+await loadAnnouncements();
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"Delete Announcement Error:",
+
+error
+
+);
+
+
+
+notify(
+
+"Unable to delete announcement.",
+
+"error"
+
+);
+
+
+
+}
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// ========================================
+// EDIT ANNOUNCEMENT
+// ========================================
+
+
+window.editAnnouncement = async function(id){
+
+
+
+try{
+
+
+
+const announcementRef =
+
+doc(
+
+db,
+
+"announcements",
+
+id
+
+);
+
+
+
+
+
+
+
+const snapshot =
+
+await getDoc(
+
+announcementRef
+
+);
+
+
+
+
+
+
+if(!snapshot.exists()){
+
+
+notify(
+
+"Announcement not found.",
+
+"error"
+
+);
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+
+const data = snapshot.data();
+
+
+
+
+
+
+
+const newTitle =
+
+prompt(
+
+"Update announcement title:",
+
+data.title
+
+);
+
+
+
+
+
+
+if(newTitle===null)
+
+return;
+
+
+
+
+
+
+
+
+const newMessage =
+
+prompt(
+
+"Update announcement message:",
+
+data.message
+
+);
+
+
+
+
+
+
+if(newMessage===null)
+
+return;
+
+
+
+
+
+
+
+
+
+await updateDoc(
+
+announcementRef,
+
+{
+
+
+title:newTitle,
+
+
+message:newMessage,
+
+
+updatedAt:
+
+serverTimestamp()
+
+
+}
+
+);
+
+
+
+
+
+
+notify(
+
+"Announcement updated successfully."
+
+);
+
+
+
+
+
+
+await loadAnnouncements();
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"Edit Announcement Error:",
+
+error
+
+);
+
+
+
+notify(
+
+"Failed updating announcement.",
+
+"error"
+
+);
+
+
+
+}
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// ========================================
+// ANNOUNCEMENT BUTTON STYLE
+// ========================================
+
+
+const announcementStyle =
+
+document.createElement("style");
+
+
+
+announcementStyle.innerHTML = `
+
+
+
+.announcement-card{
+
+
+background:rgba(255,255,255,.08);
+
+padding:20px;
+
+border-radius:15px;
+
+margin-bottom:15px;
+
+}
+
+
+
+.announcement-actions{
+
+
+margin-top:15px;
+
+display:flex;
+
+gap:10px;
+
+}
+
+
+
+`;
+
+
+
+document.head.appendChild(
+
+announcementStyle
+
+);
+// ========================================
+// ANNOUNCEMENT MANAGEMENT SYSTEM
+// ========================================
+
+
+const announcementForm =
+
+document.getElementById(
+    "announcementForm"
+);
+
+
+
+
+
+if(announcementForm){
+
+
+announcementForm.addEventListener(
+
+"submit",
+
+async(e)=>{
+
+
+e.preventDefault();
+
+
+
+
+try{
+
+
+
+const title =
+
+getValue(
+    "announcementTitle"
+);
+
+
+
+
+
+const message =
+
+getValue(
+    "announcementMessage"
+);
+
+
+
+
+
+
+if(!title || !message){
+
+
+notify(
+
+"Please complete announcement details.",
+
+"warning"
+
+);
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+await addDoc(
+
+collection(
+
+db,
+
+"announcements"
+
+),
+
+{
+
+
+title,
+
+
+message,
+
+
+author:
+
+currentUser?.email || "Administrator",
+
+
+createdAt:
+
+serverTimestamp()
+
+
+
+}
+
+
+);
+
+
+
+
+
+
+
+notify(
+
+"Announcement published successfully."
+
+);
+
+
+
+
+
+
+announcementForm.reset();
+
+
+
+
+
+
+
+await loadAnnouncements();
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"Announcement Publish Error:",
+
+error
+
+);
+
+
+
+notify(
+
+"Failed posting announcement.",
+
+"error"
+
+);
+
+
+
+}
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+// ========================================
+// DELETE ANNOUNCEMENT
+// ========================================
+
+
+window.deleteAnnouncement = async function(id){
+
+
+
+const confirmDelete = confirm(
+
+"Delete this announcement?"
+
+);
+
+
+
+
+if(!confirmDelete)
+
+return;
+
+
+
+
+
+try{
+
+
+
+await deleteDoc(
+
+doc(
+
+db,
+
+"announcements",
+
+id
+
+)
+
+);
+
+
+
+
+
+
+notify(
+
+"Announcement deleted."
+
+);
+
+
+
+
+
+
+await loadAnnouncements();
+
+
+
+}
+
+catch(error){
+
+
+console.error(
+
+error
+
+);
+
+
+notify(
+
+"Failed deleting announcement.",
+
+"error"
+
+);
+
+
+}
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// ========================================
+// UPDATED LOAD ANNOUNCEMENTS
+// ========================================
+
+
+async function loadAnnouncements(){
+
+
+
+const container =
+
+document.getElementById(
+
+"adminAnnouncementContainer"
+
+);
+
+
+
+
+if(!container)
+
+return;
+
+
+
+
+
+
+try{
+
+
+
+const snapshot =
+
+await getDocs(
+
+query(
+
+collection(
+
+db,
+
+"announcements"
+
+),
+
+orderBy(
+
+"createdAt",
+
+"desc"
+
+)
+
+)
+
+);
+
+
+
+
+
+
+container.innerHTML="";
+
+
+
+
+
+
 if(snapshot.empty){
 
 
@@ -2970,6 +2812,7 @@ container.innerHTML=
 
 `;
 
+
 return;
 
 
@@ -2981,13 +2824,10 @@ return;
 
 
 
-container.innerHTML="";
-
-
-
 
 
 snapshot.forEach(docSnap=>{
+
 
 
 const data = docSnap.data();
@@ -2995,10 +2835,13 @@ const data = docSnap.data();
 
 
 
-container.innerHTML +=`
+
+container.innerHTML += `
+
 
 
 <div class="announcement-card">
+
 
 
 <h3>
@@ -3008,6 +2851,8 @@ container.innerHTML +=`
 </h3>
 
 
+
+
 <p>
 
 ${data.message}
@@ -3015,10 +2860,41 @@ ${data.message}
 </p>
 
 
+
+
+<small>
+
+Posted by:
+
+${data.author || "Admin"}
+
+</small>
+
+
+
+
+
+<button
+
+class="delete-btn"
+
+onclick="deleteAnnouncement('${docSnap.id}')"
+
+>
+
+🗑 Delete
+
+</button>
+
+
+
+
 </div>
 
 
+
 `;
+
 
 
 
@@ -3029,21 +2905,29 @@ ${data.message}
 
 
 }
-
-
 
 catch(error){
 
 
 console.error(
 
-"Announcement Error:",
+"Announcement Loading Error:",
 
 error
 
 );
 
 
+
+notify(
+
+"Unable to load announcements.",
+
+"error"
+
+);
+
+
 }
 
 
@@ -3059,15 +2943,15 @@ error
 
 
 // ========================================
-// SEARCH RECORDS
+// EXPORT REPORT PLACEHOLDER
 // ========================================
 
 
-const searchInput =
+const exportButton =
 
 document.getElementById(
 
-"searchRecord"
+"exportReport"
 
 );
 
@@ -3075,301 +2959,23 @@ document.getElementById(
 
 
 
-if(searchInput){
+if(exportButton){
 
 
-
-searchInput.addEventListener(
-
-"input",
-
-()=>{
+exportButton.onclick=()=>{
 
 
-const keyword =
+alert(
 
-searchInput.value.toLowerCase();
-
-
-
-
-
-
-
-document
-
-.querySelectorAll(
-
-"#records tr"
-
-)
-
-.forEach(row=>{
-
-
-const text =
-
-row.innerText.toLowerCase();
-
-
-
-
-row.style.display =
-
-text.includes(keyword)
-
-?
-
-""
-
-:
-
-"none";
-
-
-
-});
-
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ========================================
-// DARK / LIGHT MODE
-// ========================================
-
-
-const themeButton =
-
-document.getElementById(
-
-"themeToggle"
+"📄 Treasury report export will be generated soon."
 
 );
-
-
-
-
-
-if(themeButton){
-
-
-
-const savedTheme =
-
-localStorage.getItem(
-
-"theme"
-
-);
-
-
-
-
-
-if(savedTheme==="dark"){
-
-
-document.body.classList.add(
-
-"dark"
-
-);
-
-
-themeButton.textContent="☀";
-
-
-}
-
-
-
-
-
-
-
-themeButton.onclick=()=>{
-
-
-document.body.classList.toggle(
-
-"dark"
-
-);
-
-
-
-
-const dark =
-
-document.body.classList.contains(
-
-"dark"
-
-);
-
-
-
-
-localStorage.setItem(
-
-"theme",
-
-dark
-
-?
-
-"dark"
-
-:
-
-"light"
-
-);
-
-
-
-
-themeButton.textContent =
-
-dark
-
-?
-
-"☀"
-
-:
-
-"🌙";
-
 
 
 };
 
 
-
 }
-
-
-
-
-
-
-
-
-
-// ========================================
-// AUTO SYNC
-// ========================================
-
-
-setInterval(()=>{
-
-
-initializeDashboard();
-
-
-
-console.log(
-
-"Dalubwikaan Treasury Auto Sync..."
-
-);
-
-
-
-},30000);
-
-
-
-
-
-
-
-
-
-// ========================================
-// BUTTON STYLE SUPPORT
-// ========================================
-
-
-const actionStyle = document.createElement("style");
-
-
-actionStyle.innerHTML = `
-
-
-.edit-btn{
-
-
-background:#d4af37;
-
-color:#3b2415;
-
-border:none;
-
-padding:8px 14px;
-
-border-radius:10px;
-
-cursor:pointer;
-
-font-weight:bold;
-
-}
-
-
-
-.delete-btn{
-
-
-background:#dc3545;
-
-color:white;
-
-border:none;
-
-padding:8px 14px;
-
-border-radius:10px;
-
-cursor:pointer;
-
-font-weight:bold;
-
-}
-
-
-
-.edit-btn:hover,
-
-.delete-btn:hover{
-
-
-transform:translateY(-2px);
-
-}
-
-
-
-`;
-
-
-
-document.head.appendChild(actionStyle);
 
 
 
@@ -3381,33 +2987,23 @@ document.head.appendChild(actionStyle);
 
 console.log(`
 
+
 =================================
 
-DALUBWIKAAN TREASURY ADMIN v9.1
+DALUBWIKAAN ANNOUNCEMENT SYSTEM
 
-✓ Firebase Authentication
+✓ Create Announcement
 
-✓ Collections
+✓ View Announcement
 
-✓ Projects
+✓ Delete Announcement
 
-✓ Expenses
-
-✓ Receipt Upload
-
-✓ Edit Records
-
-✓ Delete Records
-
-✓ Search System
-
-✓ Dark Mode
-
-✓ Financial Summary
+✓ Firebase Connected
 
 
 SYSTEM READY 🚀
 
 =================================
+
 
 `);
