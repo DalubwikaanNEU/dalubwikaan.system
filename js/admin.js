@@ -1,14 +1,18 @@
 // ========================================
 // DALUBWIKAAN TREASURY MANAGEMENT SYSTEM
-// Admin Panel
+// ADMIN PANEL
 // Firebase Authentication
 // Firestore CRUD
 // Firebase Storage
+// Announcement System
 // ========================================
+
 
 import { db, storage } from "./firebase.js";
 
+
 import {
+
     collection,
     addDoc,
     getDocs,
@@ -18,379 +22,991 @@ import {
     serverTimestamp,
     query,
     orderBy
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+
 
 import {
+
     ref,
     uploadBytes,
     getDownloadURL
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
+
+
 
 import {
+
     getAuth,
     onAuthStateChanged,
     signOut
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+
 
 const auth = getAuth();
+
 let currentUser = null;
+
+
 
 // ========================================
 // LOADER
 // ========================================
 
-window.addEventListener("load", () => {
 
-    setTimeout(() => {
+window.addEventListener("load",()=>{
 
-        document.getElementById("loader")?.remove();
 
-    }, 800);
+    setTimeout(()=>{
+
+
+        document
+        .getElementById("loader")
+        ?.remove();
+
+
+    },800);
+
 
 });
+
+
 
 // ========================================
 // HELPERS
 // ========================================
 
-const value = (id) =>
-    document.getElementById(id)?.value.trim() || "";
 
-const peso = (amount) =>
-    `₱${Number(amount || 0).toLocaleString()}`;
+const value = (id)=>
 
-const notify = (message) => alert(message);
+document
+.getElementById(id)
+?.value
+.trim()
+|| "";
+
+
+
+const peso = (amount)=>
+
+`₱${Number(amount || 0).toLocaleString()}`;
+
+
+
+const notify = (message)=>
+
+alert(message);
+
+
 
 // ========================================
 // AUTHENTICATION
 // ========================================
 
-onAuthStateChanged(auth, async (user) => {
 
-    if (!user) {
+onAuthStateChanged(auth, async(user)=>{
 
-        location.href = "login.html";
+
+    if(!user){
+
+
+        location.href="login.html";
+
         return;
+
 
     }
 
-    try {
 
-        const adminRef = doc(db, "admins", user.uid);
-        const adminDoc = await getDoc(adminRef);
 
-        if (!adminDoc.exists()) {
+    try{
 
-            alert("Access denied.");
+
+        const adminRef =
+
+        doc(
+            db,
+            "admins",
+            user.uid
+        );
+
+
+
+        const adminDoc =
+
+        await getDoc(adminRef);
+
+
+
+
+        if(!adminDoc.exists()){
+
+
+            alert(
+                "Access denied."
+            );
+
 
             await signOut(auth);
 
-            location.href = "login.html";
+
+            location.href="login.html";
+
 
             return;
 
-        }
-
-        currentUser = user;
-
-        const email = document.getElementById("adminEmail");
-
-        if (email) {
-
-            email.textContent = user.email;
 
         }
+
+
+
+        currentUser=user;
+
+
+
+        const email =
+
+        document
+        .getElementById(
+            "adminEmail"
+        );
+
+
+
+        if(email){
+
+
+            email.textContent =
+            user.email;
+
+
+        }
+
+
 
         await refresh();
 
-    }
 
-    catch (error) {
-
-        console.error(error);
-
-        notify("Unable to verify administrator.");
 
     }
+
+
+    catch(error){
+
+
+        console.error(
+            error
+        );
+
+
+        notify(
+            "Unable to verify administrator."
+        );
+
+
+    }
+
+
 
 });
+
+
 
 // ========================================
 // LOGOUT
 // ========================================
 
-document.getElementById("logout")?.addEventListener("click", async () => {
+
+document
+.getElementById("logout")
+?.addEventListener(
+"click",
+async()=>{
+
 
     await signOut(auth);
 
-    location.href = "login.html";
+
+    location.href="login.html";
+
 
 });
+
+
+
 // ========================================
-// AUDIT TRAIL
+// ANNOUNCEMENT SYSTEM
 // ========================================
 
-async function createAudit(action, details) {
 
-    try {
+async function createAnnouncement(
 
-        await addDoc(collection(db, "audit"), {
+title,
 
-            action,
-            details,
+message
 
-            user: currentUser?.email || "Administrator",
+){
 
-            date: new Date().toLocaleString(),
 
-            createdAt: serverTimestamp()
+    try{
 
-        });
+
+        await addDoc(
+
+            collection(
+                db,
+                "announcements"
+            ),
+
+
+            {
+
+
+                title,
+
+                message,
+
+
+                user:
+
+                currentUser?.email
+                ||
+                "Administrator",
+
+
+
+                createdAt:
+
+                serverTimestamp()
+
+
+
+            }
+
+        );
+
+
 
     }
 
-    catch (error) {
 
-        console.error("Audit Error:", error);
+    catch(error){
+
+
+        console.error(
+
+            "Announcement Error:",
+            error
+
+        );
+
 
     }
+
 
 }
+
+
+
+// ========================================
+// ANNOUNCEMENT FORM
+// ========================================
+
+
+const announcementForm =
+
+document
+.getElementById(
+"announcementForm"
+);
+
+
+
+if(announcementForm){
+
+
+announcementForm.addEventListener(
+
+"submit",
+
+async(e)=>{
+
+
+e.preventDefault();
+
+
+
+const title =
+
+value(
+"announcementTitle"
+);
+
+
+
+const message =
+
+value(
+"announcementMessage"
+);
+
+
+
+if(!title || !message){
+
+
+notify(
+"Please complete announcement fields."
+);
+
+
+return;
+
+
+}
+
+
+
+await createAnnouncement(
+
+title,
+
+message
+
+);
+
+
+
+notify(
+"Announcement posted successfully."
+);
+
+
+
+announcementForm.reset();
+
+
+
+await loadAnnouncements();
+
+
+
+}
+
+
+);
+
+
+
+}
+// ========================================
+// LOAD ANNOUNCEMENTS
+// ========================================
+
+
+async function loadAnnouncements(){
+
+
+    const container =
+
+    document
+    .getElementById(
+        "announcementContainer"
+    );
+
+
+
+    if(!container) return;
+
+
+
+    try{
+
+
+        const announcementQuery =
+
+        query(
+
+            collection(
+                db,
+                "announcements"
+            ),
+
+            orderBy(
+                "createdAt",
+                "desc"
+            )
+
+        );
+
+
+
+        const snapshot =
+
+        await getDocs(
+            announcementQuery
+        );
+
+
+
+        if(snapshot.empty){
+
+
+            container.innerHTML = `
+
+            <div class="empty-state">
+
+                <p>
+                No announcements yet.
+                </p>
+
+            </div>
+
+            `;
+
+
+            return;
+
+
+        }
+
+
+
+        container.innerHTML =
+
+        snapshot.docs.map(docSnap=>{
+
+
+            const data =
+            docSnap.data();
+
+
+
+            return `
+
+
+            <div class="panel announcement-card">
+
+
+                <h3>
+                    📢 ${data.title}
+                </h3>
+
+
+
+                <p>
+                    ${data.message}
+                </p>
+
+
+
+                <small>
+
+                    Posted by:
+                    ${data.user || "Administrator"}
+
+                </small>
+
+
+
+            </div>
+
+
+            `;
+
+
+        }).join("");
+
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+
+            "Announcement Load Error:",
+            error
+
+        );
+
+
+
+        container.innerHTML = `
+
+
+        <div class="empty-state">
+
+            <p>
+            Failed to load announcements.
+            </p>
+
+
+        </div>
+
+
+        `;
+
+
+    }
+
+
+}
+
+
+
 
 // ========================================
 // COLLECTION FORM
 // ========================================
 
-const collectionForm = document.getElementById("collectionForm");
 
-if (collectionForm) {
+const collectionForm =
 
-    collectionForm.addEventListener("submit", async (e) => {
+document
+.getElementById(
+"collectionForm"
+);
 
-        e.preventDefault();
 
-        try {
 
-            const year = value("yearLevel");
-            const amount = Number(value("amount"));
-            const date = value("date");
+if(collectionForm){
 
-            // ===========================
-            // VALIDATION
-            // ===========================
 
-            if (!year) {
+collectionForm.addEventListener(
 
-                notify("Please select a year level.");
-                return;
+"submit",
 
-            }
+async(e)=>{
 
-            if (isNaN(amount) || amount <= 0) {
 
-                notify("Enter a valid collection amount.");
-                return;
+e.preventDefault();
 
-            }
 
-            if (!date) {
 
-                notify("Please select a collection date.");
-                return;
+try{
 
-            }
 
-            // ===========================
-            // DATA
-            // ===========================
+const year =
 
-            const data = {
+value(
+"yearLevel"
+);
 
-                year,
-                amount,
-                date,
 
-                type: "Collection",
 
-                createdAt: serverTimestamp()
+const amount =
 
-            };
+Number(
+value(
+"amount"
+)
+);
 
-            // ===========================
-            // SAVE TO FIRESTORE
-            // ===========================
 
-            await addDoc(
-                collection(db, "collections"),
-                data
-            );
 
-            // ===========================
-            // AUDIT LOG
-            // ===========================
+const date =
 
-            await createAudit(
+value(
+"date"
+);
 
-                "Added Collection",
 
-                `${year} • ${peso(amount)}`
 
-            );
+// VALIDATION
 
-            notify("Collection successfully added.");
 
-            collectionForm.reset();
+if(!year){
 
-            await refresh();
 
-        }
+notify(
+"Please select a year level."
+);
 
-        catch (error) {
 
-            console.error("Collection Error:", error);
+return;
 
-            notify("Failed to save collection.");
-
-        }
-
-    });
 
 }
+
+
+
+if(isNaN(amount) || amount <= 0){
+
+
+notify(
+"Enter a valid collection amount."
+);
+
+
+return;
+
+
+}
+
+
+
+if(!date){
+
+
+notify(
+"Please select collection date."
+);
+
+
+return;
+
+
+}
+
+
+
+// SAVE COLLECTION
+
+
+await addDoc(
+
+collection(
+db,
+"collections"
+),
+
+
+{
+
+
+year,
+
+amount,
+
+date,
+
+
+type:
+"Collection",
+
+
+
+createdAt:
+
+serverTimestamp()
+
+
+
+}
+
+
+);
+
+
+
+
+// SUCCESS
+
+
+notify(
+"Collection successfully added."
+);
+
+
+
+collectionForm.reset();
+
+
+
+await refresh();
+
+
+
+}
+
+
+
+catch(error){
+
+
+console.error(
+
+"Collection Error:",
+error
+
+);
+
+
+
+notify(
+"Failed to save collection."
+);
+
+
+
+}
+
+
+
+}
+
+
+
+);
+
+
+
+}
+
+
+
+
 
 // ========================================
 // COLLECTION HELPERS
 // ========================================
 
-function resetCollectionForm() {
+
+function resetCollectionForm(){
+
 
     collectionForm?.reset();
 
-}
-
-function validateCollection(amount) {
-
-    return !isNaN(amount) && amount > 0;
 
 }
+
+
+
+function validateCollection(amount){
+
+
+    return (
+
+        !isNaN(amount)
+
+        &&
+
+        amount > 0
+
+    );
+
+
+}
+
+
+
 // ========================================
 // PROJECT MODULE
-// Add New Project
 // ========================================
 
-const projectForm = document.getElementById("projectForm");
 
-if (projectForm) {
+const projectForm =
 
-    projectForm.addEventListener("submit", async (e) => {
+document
+.getElementById(
+"projectForm"
+);
 
-        e.preventDefault();
 
-        try {
 
-            // ===========================
-            // GET VALUES
-            // ===========================
+if(projectForm){
 
-            const name = value("projectName");
-            const budget = Number(value("projectBudget"));
-            const description = value("description");
 
-            // ===========================
-            // VALIDATION
-            // ===========================
+projectForm.addEventListener(
 
-            if (!name) {
+"submit",
 
-                notify("Please enter the project name.");
-                return;
+async(e)=>{
 
-            }
 
-            if (isNaN(budget) || budget <= 0) {
+e.preventDefault();
 
-                notify("Please enter a valid project budget.");
-                return;
 
-            }
 
-            if (!description) {
+try{
 
-                notify("Please provide a project description.");
-                return;
 
-            }
+const name =
 
-            // ===========================
-            // FIRESTORE DATA
-            // ===========================
+value(
+"projectName"
+);
 
-            const data = {
 
-                name,
-                budget,
-                description,
 
-                status: "Planned",
-                type: "Project",
+const budget =
 
-                createdAt: serverTimestamp()
+Number(
+value(
+"projectBudget"
+)
+);
 
-            };
 
-            // ===========================
-            // SAVE PROJECT
-            // ===========================
 
-            await addDoc(
-                collection(db, "projects"),
-                data
-            );
+const description =
 
-            // ===========================
-            // AUDIT LOG
-            // ===========================
+value(
+"description"
+);
 
-            await createAudit(
 
-                "Added Project",
 
-                `${name} • Budget: ${peso(budget)}`
 
-            );
+// VALIDATION
 
-            notify("Project successfully added.");
 
-            projectForm.reset();
+if(!name){
 
-            await refresh();
 
-        }
+notify(
+"Please enter project name."
+);
 
-        catch (error) {
 
-            console.error("Project Error:", error);
+return;
 
-            notify("Unable to save project.");
-
-        }
-
-    });
 
 }
 
-// ========================================
-// PROJECT HELPERS
-// ========================================
 
-function validateProjectBudget(budget) {
 
-    return !isNaN(budget) && budget > 0;
+if(isNaN(budget) || budget <=0){
+
+
+notify(
+"Enter valid project budget."
+);
+
+
+return;
+
 
 }
 
-function resetProjectForm() {
 
-    projectForm?.reset();
+
+if(!description){
+
+
+notify(
+"Please provide project description."
+);
+
+
+return;
+
+
+}
+
+
+
+// SAVE PROJECT
+
+
+await addDoc(
+
+collection(
+db,
+"projects"
+),
+
+
+{
+
+
+name,
+
+budget,
+
+description,
+
+
+status:
+"Planned",
+
+
+
+type:
+"Project",
+
+
+
+createdAt:
+
+serverTimestamp()
+
+
+
+}
+
+
+);
+
+
+
+
+notify(
+"Project successfully added."
+);
+
+
+
+projectForm.reset();
+
+
+
+await refresh();
+
+
+
+}
+
+
+
+catch(error){
+
+
+console.error(
+
+"Project Error:",
+error
+
+);
+
+
+
+notify(
+"Unable to save project."
+);
+
+
+
+}
+
+
+
+}
+
+
+
+);
+
+
 
 }
 // ========================================
@@ -398,1125 +1014,1653 @@ function resetProjectForm() {
 // Firebase Storage + Firestore
 // ========================================
 
-const expenseForm = document.getElementById("expenseForm");
-const receiptInput = document.getElementById("receiptFile");
-const receiptPreview = document.getElementById("receiptPreview");
+
+const expenseForm =
+
+document
+.getElementById(
+"expenseForm"
+);
+
+
+
+const receiptInput =
+
+document
+.getElementById(
+"receiptFile"
+);
+
+
+
+const receiptPreview =
+
+document
+.getElementById(
+"receiptPreview"
+);
+
+
 
 // ========================================
 // RECEIPT PREVIEW
 // ========================================
 
-if (receiptInput) {
 
-    receiptInput.addEventListener("change", () => {
+if(receiptInput){
 
-        receiptPreview.innerHTML = "";
 
-        const file = receiptInput.files[0];
+receiptInput.addEventListener(
 
-        if (!file) return;
+"change",
 
-        // Image files only
-        if (!file.type.startsWith("image/")) {
+()=>{
 
-            notify("Only image files are allowed.");
 
-            receiptInput.value = "";
+receiptPreview.innerHTML="";
 
-            return;
 
-        }
 
-        // Maximum 5 MB
-        const MAX_SIZE = 5 * 1024 * 1024;
+const file =
 
-        if (file.size > MAX_SIZE) {
+receiptInput.files[0];
 
-            notify("Receipt image must not exceed 5 MB.");
 
-            receiptInput.value = "";
 
-            return;
+if(!file) return;
 
-        }
 
-        receiptPreview.innerHTML = `
-            <img
-                src="${URL.createObjectURL(file)}"
-                alt="Receipt Preview"
-                style="
-                    width:220px;
-                    border-radius:12px;
-                    margin-top:15px;
-                    box-shadow:0 5px 15px rgba(0,0,0,.15);
-                "
-            `;
-    });
+
+if(!file.type.startsWith("image/")){
+
+
+notify(
+"Only image files are allowed."
+);
+
+
+
+receiptInput.value="";
+
+return;
+
 
 }
+
+
+
+
+const MAX_SIZE =
+
+5 * 1024 * 1024;
+
+
+
+if(file.size > MAX_SIZE){
+
+
+notify(
+"Receipt image must not exceed 5MB."
+);
+
+
+
+receiptInput.value="";
+
+
+return;
+
+
+}
+
+
+
+
+receiptPreview.innerHTML = `
+
+
+<img
+
+src="${URL.createObjectURL(file)}"
+
+alt="Receipt Preview"
+
+style="
+
+width:220px;
+
+border-radius:12px;
+
+margin-top:15px;
+
+"
+
+>
+
+
+`;
+
+
+
+}
+
+
+
+);
+
+
+
+}
+
+
+
 
 // ========================================
 // SAVE EXPENSE
 // ========================================
 
-if (expenseForm) {
 
-    expenseForm.addEventListener("submit", async (e) => {
+if(expenseForm){
 
-        e.preventDefault();
 
-        try {
+expenseForm.addEventListener(
 
-            const project = value("expenseProject");
-            const amount = Number(value("expenseAmount"));
-            const description = value("expenseDescription");
+"submit",
 
-            // ===========================
-            // VALIDATION
-            // ===========================
+async(e)=>{
 
-            if (!project) {
 
-                notify("Please select a project.");
-                return;
+e.preventDefault();
 
-            }
 
-            if (isNaN(amount) || amount <= 0) {
 
-                notify("Please enter a valid amount.");
-                return;
+try{
 
-            }
 
-            if (!description) {
+const project =
 
-                notify("Please enter an expense description.");
-                return;
+value(
+"expenseProject"
+);
 
-            }
 
-            let receiptURL = "";
 
-            // ===========================
-            // UPLOAD RECEIPT
-            // ===========================
+const amount =
 
-            const file = receiptInput?.files[0];
+Number(
+value(
+"expenseAmount"
+)
+);
 
-            if (file) {
 
-                const fileName =
-                    `${Date.now()}_${file.name}`;
 
-                const storageRef = ref(
-                    storage,
-                    `receipts/${fileName}`
-                );
+const description =
 
-                await uploadBytes(storageRef, file);
+value(
+"expenseDescription"
+);
 
-                receiptURL = await getDownloadURL(storageRef);
 
-            }
 
-            // ===========================
-            // SAVE FIRESTORE
-            // ===========================
 
-            const expenseData = {
+// VALIDATION
 
-                project,
-                amount,
-                description,
 
-                receipt: receiptURL,
+if(!project){
 
-                status: "Approved",
 
-                type: "Expense",
+notify(
+"Please enter project name."
+);
 
-                date: new Date().toLocaleDateString(),
 
-                createdAt: serverTimestamp()
+return;
 
-            };
-
-            await addDoc(
-                collection(db, "expenses"),
-                expenseData
-            );
-
-            // ===========================
-            // AUDIT
-            // ===========================
-
-            await createAudit(
-
-                "Added Expense",
-
-                `${project} • ${peso(amount)}`
-
-            );
-
-            notify("Expense successfully recorded.");
-
-            expenseForm.reset();
-
-            if (receiptPreview) {
-
-                receiptPreview.innerHTML = "";
-
-            }
-
-            await refresh();
-
-        }
-
-        catch (error) {
-
-            console.error("Expense Error:", error);
-
-            notify("Failed to save expense.");
-
-        }
-
-    });
 
 }
 
-// ========================================
-// EXPENSE HELPERS
-// ========================================
 
-function validateExpense(amount) {
 
-    return !isNaN(amount) && amount > 0;
+if(isNaN(amount) || amount<=0){
+
+
+notify(
+"Please enter valid amount."
+);
+
+
+return;
+
+
+}
+
+
+
+if(!description){
+
+
+notify(
+"Please enter expense details."
+);
+
+
+return;
+
 
 }
 
-function resetExpenseForm() {
 
-    expenseForm?.reset();
 
-    if (receiptPreview) {
 
-        receiptPreview.innerHTML = "";
+let receiptURL="";
 
-    }
 
-}
-// ========================================
-// LOAD ALL RECORDS
-// ========================================
 
-async function loadRecords() {
 
-    const table = document.getElementById("records");
+// UPLOAD RECEIPT
 
-    if (!table) return;
 
-    table.innerHTML = `
-        <tr>
-            <td colspan="4" style="text-align:center;">
-                Loading records...
-            </td>
-        </tr>
-    `;
+const file =
 
-    try {
+receiptInput?.files[0];
 
-        // ========================================
-        // LOAD COLLECTIONS
-        // ========================================
 
-        const collectionsQuery = query(
-            collection(db, "collections"),
-            orderBy("createdAt", "desc")
-        );
 
-        const projectsQuery = query(
-            collection(db, "projects"),
-            orderBy("createdAt", "desc")
-        );
+if(file){
 
-        const expensesQuery = query(
-            collection(db, "expenses"),
-            orderBy("createdAt", "desc")
-        );
 
-        const [
+const fileName =
 
-            collectionsSnap,
-            projectsSnap,
-            expensesSnap
+`${Date.now()}_${file.name}`;
 
-        ] = await Promise.all([
 
-            getDocs(collectionsQuery),
-            getDocs(projectsQuery),
-            getDocs(expensesQuery)
 
-        ]);
+const storageRef =
 
-        const records = [];
+ref(
 
-        // ========================================
-        // COLLECTIONS
-        // ========================================
+storage,
 
-        collectionsSnap.forEach(docSnap => {
+`receipts/${fileName}`
 
-            const data = docSnap.data();
+);
 
-            records.push({
 
-                id: docSnap.id,
-                collection: "collections",
 
-                type: "Collection",
+await uploadBytes(
 
-                title: data.year,
+storageRef,
 
-                details: data.date,
+file
 
-                amount: data.amount,
+);
 
-                receipt: ""
 
-            });
 
-        });
+receiptURL =
 
-        // ========================================
-        // PROJECTS
-        // ========================================
+await getDownloadURL(
 
-        projectsSnap.forEach(docSnap => {
+storageRef
 
-            const data = docSnap.data();
+);
 
-            records.push({
 
-                id: docSnap.id,
-                collection: "projects",
-
-                type: "Project",
-
-                title: data.name,
-
-                details: data.description,
-
-                amount: data.budget,
-
-                receipt: ""
-
-            });
-
-        });
-
-        // ========================================
-        // EXPENSES
-        // ========================================
-
-        expensesSnap.forEach(docSnap => {
-
-            const data = docSnap.data();
-
-            records.push({
-
-                id: docSnap.id,
-                collection: "expenses",
-
-                type: "Expense",
-
-                title: data.project,
-
-                details: data.description,
-
-                amount: data.amount,
-
-                receipt: data.receipt || ""
-
-            });
-
-        });
-
-        updateStats(records);
-
-        // ========================================
-        // EMPTY TABLE
-        // ========================================
-
-        if (records.length === 0) {
-
-            table.innerHTML = `
-                <tr>
-                    <td colspan="4">
-                        No records found.
-                    </td>
-                </tr>
-            `;
-
-            return;
-
-        }
-
-        // ========================================
-        // TABLE RENDER
-        // ========================================
-
-        table.innerHTML = records.map(record => `
-
-            <tr>
-
-                <td>${record.type}</td>
-
-                <td>
-
-                    <strong>${record.title}</strong>
-
-                    <br>
-
-                    ${record.details}
-
-                    ${record.receipt ? `
-
-                    <br><br>
-
-                    <a
-                        href="${record.receipt}"
-                        target="_blank"
-                        rel="noopener"
-                    >
-
-                        🧾 View Receipt
-
-                    </a>
-
-                    ` : ""}
-
-                </td>
-
-                <td>${peso(record.amount)}</td>
-
-                <td>
-
-                    <button
-                        class="delete-btn"
-                        onclick="deleteRecord('${record.collection}','${record.id}')"
-                    >
-
-                        🗑 Delete
-
-                    </button>
-
-                </td>
-
-            </tr>
-
-        `).join("");
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        table.innerHTML = `
-
-            <tr>
-
-                <td colspan="4">
-
-                    Failed to load records.
-
-                </td>
-
-            </tr>
-
-        `;
-
-    }
 
 }
 
+
+
+
+// SAVE EXPENSE
+
+
+await addDoc(
+
+collection(
+db,
+"expenses"
+),
+
+
+{
+
+
+project,
+
+amount,
+
+description,
+
+
+receipt:
+receiptURL,
+
+
+
+status:
+"Approved",
+
+
+
+type:
+"Expense",
+
+
+
+date:
+
+new Date()
+.toLocaleDateString(),
+
+
+
+createdAt:
+
+serverTimestamp()
+
+
+
+}
+
+
+);
+
+
+
+
+notify(
+"Expense successfully recorded."
+);
+
+
+
+expenseForm.reset();
+
+
+
+if(receiptPreview){
+
+
+receiptPreview.innerHTML="";
+
+
+}
+
+
+
+await refresh();
+
+
+
+}
+
+
+
+catch(error){
+
+
+console.error(
+
+"Expense Error:",
+error
+
+);
+
+
+
+notify(
+"Failed to save expense."
+);
+
+
+
+}
+
+
+
+}
+
+
+
+);
+
+
+
+}
+
+
+
+
+// ========================================
+// LOAD TREASURY RECORDS
+// ========================================
+
+
+async function loadRecords(){
+
+
+const table =
+
+document
+.getElementById(
+"records"
+);
+
+
+
+if(!table) return;
+
+
+
+table.innerHTML=`
+
+<tr>
+
+<td colspan="4">
+
+Loading records...
+
+</td>
+
+</tr>
+
+`;
+
+
+
+try{
+
+
+const [
+
+collectionsSnap,
+
+projectsSnap,
+
+expensesSnap
+
+
+] = await Promise.all([
+
+
+
+getDocs(
+
+query(
+
+collection(
+db,
+"collections"
+),
+
+orderBy(
+"createdAt",
+"desc"
+)
+
+)
+
+),
+
+
+
+
+getDocs(
+
+query(
+
+collection(
+db,
+"projects"
+),
+
+orderBy(
+"createdAt",
+"desc"
+)
+
+)
+
+),
+
+
+
+
+getDocs(
+
+query(
+
+collection(
+db,
+"expenses"
+),
+
+orderBy(
+"createdAt",
+"desc"
+)
+
+)
+
+)
+
+
+]);
+
+
+
+
+const records=[];
+
+
+
+
+collectionsSnap.forEach(docSnap=>{
+
+
+const data =
+docSnap.data();
+
+
+
+records.push({
+
+
+id:
+docSnap.id,
+
+
+collection:
+"collections",
+
+
+
+type:
+"Collection",
+
+
+
+title:
+data.year,
+
+
+
+details:
+data.date,
+
+
+
+amount:
+data.amount,
+
+
+
+receipt:""
+
+
+
+});
+
+
+
+});
+
+
+
+
+
+projectsSnap.forEach(docSnap=>{
+
+
+const data =
+docSnap.data();
+
+
+
+records.push({
+
+
+id:
+docSnap.id,
+
+
+collection:
+"projects",
+
+
+
+type:
+"Project",
+
+
+
+title:
+data.name,
+
+
+
+details:
+data.description,
+
+
+
+amount:
+data.budget,
+
+
+
+receipt:""
+
+
+
+});
+
+
+
+});
+
+
+
+
+
+expensesSnap.forEach(docSnap=>{
+
+
+const data =
+docSnap.data();
+
+
+
+records.push({
+
+
+id:
+docSnap.id,
+
+
+collection:
+"expenses",
+
+
+
+type:
+"Expense",
+
+
+
+title:
+data.project,
+
+
+
+details:
+data.description,
+
+
+
+amount:
+data.amount,
+
+
+
+receipt:
+data.receipt || ""
+
+
+
+});
+
+
+
+});
+
+
+
+
+
+updateStats(records);
+
+
+
+
+if(records.length===0){
+
+
+table.innerHTML=`
+
+<tr>
+
+<td colspan="4">
+
+No records available.
+
+</td>
+
+</tr>
+
+`;
+
+return;
+
+
+}
+
+
+
+
+table.innerHTML =
+
+records.map(record=>`
+
+
+<tr>
+
+
+<td>
+
+${record.type}
+
+</td>
+
+
+
+<td>
+
+
+<strong>
+
+${record.title}
+
+</strong>
+
+
+<br>
+
+
+${record.details}
+
+
+
+${record.receipt ? `
+
+
+<br><br>
+
+
+<a href="${record.receipt}"
+
+target="_blank">
+
+🧾 View Receipt
+
+</a>
+
+
+`:""}
+
+
+
+</td>
+
+
+
+
+<td>
+
+${peso(record.amount)}
+
+</td>
+
+
+
+
+<td>
+
+
+<button
+
+class="delete-btn"
+
+onclick="deleteRecord('${record.collection}','${record.id}')"
+
+>
+
+🗑 Delete
+
+</button>
+
+
+
+</td>
+
+
+
+</tr>
+
+
+
+`).join("");
+
+
+
+}
+
+
+
+catch(error){
+
+
+console.error(
+
+"Records Error:",
+error
+
+);
+
+
+
+table.innerHTML=`
+
+<tr>
+
+<td colspan="4">
+
+Failed to load records.
+
+</td>
+
+</tr>
+
+`;
+
+
+
+}
+
+
+
+}
 // ========================================
 // DASHBOARD STATISTICS
 // ========================================
 
-function updateStats(records) {
 
-    const totalRecords = records.length;
+function updateStats(records){
+
+
+    const totalRecords =
+    records.length;
+
+
 
     const totalCollections =
-        records.filter(r => r.type === "Collection").length;
+    records.filter(
+        r=>r.type==="Collection"
+    ).length;
+
+
 
     const totalProjects =
-        records.filter(r => r.type === "Project").length;
+    records.filter(
+        r=>r.type==="Project"
+    ).length;
+
+
 
     const totalExpenses =
-        records.filter(r => r.type === "Expense").length;
+    records.filter(
+        r=>r.type==="Expense"
+    ).length;
 
-    document.getElementById("recordCount").textContent =
-        totalRecords;
 
-    document.getElementById("collectionCount").textContent =
-        totalCollections;
 
-    document.getElementById("projectCount").textContent =
-        totalProjects;
+    document
+    .getElementById("recordCount")
+    ?.textContent = totalRecords;
 
-    document.getElementById("expenseCount").textContent =
-        totalExpenses;
 
-}
-// ========================================
-// AUDIT TRAIL
-// ========================================
 
-async function loadAudit() {
+    document
+    .getElementById("collectionCount")
+    ?.textContent = totalCollections;
 
-    const auditContainer =
-        document.getElementById("auditContainer");
 
-    const auditCount =
-        document.getElementById("auditCount");
 
-    if (!auditContainer) return;
+    document
+    .getElementById("projectCount")
+    ?.textContent = totalProjects;
 
-    auditContainer.innerHTML = `
-        <div class="panel">
-            Loading audit logs...
-        </div>
-    `;
 
-    try {
 
-        const auditQuery = query(
-            collection(db, "audit"),
-            orderBy("createdAt", "desc")
-        );
+    document
+    .getElementById("expenseCount")
+    ?.textContent = totalExpenses;
 
-        const snapshot = await getDocs(auditQuery);
-
-        const logs = [];
-
-        snapshot.forEach(docSnap => {
-
-            logs.push({
-
-                id: docSnap.id,
-                ...docSnap.data()
-
-            });
-
-        });
-
-        auditCount.textContent = logs.length;
-
-        if (logs.length === 0) {
-
-            auditContainer.innerHTML = `
-                <div class="panel">
-
-                    No audit logs found.
-
-                </div>
-            `;
-
-            return;
-
-        }
-
-        auditContainer.innerHTML = logs.map(log => `
-
-            <div class="panel audit-card">
-
-                <h4>
-
-                    ${log.action}
-
-                </h4>
-
-                <p>
-
-                    ${log.details}
-
-                </p>
-
-                <small>
-
-                    👤 ${log.user}
-
-                    <br>
-
-                    🕒 ${log.date}
-
-                </small>
-
-            </div>
-
-        `).join("");
-
-    }
-
-    catch (error) {
-
-        console.error("Audit Error:", error);
-
-        auditContainer.innerHTML = `
-            <div class="panel">
-
-                Failed to load audit logs.
-
-            </div>
-        `;
-
-    }
 
 }
+
+
+
+
 
 // ========================================
 // DELETE RECORD
 // ========================================
 
-window.deleteRecord = async (collectionName, documentId) => {
 
-    const confirmDelete = confirm(
+window.deleteRecord = async(
 
-        "Are you sure you want to delete this record?"
+collectionName,
 
-    );
+documentId
 
-    if (!confirmDelete) return;
+)=>{
 
-    try {
 
-        await deleteDoc(
-            doc(db, collectionName, documentId)
-        );
+const confirmDelete =
 
-        await createAudit(
+confirm(
+"Are you sure you want to delete this record?"
+);
 
-            "Deleted Record",
 
-            `${collectionName} • ${documentId}`
 
-        );
+if(!confirmDelete)
+return;
 
-        notify("Record deleted successfully.");
 
-        await refresh();
 
-    }
+try{
 
-    catch (error) {
 
-        console.error("Delete Error:", error);
+await deleteDoc(
 
-        notify("Unable to delete the selected record.");
+doc(
 
-    }
+db,
+
+collectionName,
+
+documentId
+
+)
+
+);
+
+
+
+notify(
+"Record deleted successfully."
+);
+
+
+
+await refresh();
+
+
+
+}
+
+
+
+catch(error){
+
+
+console.error(
+
+"Delete Error:",
+
+error
+
+);
+
+
+
+notify(
+"Unable to delete record."
+);
+
+
+
+}
+
+
 
 };
 
+
+
+
+
+
 // ========================================
-// LIVE SEARCH
+// SEARCH RECORDS
 // ========================================
+
 
 const searchInput =
-    document.getElementById("searchRecord");
 
-if (searchInput) {
+document
+.getElementById(
+"searchRecord"
+);
 
-    searchInput.addEventListener("keyup", () => {
 
-        const keyword =
-            searchInput.value.toLowerCase().trim();
 
-        const rows =
-            document.querySelectorAll("#records tr");
+if(searchInput){
 
-        rows.forEach(row => {
 
-            const text =
-                row.textContent.toLowerCase();
+searchInput.addEventListener(
 
-            row.style.display =
-                text.includes(keyword)
-                    ? ""
-                    : "none";
+"keyup",
 
-        });
+()=>{
 
-    });
+
+const keyword =
+
+searchInput.value
+.toLowerCase()
+.trim();
+
+
+
+const rows =
+
+document
+.querySelectorAll(
+"#records tr"
+);
+
+
+
+rows.forEach(row=>{
+
+
+const text =
+
+row.textContent
+.toLowerCase();
+
+
+
+row.style.display =
+
+text.includes(keyword)
+
+?
+
+""
+
+:
+
+"none";
+
+
+
+});
+
+
 
 }
+
+
+
+);
+
+
+
+}
+
+
+
+
+
+
+// ========================================
+// FINANCIAL SUMMARY
+// ========================================
+
+
+async function loadFinancialSummary(){
+
+
+try{
+
+
+const [
+
+collectionsSnap,
+
+expensesSnap
+
+
+]=await Promise.all([
+
+
+
+getDocs(
+
+collection(
+db,
+"collections"
+)
+
+),
+
+
+
+getDocs(
+
+collection(
+db,
+"expenses"
+)
+
+)
+
+
+
+]);
+
+
+
+let totalCollections = 0;
+
+let totalExpenses = 0;
+
+
+
+collectionsSnap.forEach(doc=>{
+
+
+totalCollections +=
+
+Number(
+doc.data().amount || 0
+);
+
+
+
+});
+
+
+
+
+
+expensesSnap.forEach(doc=>{
+
+
+totalExpenses +=
+
+Number(
+doc.data().amount || 0
+);
+
+
+
+});
+
+
+
+
+
+const balance =
+
+totalCollections -
+totalExpenses;
+
+
+
+
+document
+.getElementById(
+"totalCollections"
+)
+?.textContent =
+
+peso(totalCollections);
+
+
+
+
+
+document
+.getElementById(
+"totalExpenses"
+)
+?.textContent =
+
+peso(totalExpenses);
+
+
+
+
+
+document
+.getElementById(
+"currentBalance"
+)
+?.textContent =
+
+peso(balance);
+
+
+
+
+
+}
+
+
+
+catch(error){
+
+
+console.error(
+
+"Financial Summary Error:",
+
+error
+
+);
+
+
+
+}
+
+
+
+}
+
+
+
+
 
 // ========================================
 // REFRESH SYSTEM
 // ========================================
 
-async function refresh() {
 
-    try {
+async function refresh(){
 
-        await Promise.all([
 
-            loadRecords(),
+try{
 
-            loadAudit()
 
-        ]);
+await Promise.all([
 
-    }
 
-    catch (error) {
+loadRecords(),
 
-        console.error("Refresh Error:", error);
 
-    }
+loadAnnouncements(),
 
-}
 
-// ========================================
-// AUTO REFRESH
-// ========================================
+loadFinancialSummary()
 
-refresh();
-// ========================================
-// FINANCIAL ANALYTICS
-// Dashboard Summary
-// ========================================
 
-async function loadFinancialSummary() {
+]);
 
-    try {
 
-        const [
-            collectionsSnap,
-            projectsSnap,
-            expensesSnap
-
-        ] = await Promise.all([
-
-            getDocs(collection(db, "collections")),
-            getDocs(collection(db, "projects")),
-            getDocs(collection(db, "expenses"))
-
-        ]);
-
-        let totalCollections = 0;
-        let totalExpenses = 0;
-        let totalProjectBudget = 0;
-
-        // ===============================
-        // COLLECTIONS
-        // ===============================
-
-        collectionsSnap.forEach(doc => {
-
-            const data = doc.data();
-
-            totalCollections += Number(data.amount || 0);
-
-        });
-
-        // ===============================
-        // PROJECT BUDGETS
-        // ===============================
-
-        projectsSnap.forEach(doc => {
-
-            const data = doc.data();
-
-            totalProjectBudget += Number(data.budget || 0);
-
-        });
-
-        // ===============================
-        // EXPENSES
-        // ===============================
-
-        expensesSnap.forEach(doc => {
-
-            const data = doc.data();
-
-            totalExpenses += Number(data.amount || 0);
-
-        });
-
-        // ===============================
-        // COMPUTATIONS
-        // ===============================
-
-        const currentBalance =
-            totalCollections - totalExpenses;
-
-        // ===============================
-        // UPDATE DASHBOARD
-        // ===============================
-
-        document.getElementById("totalCollection").textContent =
-            peso(totalCollections);
-
-        document.getElementById("totalExpenses").textContent =
-            peso(totalExpenses);
-
-        document.getElementById("currentBalance").textContent =
-            peso(currentBalance);
-
-        document.getElementById("totalProjects").textContent =
-            peso(totalProjectBudget);
-
-        // ===============================
-        // TREASURY STATUS
-        // ===============================
-
-        const status =
-            document.getElementById("dashboardStatus");
-
-        if (status) {
-
-            if (currentBalance > 0) {
-
-                status.textContent =
-                    "🟢 Treasury Status: Healthy";
-
-                status.style.color = "#16a34a";
-
-            }
-
-            else if (currentBalance === 0) {
-
-                status.textContent =
-                    "🟡 Treasury Status: Balanced";
-
-                status.style.color = "#ca8a04";
-
-            }
-
-            else {
-
-                status.textContent =
-                    "🔴 Treasury Status: Deficit";
-
-                status.style.color = "#dc2626";
-
-            }
-
-        }
-
-    }
-
-    catch (error) {
-
-        console.error("Financial Summary Error:", error);
-
-    }
 
 }
 
-// ========================================
-// QUICK ANALYTICS
-// ========================================
 
-function getExpensePercentage(collections, expenses) {
 
-    if (collections === 0) return 0;
+catch(error){
 
-    return ((expenses / collections) * 100).toFixed(2);
 
-}
+console.error(
 
-// ========================================
-// DASHBOARD OVERVIEW
-// ========================================
+"Refresh Error:",
 
-async function updateDashboardAnalytics() {
-
-    const collectionsSnap =
-        await getDocs(collection(db, "collections"));
-
-    const expensesSnap =
-        await getDocs(collection(db, "expenses"));
-
-    let income = 0;
-    let expense = 0;
-
-    collectionsSnap.forEach(doc => {
-
-        income += Number(doc.data().amount || 0);
-
-    });
-
-    expensesSnap.forEach(doc => {
-
-        expense += Number(doc.data().amount || 0);
-
-    });
-
-    const percent =
-        getExpensePercentage(income, expense);
-
-    const analytics =
-        document.getElementById("expensePercentage");
-
-    if (analytics) {
-
-        analytics.textContent =
-            `${percent}% of collected funds have been spent.`;
-
-    }
-
-}
-
-// ========================================
-// LOAD ANALYTICS
-// ========================================
-
-async function loadAnalytics() {
-
-    await Promise.all([
-
-        loadFinancialSummary(),
-
-        updateDashboardAnalytics()
-
-    ]);
-
-}
-// ========================================
-// DALUBWIKAAN TREASURY SYSTEM
-// FINAL UTILITIES
-// ========================================
-
-// ========================================
-// DARK MODE
-// ========================================
-
-const themeButton = document.getElementById("themeToggle");
-
-if (themeButton) {
-
-    const savedTheme =
-        localStorage.getItem("theme") || "light";
-
-    document.body.classList.toggle(
-        "dark",
-        savedTheme === "dark"
-    );
-
-    themeButton.textContent =
-        savedTheme === "dark"
-            ? "☀ Light Mode"
-            : "🌙 Dark Mode";
-
-    themeButton.addEventListener("click", () => {
-
-        document.body.classList.toggle("dark");
-
-        const dark =
-            document.body.classList.contains("dark");
-
-        localStorage.setItem(
-            "theme",
-            dark ? "dark" : "light"
-        );
-
-        themeButton.textContent =
-            dark
-                ? "☀ Light Mode"
-                : "🌙 Dark Mode";
-
-    });
-
-}
-
-// ========================================
-// EXPORT RECORDS (CSV)
-// ========================================
-
-window.exportCSV = () => {
-
-    const table =
-        document.getElementById("records");
-
-    if (!table) return;
-
-    let csv = [];
-
-    table.querySelectorAll("tr").forEach(row => {
-
-        const cols = [...row.querySelectorAll("td,th")];
-
-        csv.push(
-
-            cols
-                .map(col =>
-                    `"${col.innerText.replace(/"/g, '""')}"`
-                )
-                .join(",")
-
-        );
-
-    });
-
-    const blob = new Blob(
-
-        [csv.join("\n")],
-
-        { type: "text/csv;charset=utf-8;" }
-
-    );
-
-    const link =
-        document.createElement("a");
-
-    link.href =
-        URL.createObjectURL(blob);
-
-    link.download =
-        `Treasury_Report_${Date.now()}.csv`;
-
-    link.click();
-
-};
-
-// ========================================
-// AUTO REFRESH
-// ========================================
-
-setInterval(async () => {
-
-    try {
-
-        await refresh();
-
-        await loadAnalytics();
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-    }
-
-}, 30000);
-
-// ========================================
-// SYSTEM INITIALIZATION
-// ========================================
-
-async function initializeDashboard() {
-
-    try {
-
-        await Promise.all([
-
-            refresh(),
-
-            loadAnalytics()
-
-        ]);
-
-        console.log(
-            "Dalubwikaan Treasury System Ready."
-        );
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "Initialization Error:",
-            error
-        );
-
-    }
-
-}
-
-initializeDashboard();
-
-// ========================================
-// GLOBAL ERROR HANDLER
-// ========================================
-
-window.addEventListener("error", event => {
-
-    console.error(
-
-        "Unexpected Error:",
-
-        event.error
-
-    );
-
-});
-
-// ========================================
-// UNHANDLED PROMISES
-// ========================================
-
-window.addEventListener(
-
-    "unhandledrejection",
-
-    event => {
-
-        console.error(
-
-            "Unhandled Promise:",
-
-            event.reason
-
-        );
-
-    }
+error
 
 );
 
+
+
+}
+
+
+
+}
+
+
+
+
+
+
 // ========================================
-// SECURITY
+// DARK / LIGHT MODE
 // ========================================
 
-// Disable right-click (optional)
-document.addEventListener("contextmenu", e => {
-    e.preventDefault();
+
+const themeButton =
+
+document
+.getElementById(
+"themeToggle"
+);
+
+
+
+if(themeButton){
+
+
+const savedTheme =
+
+localStorage.getItem(
+"theme"
+)
+||
+"light";
+
+
+
+document.body.classList.toggle(
+
+"dark",
+
+savedTheme==="dark"
+
+);
+
+
+
+
+themeButton.textContent =
+
+savedTheme==="dark"
+
+?
+
+"☀ Light Mode"
+
+:
+
+"🌙 Dark Mode";
+
+
+
+
+themeButton.addEventListener(
+
+"click",
+
+()=>{
+
+
+document.body.classList.toggle(
+"dark"
+);
+
+
+
+const dark =
+
+document.body.classList.contains(
+"dark"
+);
+
+
+
+localStorage.setItem(
+
+"theme",
+
+dark
+?
+"dark"
+:
+"light"
+
+);
+
+
+
+themeButton.textContent =
+
+dark
+
+?
+
+"☀ Light Mode"
+
+:
+
+"🌙 Dark Mode";
+
+
+
+}
+
+
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+// ========================================
+// EXPORT CSV
+// ========================================
+
+
+window.exportCSV = ()=>{
+
+
+const table =
+
+document
+.getElementById(
+"records"
+);
+
+
+
+if(!table)
+return;
+
+
+
+let csv=[];
+
+
+
+table
+.querySelectorAll("tr")
+.forEach(row=>{
+
+
+const cols =
+
+[
+...row.querySelectorAll(
+"td,th"
+)
+];
+
+
+
+csv.push(
+
+cols.map(col=>
+
+`"${col.innerText.replace(/"/g,'""')}"`
+
+)
+
+.join(",")
+
+);
+
+
+
 });
 
-// Disable common developer shortcuts (optional)
-document.addEventListener("keydown", e => {
 
-    if (
-        e.key === "F12" ||
-        (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key.toUpperCase())) ||
-        (e.ctrlKey && e.key.toUpperCase() === "U")
-    ) {
 
-        e.preventDefault();
 
-    }
+const blob =
 
-});
+new Blob(
+
+[
+csv.join("\n")
+],
+
+{
+
+type:
+"text/csv;charset=utf-8;"
+
+}
+
+);
+
+
+
+const link =
+
+document.createElement(
+"a"
+);
+
+
+
+link.href =
+
+URL.createObjectURL(
+blob
+);
+
+
+
+link.download =
+
+`Dalubwikaan_Treasury_${Date.now()}.csv`;
+
+
+
+link.click();
+
+
+
+};
+
+
+
+
+
+
 
 // ========================================
-// VERSION
+// INITIALIZATION
 // ========================================
+
+
+async function initializeDashboard(){
+
+
+try{
+
+
+await refresh();
+
+
 
 console.log(`
-=========================================
-DALUBWIKAAN TREASURY MANAGEMENT SYSTEM
-Version: 2.0
-Firebase + Authentication
+
+================================
+
+DALUBWIKAAN TREASURY SYSTEM
+
+VERSION 3.0
+
+Firebase Authentication
+
 Firestore CRUD
-Storage
+
+Storage Receipt Upload
+
+Announcement Board
+
 Analytics
-Audit Trail
+
 Dark Mode
+
 CSV Export
-=========================================
+
+================================
+
 `);
+
+
+
+}
+
+
+
+catch(error){
+
+
+console.error(
+
+"Initialization Error:",
+
+error
+
+);
+
+
+
+}
+
+
+
+}
+
+
+
+initializeDashboard();
+
+
+
+
+
+
+// ========================================
+// ERROR HANDLER
+// ========================================
+
+
+window.addEventListener(
+
+"unhandledrejection",
+
+event=>{
+
+
+console.error(
+
+"Unhandled Promise:",
+
+event.reason
+
+);
+
+
+
+}
+
+);
