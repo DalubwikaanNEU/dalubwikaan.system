@@ -1213,10 +1213,14 @@ loader.style.display="none";
 // ===============================
 
 
-loadCollections();
+window.onload = () => {
 
+    alert("Dashboard Loaded");
 
-loadProjects();
+    loadCollections();
 
+    loadProjects();
 
-loadExpenses();
+    loadExpenses();
+
+};
