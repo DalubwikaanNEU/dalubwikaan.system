@@ -784,12 +784,7 @@ function loadProjects(){
 
 
                     const spent =
-
-                    projectExpenses[name]
-
-                    ||
-
-                    0;
+                        Number(data.actualExpenses) || 0;
 
 
 
