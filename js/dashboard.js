@@ -41,7 +41,7 @@ let budgetChart = null;
 
 
 window.totalFunds = 0;
-
+window.expenseTotal = 0;
 window.currentExpenses = 0;
 
 window.totalProjectActualExpenses = 0;
@@ -623,7 +623,7 @@ function loadProjects(){
         projectQuery,
 
         async(projectSnapshot)=>{
-            let totalProjectActualExpenses = 0;
+            window.totalProjectActualExpenses = 0;
 
 
 
@@ -788,7 +788,7 @@ function loadProjects(){
                     const spent =
                         Number(data.actualExpenses) || 0;
 
-                    totalProjectActualExpenses += spent;
+                    window.totalProjectActualExpenses += spent;
 
 
 
@@ -1069,32 +1069,12 @@ function loadProjects(){
 
 
             }
-window.currentExpenses =
-    reportData.expenses + totalProjecActualExpenses;
-
-setText(
-    "totalExpenses",
-    peso(window.currentExpenses)
-
-    );
-
-
-updateBalance();
-updateBudgetChart();
-
-
-
+window.expenseTotal = totalExpenses;
+        updateFinancialSummary();
 
         }
-
-
-
-    );
-
-
-
+);
 }
-
 
 
 
@@ -1423,14 +1403,11 @@ if(snapshot.empty){
 reportData.expenses = totalExpenses;
 
 // Recompute total expenses if projects are already loaded
-let totalProjectActualExpenses = 0;
-
-reportData.projects.forEach(project => {
-    totalProjectActualExpenses += Number(project.spent || 0);
-});
+window.currentExpenses =
+    totalExpenses + window.totalProjectActualExpenses;
 
 window.currentExpenses =
-    totalExpenses + totalProjectActualExpenses;
+    reportData.expenses + window.totalProjectActualExpenses;
 
 setText(
     "totalExpenses",
