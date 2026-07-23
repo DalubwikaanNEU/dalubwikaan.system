@@ -623,7 +623,7 @@ function loadProjects(){
         projectQuery,
 
         async(projectSnapshot)=>{
-            window.totalProjectActualExpenses = 0;
+            window.projectActualExpenseTotal = 0;
 
 
 
@@ -788,7 +788,7 @@ function loadProjects(){
                     const spent =
                         Number(data.actualExpenses) || 0;
 
-                    window.totalProjectActualExpenses += spent;
+                    window.projectActualExpenseTotal += spent;
 
 
 
