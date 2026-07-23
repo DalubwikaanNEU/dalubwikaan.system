@@ -370,7 +370,7 @@ if (projectForm) {
         const budget = Number(getValue("projectBudget"));
         const description = getValue("description");
         const status = getValue("projectStatus");
-
+        const utilizationStatus = getValue("utilizationStatusInput") || "0% done";
         if (!name) {
             notify("Project name is required.");
             return;
@@ -386,6 +386,7 @@ if (projectForm) {
             budget,
             description,
             status
+            utilizationStatus
         });
 
         projectForm.reset();
