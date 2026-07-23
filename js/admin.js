@@ -1565,7 +1565,7 @@ if(collectionForm){
 
         //    return;
 
-        }
+        //}
 
         if(isNaN(amount) || amount<=0){
 
