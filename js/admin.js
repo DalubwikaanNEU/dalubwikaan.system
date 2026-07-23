@@ -2355,14 +2355,6 @@ async function(id){
 
 };
 
-
-
-
-
-
-
-
-
 // ========================================
 // DELETE ANNOUNCEMENT
 // ========================================
@@ -2412,426 +2404,543 @@ async function(id){
 };
 
 
-
-
-
-
-
-
-
 // ========================================
-// COLLECTION MANAGEMENT
+// COLLECTION MANAGEMENT v16.0
 // ========================================
 
+let collectionCache = [];
+
+// ========================================
+// LOAD COLLECTIONS
+// ========================================
+
+async function loadCollections() {
+
+    const container = document.getElementById("collectionContainer");
+
+    if (!container) return;
+
+    try {
+
+        const snapshot = await getDocs(
+            query(
+                collection(db, "collections"),
+                orderBy("createdAt", "desc")
+            )
+        );
+
+        collectionCache = [];
+        container.innerHTML = "";
+
+        if (snapshot.empty) {
+
+            container.innerHTML = `
+            <div class="empty-state">
+                No collection records found.
+            </div>
+            `;
+
+            return;
+        }
+
+        snapshot.forEach(docSnap => {
+
+            const data = docSnap.data();
+
+            collectionCache.push({
+                id: docSnap.id,
+                ...data
+            });
+
+            container.innerHTML += `
+
+            <div class="data-card">
+
+                <h3>💰 ${data.yearLevel}</h3>
+
+                <p>
+                    Collection Date:
+                    <strong>${data.date}</strong>
+                </p>
+
+                <p>
+                    Remarks:
+                    ${data.remarks || "No remarks"}
+                </p>
+
+                <h2>${peso(data.amount)}</h2>
+
+                <br>
+
+                <button onclick="editCollection('${docSnap.id}')">
+                    ✏️ Edit
+                </button>
+
+                <button onclick="deleteCollection('${docSnap.id}')">
+                    🗑 Delete
+                </button>
+
+            </div>
+
+            `;
+
+        });
+
+    }
+
+    catch(error){
+
+        console.error(
+            "LOAD COLLECTION ERROR:",
+            error
+        );
+
+    }
+
+}
+
+// ========================================
+// ADD COLLECTION
+// ========================================
+
+async function addCollection(data){
+
+    await addDoc(
+
+        collection(
+            db,
+            "collections"
+        ),
+
+        {
+
+            ...data,
+
+            createdAt:
+            serverTimestamp()
+
+        }
+
+    );
+
+    notify("Collection saved!");
+
+    loadCollections();
+
+    loadSummary();
+
+}
+
+// ========================================
+// COLLECTION FORM
+// ========================================
 
 const collectionForm =
 document.getElementById(
     "collectionForm"
 );
 
-
-
-
 if(collectionForm){
 
+    collectionForm.addEventListener(
 
+        "submit",
 
-collectionForm.addEventListener(
+        async(e)=>{
 
-"submit",
+            e.preventDefault();
 
-async(e)=>{
+            try{
 
+                const yearLevel =
+                getValue("yearLevel");
 
-    e.preventDefault();
+                const amount =
+                Number(
+                    getValue("amount")
+                );
 
+                const date =
+                getValue("date");
 
+                const remarks =
+                getValue("remarks");
 
-    try{
+                if(!yearLevel){
 
+                    notify(
+                        "Select year level."
+                    );
 
-        const yearLevel =
-        getValue(
-            "yearLevel"
-        );
+                    return;
 
+                }
 
+                if(amount <= 0){
 
-        const amount =
-        Number(
-            getValue(
-                "amount"
-            )
-        );
+                    notify(
+                        "Invalid amount."
+                    );
 
+                    return;
 
+                }
 
-        const date =
-        getValue(
-            "date"
-        );
+                if(!date){
 
+                    notify(
+                        "Select collection date."
+                    );
 
+                    return;
 
+                }
 
+                await addCollection({
 
-        if(!yearLevel || !amount || !date){
+                    yearLevel,
 
+                    amount,
 
-            notify(
-                "Complete collection details."
-            );
+                    date,
 
+                    remarks
 
-            return;
+                });
 
+                collectionForm.reset();
+
+            }
+
+            catch(error){
+
+                console.error(
+                    "COLLECTION FORM ERROR:",
+                    error
+                );
+
+                notify(
+                    error.message,
+                    "error"
+                );
+
+            }
 
         }
 
+    );
+
+}
 
 
 
+// ========================================
+// EDIT COLLECTION
+// ========================================
 
+window.editCollection =
+async function(id){
 
+    try{
 
-        await addDoc(
+        const refDoc =
+        doc(
+            db,
+            "collections",
+            id
+        );
 
-            collection(
-                db,
-                "collections"
-            ),
+        const snap =
+        await getDoc(refDoc);
+
+        if(!snap.exists()) return;
+
+        const data =
+        snap.data();
+
+        const amount =
+        prompt(
+            "Update Collection Amount",
+            data.amount
+        );
+
+        if(amount===null)
+        return;
+
+        const remarks =
+        prompt(
+            "Remarks",
+            data.remarks || ""
+        );
+
+        if(remarks===null)
+        return;
+
+        await updateDoc(
+
+            refDoc,
 
             {
 
+                amount:Number(amount),
 
-                yearLevel,
+                remarks,
 
-
-                amount,
-
-
-                date,
-
-
-                createdAt:
-
+                updatedAt:
                 serverTimestamp()
-
-
 
             }
 
         );
 
-
-
-
-
         notify(
-            "Collection saved!"
+            "Collection updated!"
         );
 
-
-
-
-        collectionForm.reset();
-
-
+        loadCollections();
 
         loadSummary();
 
-
-
     }
-
 
     catch(error){
 
-
         console.error(
-
-            "COLLECTION ERROR:",
-
             error
-
         );
-
-
-        notify(
-            error.message,
-            "error"
-        );
-
 
     }
 
-
-
-}
-
-
-);
-
-
-}
-
-
-
-
-
-
+};
 
 
 
 // ========================================
-// SUMMARY SYSTEM
+// DELETE COLLECTION
 // ========================================
 
+window.deleteCollection =
+async function(id){
 
-async function loadSummary(){
-
+    if(
+        !confirm(
+            "Delete this collection?"
+        )
+    )
+    return;
 
     try{
 
+        await deleteDoc(
 
-        let totalCollections = 0;
+            doc(
 
-        let totalExpenses = 0;
-
-        let totalProjects = 0;
-
-        let totalRecords = 0;
-
-
-
-
-
-
-        const collectionSnap =
-        await getDocs(
-
-            collection(
                 db,
-                "collections"
-            )
 
-        );
+                "collections",
 
-
-
-
-        collectionSnap.forEach(item=>{
-
-
-            totalCollections += Number(
-
-                item.data().amount || 0
-
-            );
-
-
-        });
-
-
-
-
-
-
-
-
-        const expenseSnap =
-        await getDocs(
-
-            collection(
-                db,
-                "expenses"
-            )
-
-        );
-
-
-
-
-        expenseSnap.forEach(item=>{
-
-
-            totalExpenses += Number(
-
-                item.data().amount || 0
-
-            );
-
-
-        });
-
-
-
-
-
-
-
-
-        const projectSnap =
-        await getDocs(
-
-            collection(
-                db,
-                "projects"
-            )
-
-        );
-
-
-
-        totalProjects =
-        projectSnap.size;
-
-
-
-
-
-
-
-
-        const recordSnap =
-        await getDocs(
-
-            collection(
-                db,
-                "records"
-            )
-
-        );
-
-
-
-        totalRecords =
-        recordSnap.size;
-
-
-
-
-
-
-
-
-
-        setText(
-
-            "totalCollections",
-
-            peso(totalCollections)
-
-        );
-
-
-
-
-        setText(
-
-            "summaryCollections",
-
-            peso(totalCollections)
-
-        );
-
-
-
-
-
-
-        setText(
-
-            "totalExpenses",
-
-            peso(totalExpenses)
-
-        );
-
-
-
-
-
-        setText(
-
-            "summaryExpenses",
-
-            peso(totalExpenses)
-
-        );
-
-
-
-
-
-
-
-        setText(
-
-            "currentBalance",
-
-            peso(
-
-                totalCollections -
-
-                totalExpenses
+                id
 
             )
 
         );
 
-
-
-
-
-
-
-        setText(
-
-            "totalRecords",
-
-            totalRecords
-
+        notify(
+            "Collection deleted!"
         );
 
+        loadCollections();
 
-
-
-
-
-
-        setText(
-
-            "totalProjects",
-
-            totalProjects
-
-        );
-
-
-
-
+        loadSummary();
 
     }
-
 
     catch(error){
 
-
         console.error(
-
-            "SUMMARY ERROR:",
-
             error
-
         );
-
 
     }
 
+};
 
+ 
+// ========================================
+// SUMMARY SYSTEM v16.0
+// ========================================
+
+async function loadSummary(){
+
+    try{
+
+        let totalCollections = 0;
+        let totalExpenses = 0;
+
+        let firstYear = 0;
+        let secondYear = 0;
+        let thirdYear = 0;
+        let fourthYear = 0;
+
+        // ===========================
+        // COLLECTIONS
+        // ===========================
+
+        const collectionSnap = await getDocs(
+            collection(db,"collections")
+        );
+
+        collectionSnap.forEach(docSnap=>{
+
+            const data = docSnap.data();
+
+            const amount =
+            Number(data.amount || 0);
+
+            totalCollections += amount;
+
+            switch(
+                (data.yearLevel || "")
+                .trim()
+                .toLowerCase()
+            ){
+
+                case "first year":
+                    firstYear += amount;
+                break;
+
+                case "second year":
+                    secondYear += amount;
+                break;
+
+                case "third year":
+                    thirdYear += amount;
+                break;
+
+                case "fourth year":
+                    fourthYear += amount;
+                break;
+
+            }
+
+        });
+
+        // ===========================
+        // EXPENSES
+        // ===========================
+
+        const expenseSnap =
+        await getDocs(
+            collection(db,"expenses")
+        );
+
+        expenseSnap.forEach(docSnap=>{
+
+            totalExpenses += Number(
+                docSnap.data().amount || 0
+            );
+
+        });
+
+        // ===========================
+        // PROJECT COUNT
+        // ===========================
+
+        const projectSnap =
+        await getDocs(
+            collection(db,"projects")
+        );
+
+        // ===========================
+        // RECORD COUNT
+        // ===========================
+
+        const recordSnap =
+        await getDocs(
+            collection(db,"records")
+        );
+
+        // ===========================
+        // MAIN SUMMARY
+        // ===========================
+
+        setText(
+            "summaryCollections",
+            peso(totalCollections)
+        );
+
+        setText(
+            "totalCollections",
+            peso(totalCollections)
+        );
+
+        setText(
+            "summaryExpenses",
+            peso(totalExpenses)
+        );
+
+        setText(
+            "totalExpenses",
+            peso(totalExpenses)
+        );
+
+        setText(
+            "currentBalance",
+            peso(
+                totalCollections -
+                totalExpenses
+            )
+        );
+
+        setText(
+            "totalProjects",
+            projectSnap.size
+        );
+
+        setText(
+            "totalRecords",
+            recordSnap.size
+        );
+
+        // ===========================
+        // YEAR LEVEL SUMMARY
+        // ===========================
+
+        setText(
+            "firstYearCollection",
+            peso(firstYear)
+        );
+
+        setText(
+            "secondYearCollection",
+            peso(secondYear)
+        );
+
+        setText(
+            "thirdYearCollection",
+            peso(thirdYear)
+        );
+
+        setText(
+            "fourthYearCollection",
+            peso(fourthYear)
+        );
+
+    }
+
+    catch(error){
+
+        console.error(
+            "SUMMARY ERROR:",
+            error
+        );
+
+    }
 
 }
+
+
+    
 // ========================================
 // SEARCH SYSTEM
 // ========================================
@@ -2978,13 +3087,6 @@ if(refreshButton){
 }
 
 
-
-
-
-
-
-
-
 // ========================================
 // EXPORT TREASURY REPORT
 // ========================================
@@ -3077,14 +3179,6 @@ if(exportButton){
 
 }
 
-
-
-
-
-
-
-
-
 // ========================================
 // FIREBASE CONNECTION TEST
 // ========================================
@@ -3148,14 +3242,6 @@ DALUBWIKAAN DATABASE ONLINE
 
 
 }
-
-
-
-
-
-
-
-
 
 // ========================================
 // START SYSTEM
