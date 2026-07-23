@@ -446,7 +446,7 @@ function loadCollections(){
 
             totalFunds;
 
-
+updateFinancialSummary();
 
 
 
