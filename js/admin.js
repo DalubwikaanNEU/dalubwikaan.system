@@ -2410,77 +2410,59 @@ async function(id){
 
 let collectionCache = [];
 
-// ========================================
-// LOAD COLLECTIONS
-// ========================================
+container.innerHTML += `
 
-async function loadCollections() {
+<div class="data-card">
 
-    const container = document.getElementById("collectionContainer");
+    <h3>👤 ${data.studentName || "Unknown Student"}</h3>
 
-    if (!container) return;
+    <p>
+        <strong>Student ID:</strong>
+        ${data.studentId || "N/A"}
+    </p>
 
-    try {
+    <p>
+        <strong>Course:</strong>
+        ${data.course || "N/A"}
+    </p>
 
-        const snapshot = await getDocs(
-            query(
-                collection(db, "collections"),
-                orderBy("createdAt", "desc")
-            )
-        );
+    <p>
+        <strong>Year Level:</strong>
+        ${data.yearLevel || "N/A"}
+    </p>
 
-        collectionCache = [];
-        container.innerHTML = "";
+    <p>
+        <strong>Payment Type:</strong>
+        ${data.paymentType || "N/A"}
+    </p>
 
-        if (snapshot.empty) {
+    <p>
+        <strong>Date:</strong>
+        ${data.date}
+    </p>
 
-            container.innerHTML = `
-            <div class="empty-state">
-                No collection records found.
-            </div>
-            `;
+    <p>
+        <strong>Amount:</strong>
+        ${peso(data.amount)}
+    </p>
 
-            return;
-        }
+    <p>
+        <strong>Remarks:</strong>
+        ${data.remarks || "-"}
+    </p>
 
-        snapshot.forEach(docSnap => {
+    <button onclick="editCollection('${docSnap.id}')">
+        ✏️ Edit
+    </button>
 
-            const data = docSnap.data();
+    <button onclick="deleteCollection('${docSnap.id}')">
+        🗑 Delete
+    </button>
 
-            collectionCache.push({
-                id: docSnap.id,
-                ...data
-            });
+</div>
 
-            container.innerHTML += `
+`;
 
-            <div class="data-card">
-
-                <h3>💰 ${data.yearLevel}</h3>
-
-                <p>
-                    Collection Date:
-                    <strong>${data.date}</strong>
-                </p>
-
-                <p>
-                    Remarks:
-                    ${data.remarks || "No remarks"}
-                </p>
-
-                <h2>${peso(data.amount)}</h2>
-
-                <br>
-
-                <button onclick="editCollection('${docSnap.id}')">
-                    ✏️ Edit
-                </button>
-
-                <button onclick="deleteCollection('${docSnap.id}')">
-                    🗑 Delete
-                </button>
-
-            </div>
 
             `;
 
@@ -2799,27 +2781,19 @@ async function loadSummary(){
 
             totalCollections += amount;
 
-            switch(
-                (data.yearLevel || "")
-                .trim()
-                .toLowerCase()
-            ){
+        const level = (data.yearLevel || "").toLowerCase();
 
-                case "first year":
-                    firstYear += amount;
-                break;
+if(level.includes("1"))
+    firstYear += amount;
 
-                case "second year":
-                    secondYear += amount;
-                break;
+else if(level.includes("2"))
+    secondYear += amount;
 
-                case "third year":
-                    thirdYear += amount;
-                break;
+else if(level.includes("3"))
+    thirdYear += amount;
 
-                case "fourth year":
-                    fourthYear += amount;
-                break;
+else if(level.includes("4"))
+    fourthYear += amount;
 
             }
 
