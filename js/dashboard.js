@@ -1029,7 +1029,7 @@ window.projectActualExpenseTotal += actualExpense;
 
 
 
-                        `;
+                        
 
 
 
@@ -1038,18 +1038,13 @@ window.projectActualExpenseTotal += actualExpense;
         }
 
 
-
-
-
-
-
 if (projectSnapshot.empty && table) {
 
     table.innerHTML = `
         <tr>
             <td colspan="3">
                 No projects available.
-            </td>
+              </td>
         </tr>
     `;
 
