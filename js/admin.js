@@ -1806,7 +1806,7 @@ async function loadSummary() {
             const pData = docSnap.data();
             projectActualExpenses += Number(pData.actualExpenses) || 0;
 
-        }];
+        });
         
         // ----------------------------
         // RECORD COUNT
