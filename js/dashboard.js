@@ -214,78 +214,8 @@ function statusBadge(status){
 // FINANCIAL STATUS
 // =================================
 
-
-function financialStatus(
-    budget,
-    spent
-){
-
-
-
-    const difference =
-
-    Number(budget || 0)
-
-    -
-
-    Number(spent || 0);
-
-
-
-
-
-
-
-    if(difference < 0){
-
-
-
-        return `
-
-
-        <span class="danger-status">
-
-
-        🔴 Abonado
-
-        ${peso(
-            Math.abs(difference)
-        )}
-
-
-        </span>
-
-
-        `;
-
-
-
-    }
-
-
-
-
-
-
-
-    return `
-
-
-    <span class="success-status">
-
-
-    🟢 Remaining
-
-    ${peso(difference)}
-
-
-    </span>
-
-
-    `;
-
-
-
+function financialStatus(statusText) {
+    return statusText || "0% done";
 }
 
 
@@ -1039,9 +969,9 @@ function loadProjects(){
 
                         ${financialStatus(
 
-                            budget,
+                            data.utilizationStatus,
 
-                            spent
+                        
 
                         )}
 
