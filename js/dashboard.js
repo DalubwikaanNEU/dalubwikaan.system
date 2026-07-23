@@ -405,7 +405,7 @@ function loadCollections(){
 
                     </td>
                     <td>
-                      <span class="${data.status ? data.status.toLowercase() : 'pending'}">
+                      <span class="${data.status ? data.status.toLowerCase() : 'pending'}">
                       ${data.status || "Recorded"}
                       </span>
                     </td>
