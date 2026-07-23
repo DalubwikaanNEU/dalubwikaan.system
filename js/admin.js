@@ -388,7 +388,8 @@ if (projectForm) {
             actualExpenses,
             description,
             status,
-            utilizationStatus
+            utilizationStatus,
+            actualExpenses
         });
 
         projectForm.reset();
