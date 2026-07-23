@@ -955,83 +955,59 @@ window.projectActualExpenseTotal += actualExpense;
 
                         <br><br>
 
+// =====================
+// IMPORTANT STATUS FIX
+// =====================
 
+let status = data.status || "Planning";
 
+const projectData = {
+    name,
+    budget,
+    spent,
+    remaining,
+    status,
+    description: data.description || ""
+};
 
+reportData.projects.push(projectData);
 
-                        <strong>
+if (table) {
 
-                        Actual Expenses
+    table.innerHTML += `
+        <tr>
 
-                        </strong>
+            <td>
+                <strong>${name}</strong>
+                <br><br>
+                ${statusBadge(status)}
+            </td>
 
+            <td>
+                <strong>Allocated Budget</strong>
+                <br>
+                ${peso(budget)}
 
-                        <br>
+                <br><br>
 
+                <strong>Actual Expenses</strong>
+                <br>
+                ${peso(spent)}
 
-                        ${peso(spent)}
+                <br><br>
 
+                ${financialStatus(data.utilizationStatus)}
+            </td>
 
+            <td>
+                ${data.description || "No project description."}
+            </td>
 
+        </tr>
+    `;
+}
 
-
-
-
-                        <br><br>
-
-
-
-
-
-                        ${financialStatus(
-
-                            data.utilizationStatus,
-
-                        
-
-                        )}
-
-
-
-
-
-                        </td>
-
-
-
-
-
-
-
-
-
-                        <td>
-
-
-
-                        ${
-                            data.description ||
-
-                            "No project description."
-                        }
-
-
-
-                        </td>
-
-
-
-
-
-
-
-                        </tr>
-                        
-                        ';
-                    }
-                });
-        }
-
+}); // END projectSnapshot.forEach()
 
 if (projectSnapshot.empty && table) {
 
@@ -1039,20 +1015,17 @@ if (projectSnapshot.empty && table) {
         <tr>
             <td colspan="3">
                 No projects available.
-              </td>
+            </td>
         </tr>
     `;
-
 }
-// Update all financial totals AFTER processing every project
-updateFinancialSummary();
 
-// Refresh the chart
+updateFinancialSummary();
 updateBudgetChart();
 
-}
-);
-} 
+}); // END onSnapshot()
+
+} // END loadProjects()
 // =================================
 // LOAD EXPENSE TRANSPARENCY
 // RECEIPT MONITORING
