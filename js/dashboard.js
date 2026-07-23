@@ -1026,6 +1026,8 @@ window.projectActualExpenseTotal += actualExpense;
 
 
                         </tr>
+                        
+                        ';
 
 
 
