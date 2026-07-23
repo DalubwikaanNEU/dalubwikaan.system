@@ -474,13 +474,7 @@ function loadCollections(){
 
 
 
-                } }
-
-
-
-
-
-            });
+                })
 
 
 
