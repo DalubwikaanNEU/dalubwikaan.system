@@ -241,7 +241,7 @@ window.addEventListener("unhandledrejection", (event) => {
 projectCache = [];
 
 // ========================================
-// LOAD PROJECTS (FIXED WITH BUDGET COMPUTATION)
+// LOAD PROJECTS
 // ========================================
 
 async function loadProjects() {
@@ -278,13 +278,6 @@ async function loadProjects() {
 
             const data = docSnap.data();
 
-            // Kunin ang budget at actual expenses (default sa 0 kung walang laman)
-            const totalBudget = Number(data.budget || 0);
-            const actualExpenses = Number(data.actualExpenses || 0);
-            
-            // AUTOMATIC COMPUTATION: Ibawas ang expenses sa budget
-            const remainingBudget = totalBudget - actualExpenses;
-
             projectCache.push({
                 id: docSnap.id,
                 ...data
@@ -303,20 +296,8 @@ async function loadProjects() {
                     </p>
 
                     <p>
-                        <strong>Budget Allocation:</strong>
-                        ${peso(totalBudget)}
-                    </p>
-
-                    <p>
-                        <strong>Actual Expenses:</strong>
-                        <span style="color: #dc3545;">${peso(actualExpenses)}</span>
-                    </p>
-
-                    <p>
-                        <strong>Remaining Budget:</strong>
-                        <span style="color: ${remainingBudget < 0 ? '#dc3545' : '#28a745'}; font-weight: bold;">
-                            ${peso(remainingBudget)}
-                        </span>
+                        <strong>Budget:</strong>
+                        ${peso(data.budget)}
                     </p>
 
                     <br>
@@ -341,8 +322,6 @@ async function loadProjects() {
     }
 
 }
-
-
 // ========================================
 // ADD PROJECT
 // ========================================
@@ -375,7 +354,7 @@ async function addProject(data) {
 }
 
 // ========================================
-// PROJECT FORM (SYNTAX ERROR FIXED)
+// PROJECT FORM
 // ========================================
 
 const projectForm = document.getElementById("projectForm");
@@ -391,29 +370,10 @@ if (projectForm) {
         const description = getValue("description");
         const status = getValue("projectStatus");
         const utilizationStatus = getValue("utilizationStatusInput") || "0% done";
-        
-        // CORRECTION: Tinanggal ang sumobrang ) sa dulo ng linya na ito
-        const actualExpenses = Number(getValue("actualExpensesInput")) || 0; 
-
+        const actualExpenses = Number(getValue("actualExpensesInput")) || 0); 
         if (!name) {
             notify("Project name is required.");
             return;
-        }
-
-        // I-pasa ang kumpletong data kasama ang actual expenses sa addProject function
-        await addProject({
-            name,
-            budget,
-            description,
-            status,
-            utilizationStatus,
-            actualExpenses
-        });
-
-        // I-reset ang form pagkatapos mag-save
-        projectForm.reset();
-    });
-}
 
 
 // ========================================
@@ -1719,8 +1679,10 @@ async function(id){
     }
 
 };
-// ========================================
-// SUMMARY SYSTEM (FIXED & COMPLETED v16.0)
+
+ //========================================
+// SUMMARY SYSTEM
+// v16.0
 // ========================================
 
 async function loadSummary() {
@@ -1732,7 +1694,7 @@ async function loadSummary() {
         // ----------------------------
 
         let totalCollections = 0;
-        let totalExpenses = 0; // Dito iipunin ang lahat ng actual expenses ng projects
+        let totalExpenses = 0;
 
         let firstYear = 0;
         let secondYear = 0;
@@ -1740,7 +1702,7 @@ async function loadSummary() {
         let fourthYear = 0;
 
         // ----------------------------
-        // COLLECTIONS (Koleksyon ng Pera)
+        // COLLECTIONS
         // ----------------------------
 
         const collectionSnap = await getDocs(
@@ -1757,19 +1719,37 @@ async function loadSummary() {
 
             const level = (data.yearLevel || "").toLowerCase();
 
-            if (level.includes("1") || level.includes("first")) {
+            if (
+                level.includes("1") ||
+                level.includes("first")
+            ) {
 
                 firstYear += amount;
 
-            } else if (level.includes("2") || level.includes("second")) {
+            }
+
+            else if (
+                level.includes("2") ||
+                level.includes("second")
+            ) {
 
                 secondYear += amount;
 
-            } else if (level.includes("3") || level.includes("third")) {
+            }
+
+            else if (
+                level.includes("3") ||
+                level.includes("third")
+            ) {
 
                 thirdYear += amount;
 
-            } else if (level.includes("4") || level.includes("fourth")) {
+            }
+
+            else if (
+                level.includes("4") ||
+                level.includes("fourth")
+            ) {
 
                 fourthYear += amount;
 
