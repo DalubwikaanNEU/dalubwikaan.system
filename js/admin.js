@@ -1583,8 +1583,7 @@ if(collectionForm){
 
             //course,
 
-            yearLevel,
-
+            yearLevel: "All Years",
             //paymentType,
 
             amount,
