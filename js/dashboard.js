@@ -216,10 +216,6 @@ function statusBadge(status){
 // FINANCIAL STATUS
 // =================================
 
-function financialStatus(statusText) {
-    return statusText || "0% done";
-}
-
 function updateFinancialSummary() {
 
     window.currentExpenses =
@@ -243,11 +239,9 @@ function updateFinancialSummary() {
     reportData.expenses = window.currentExpenses;
     reportData.remaining = balance;
 
-    updateBalance();
     updateBudgetChart();
 
 }
-
 
 // =================================
 // LOAD COLLECTIONS
