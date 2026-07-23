@@ -1586,7 +1586,6 @@ if(collectionForm){
 
             date,
 
-            remarks
 
         });
 
