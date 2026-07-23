@@ -3119,21 +3119,6 @@ function generateReceipt(data) {
         </p>
 
         <p>
-            <strong>Student:</strong>
-            ${data.studentName}
-        </p>
-
-        <p>
-            <strong>Student ID:</strong>
-            ${data.studentId}
-        </p>
-
-        <p>
-            <strong>Course:</strong>
-            ${data.course}
-        </p>
-
-        <p>
             <strong>Year:</strong>
             ${data.yearLevel}
         </p>
@@ -3308,20 +3293,8 @@ window.downloadReceiptPDF = function () {
     const receiptDate =
         document.getElementById("receiptDate")?.textContent || "-";
 
-    const studentName =
-        document.getElementById("receiptStudent")?.textContent || "-";
-
-    const studentId =
-        document.getElementById("receiptStudentId")?.textContent || "-";
-
-    const course =
-        document.getElementById("receiptCourse")?.textContent || "-";
-
     const year =
         document.getElementById("receiptYear")?.textContent || "-";
-
-    const paymentType =
-        document.getElementById("receiptPayment")?.textContent || "-";
 
     const amount =
         document.getElementById("receiptAmount")?.textContent || "-";
@@ -3346,11 +3319,7 @@ window.downloadReceiptPDF = function () {
 
     pdf.text(`Receipt No: ${receiptNumber}`, 20, y); y += 10;
     pdf.text(`Date: ${receiptDate}`, 20, y); y += 10;
-    pdf.text(`Student: ${studentName}`, 20, y); y += 10;
-    pdf.text(`Student ID: ${studentId}`, 20, y); y += 10;
-    pdf.text(`Course: ${course}`, 20, y); y += 10;
     pdf.text(`Year Level: ${year}`, 20, y); y += 10;
-    pdf.text(`Payment Type: ${paymentType}`, 20, y); y += 10;
     pdf.text(`Amount: ${amount}`, 20, y); y += 10;
     pdf.text(`Remarks: ${remarks}`, 20, y); y += 20;
 
