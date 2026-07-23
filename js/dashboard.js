@@ -1730,16 +1730,23 @@ function updateFinancialSummary() {
 // BALANCE COMPUTATION
 // =================================
 
+// =================================
+// FINANCIAL SUMMARY
+// =================================
+
 function updateFinancialSummary() {
 
+    // Compute total expenses
     window.currentExpenses =
         Number(window.expenseTotal || 0) +
         Number(window.projectActualExpenseTotal || 0);
 
+    // Compute remaining balance
     const balance =
         Number(window.totalFunds || 0) -
         window.currentExpenses;
 
+    // Update dashboard values
     setText(
         "totalExpenses",
         peso(window.currentExpenses)
@@ -1750,6 +1757,7 @@ function updateFinancialSummary() {
         peso(balance)
     );
 
+    // Remaining Balance Card
     const balanceElement =
         document.getElementById("remainingBalance");
 
@@ -1774,13 +1782,18 @@ function updateFinancialSummary() {
             `;
 
             balanceElement.classList.remove("danger-status");
+
         }
+
     }
 
+    // Save values for reports
     reportData.expenses = window.currentExpenses;
     reportData.remaining = balance;
 
+    // Refresh chart
     updateBudgetChart();
+
 }
 // =================================
 // YEAR COLLECTION PROGRESS
