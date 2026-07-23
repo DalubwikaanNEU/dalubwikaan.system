@@ -591,11 +591,6 @@ updateFinancialSummary();
 
 
 
-            updateBalance();
-
-
-
-
 
 
             hideLoader();
