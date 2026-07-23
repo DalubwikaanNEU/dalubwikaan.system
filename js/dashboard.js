@@ -955,77 +955,8 @@ window.projectActualExpenseTotal += actualExpense;
 
                         <br><br>
 
-// =====================
-// IMPORTANT STATUS FIX
-// =====================
+ 
 
-let status = data.status || "Planning";
-
-const projectData = {
-    name,
-    budget,
-    spent,
-    remaining,
-    status,
-    description: data.description || ""
-};
-
-reportData.projects.push(projectData);
-
-if (table) {
-
-    table.innerHTML += `
-        <tr>
-
-            <td>
-                <strong>${name}</strong>
-                <br><br>
-                ${statusBadge(status)}
-            </td>
-
-            <td>
-                <strong>Allocated Budget</strong>
-                <br>
-                ${peso(budget)}
-
-                <br><br>
-
-                <strong>Actual Expenses</strong>
-                <br>
-                ${peso(spent)}
-
-                <br><br>
-
-                ${financialStatus(data.utilizationStatus)}
-            </td>
-
-            <td>
-                ${data.description || "No project description."}
-            </td>
-
-        </tr>
-    `;
-}
-
-}); // END projectSnapshot.forEach()
-
-if (projectSnapshot.empty && table) {
-
-    table.innerHTML = `
-        <tr>
-            <td colspan="3">
-                No projects available.
-            </td>
-        </tr>
-    `;
-}
-
-updateFinancialSummary();
-updateBudgetChart();
-
-}); // END onSnapshot()
-
-} // END loadProjects()
 // =================================
 // LOAD EXPENSE TRANSPARENCY
 // RECEIPT MONITORING
