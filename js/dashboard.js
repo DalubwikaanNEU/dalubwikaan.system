@@ -428,12 +428,6 @@ function loadCollections(){
                 }
 
 
-
-
-
-
-
-
                 if(table){
 
 
