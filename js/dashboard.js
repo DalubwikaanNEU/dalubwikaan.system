@@ -1405,100 +1405,44 @@ function loadExpenses(){
 
 
 
+if(snapshot.empty){
 
+    container.innerHTML = `
 
+        <p>
 
+        No expense records available.
 
+        </p>
 
-            if(snapshot.empty){
-
-
-
-                container.innerHTML = `
-
-
-                <p>
-
-
-                No expense records available.
-
-
-                </p>
-
-
-                `;
-
-
-
-            }
-
-
-
-
-
-
-
-
-            window.currentExpenses =
-
-            totalExpenses;
-
-
-
-
-
-
-
-            reportData.expenses =
-
-            totalExpenses;
-
-
-
-
-
-
-
-
-            setText(
-
-                "totalExpenses",
-
-                peso(totalExpenses)
-
-            );
-
-
-
-
-
-
-
-            updateBalance();
-
-
-
-
-
-
-
-            updateBudgetChart();
-
-
-
-
-
-
-        }
-
-
-
-    );
-
-
+    `;
 
 }
 
+reportData.expenses = totalExpenses;
+
+// Recompute total expenses if projects are already loaded
+let totalProjectActualExpenses = 0;
+
+reportData.projects.forEach(project => {
+    totalProjectActualExpenses += Number(project.spent || 0);
+});
+
+window.currentExpenses =
+    totalExpenses + totalProjectActualExpenses;
+
+setText(
+    "totalExpenses",
+    peso(window.currentExpenses)
+);
+
+updateBalance();
+
+updateBudgetChart();
+
+    }
+
+);
 // =================================
 // ANNOUNCEMENT BOARD
 // =================================
