@@ -416,19 +416,7 @@ function loadCollections(){
 
 
 
-                if(
-                    yearTotals[data.year]
-                    !== undefined
-                ){
-
-
-                    yearTotals[data.year] += amount;
-
-
-                }
-
-
-                if(table){
+                if (data.yearLevel && yearTotals[data.yearLevel] !==undefined) {yearTotals[data.yearLevel] += amount; }
 
 
 
