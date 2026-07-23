@@ -505,7 +505,7 @@ window.deleteProject = async function(id) {
 // Cache
 expenseCache = [];
 
-let selectedReceiptFile = null;
+selectedReceiptFile = null;
 
 // ========================================
 // RECEIPT INPUT
