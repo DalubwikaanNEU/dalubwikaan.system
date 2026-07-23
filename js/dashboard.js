@@ -1034,7 +1034,6 @@ window.projectActualExpenseTotal += actualExpense;
 
 
                     }
-
             );
         }
 
@@ -1055,7 +1054,7 @@ if (projectSnapshot.empty && table) {
     `;
 
 }
-
+});
 // Update all financial totals AFTER processing every project
 updateFinancialSummary();
 
