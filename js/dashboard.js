@@ -1054,7 +1054,6 @@ if (projectSnapshot.empty && table) {
     `;
 
 }
-});
 // Update all financial totals AFTER processing every project
 updateFinancialSummary();
 
@@ -1063,7 +1062,7 @@ updateBudgetChart();
 
 }
 );
-    
+} 
 // =================================
 // LOAD EXPENSE TRANSPARENCY
 // RECEIPT MONITORING
