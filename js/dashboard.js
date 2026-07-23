@@ -1029,17 +1029,8 @@ function loadProjects(){
 
                     }
 
-
-
-
-
-
-
-                }
-
             );
-
-
+        }
 
 
 
