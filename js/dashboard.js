@@ -1028,13 +1028,6 @@ window.projectActualExpenseTotal += actualExpense;
                         </tr>
                         
                         ';
-
-
-
-                        
-
-
-
                     }
                 });
         }
