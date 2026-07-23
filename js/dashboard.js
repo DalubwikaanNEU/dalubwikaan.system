@@ -1069,16 +1069,10 @@ function loadProjects(){
 
 
             }
-window.expenseTotal = totalExpenses;
-        updateFinancialSummary();
-
+updateFinancialSummary();
         }
 );
 }
-
-
-
-
 
 
 
