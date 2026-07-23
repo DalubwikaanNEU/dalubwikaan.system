@@ -1547,7 +1547,6 @@ if(collectionForm){
         const yearLevel =
         getValue("yearLevel");
 
-        const utilizationStatus = getValue("utilizationStatusInput") || "0% done";
         //const paymentType =
         //getValue("paymentType");
 
