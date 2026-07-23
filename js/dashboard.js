@@ -1068,14 +1068,18 @@ function loadProjects(){
 
 
             }
+window.currentExpenses =
+    reportData.expenses + totalProjecActualExpenses;
+
+setText(
+    "totalExpenses",
+    peso(window.currentExpenses)
+
+    );
 
 
-
-
-
-
-
-            updateBudgetChart();
+updateBalance();
+updateBudgetChart();
 
 
 
