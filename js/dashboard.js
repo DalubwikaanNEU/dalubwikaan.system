@@ -219,11 +219,32 @@ function financialStatus(statusText) {
     return statusText || "0% done";
 }
 
+function updateFinancialSummary() {
 
+    window.currentExpenses =
+        window.expenseTotal +
+        window.projectActualExpenseTotal;
 
+    const balance =
+        window.totalFunds -
+        window.currentExpenses;
 
+    setText(
+        "totalExpenses",
+        peso(window.currentExpenses)
+    );
 
+    setText(
+        "currentBalance",
+        peso(balance)
+    );
 
+    reportData.expenses = window.currentExpenses;
+    reportData.remaining = balance;
+
+    updateBudgetChart();
+
+}
 
 
 
