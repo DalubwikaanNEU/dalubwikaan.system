@@ -1539,12 +1539,6 @@ if(collectionForm){
         //const studentName =
         //getValue("studentName");
 
-        const studentId =
-        getValue("studentId");
-
-        const course =
-        getValue("course");
-
         const yearLevel =
         getValue("yearLevel");
 
@@ -1557,8 +1551,6 @@ if(collectionForm){
         const date =
         getValue("date");
 
-        const remarks =
-        getValue("remarks");
 
         //if(!studentName){
 
