@@ -385,7 +385,7 @@ if (projectForm) {
             name,
             budget,
             description,
-            status
+            status,
             utilizationStatus
         });
 
