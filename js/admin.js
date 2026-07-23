@@ -1585,7 +1585,7 @@ if(collectionForm){
             //course,
 
             yearLevel: yearLevel,
-            utilizationStatus: utilizationStatus, 
+            
             //paymentType,
 
             amount,
