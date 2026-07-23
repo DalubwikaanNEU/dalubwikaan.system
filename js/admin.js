@@ -1720,8 +1720,7 @@ async function(id){
 
 };
 // ========================================
-// SUMMARY SYSTEM
-// v16.0
+// SUMMARY SYSTEM (FIXED & COMPLETED v16.0)
 // ========================================
 
 async function loadSummary() {
@@ -1733,7 +1732,7 @@ async function loadSummary() {
         // ----------------------------
 
         let totalCollections = 0;
-        let totalExpenses = 0;
+        let totalExpenses = 0; // Dito iipunin ang lahat ng actual expenses ng projects
 
         let firstYear = 0;
         let secondYear = 0;
@@ -1741,7 +1740,7 @@ async function loadSummary() {
         let fourthYear = 0;
 
         // ----------------------------
-        // COLLECTIONS
+        // COLLECTIONS (Koleksyon ng Pera)
         // ----------------------------
 
         const collectionSnap = await getDocs(
@@ -1758,43 +1757,76 @@ async function loadSummary() {
 
             const level = (data.yearLevel || "").toLowerCase();
 
-            if (
-                level.includes("1") ||
-                level.includes("first")
-            ) {
+            if (level.includes("1") || level.includes("first")) {
 
                 firstYear += amount;
 
-            }
-
-            else if (
-                level.includes("2") ||
-                level.includes("second")
-            ) {
+            } else if (level.includes("2") || level.includes("second")) {
 
                 secondYear += amount;
 
-            }
-
-            else if (
-                level.includes("3") ||
-                level.includes("third")
-            ) {
+            } else if (level.includes("3") || level.includes("third")) {
 
                 thirdYear += amount;
 
-            }
-
-            else if (
-                level.includes("4") ||
-                level.includes("fourth")
-            ) {
+            } else if (level.includes("4") || level.includes("fourth")) {
 
                 fourthYear += amount;
 
             }
 
         });
+
+        // ----------------------------
+        // PROJECTS ACTUAL EXPENSES (AUTOMATIC COMPUTATION)
+        // ----------------------------
+        // Dito natin kukunin ang actualExpenses ng bawat project para ibawas sa dashboard
+        const projectSnap = await getDocs(
+            collection(db, "projects")
+        );
+
+        projectSnap.forEach(docSnap => {
+
+            const data = docSnap.data();
+
+            // Kunin ang actual expenses ng bawat site/project (default sa 0 kung wala)
+            const actualExpenses = Number(data.actualExpenses || 0);
+
+            // Ipag-add silang lahat para makuha ang kabuuang nagastos ng buong system
+            totalExpenses += actualExpenses;
+
+        });
+
+        // Kuhanin ang natitirang pera/budget para sa buong site
+        const remainingSiteBudget = totalCollections - totalExpenses;
+
+        // ----------------------------
+        // DISPLAY TO DASHBOARD UI Elements
+        // ----------------------------
+        // Siguraduhin na ang mga ID na ito ay tugma sa iyong HTML dashboard cards!
+        
+        setText("totalCollectionsDisplay", peso(totalCollections));
+        setText("totalExpensesDisplay", peso(totalExpenses));
+        setText("remainingBudgetDisplay", peso(remainingSiteBudget));
+
+        // Display per Year Level (Kung may UI elements ka para dito)
+        setText("firstYearDisplay", peso(firstYear));
+        setText("secondYearDisplay", peso(secondYear));
+        setText("thirdYearDisplay", peso(thirdYear));
+        setText("fourthYearDisplay", peso(fourthYear));
+
+        console.log("SUMMARY UPDATED successfully!");
+
+    } catch (error) {
+
+        console.error("LOAD SUMMARY ERROR:", error);
+
+        notify(error.message, "error");
+
+    }
+
+}
+
 
         // ----------------------------
         // EXPENSES
