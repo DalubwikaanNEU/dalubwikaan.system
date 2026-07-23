@@ -1535,8 +1535,8 @@ if(collectionForm){
 
         e.preventDefault();
 
-        const studentName =
-        getValue("studentName");
+        //const studentName =
+        //getValue("studentName");
 
         const studentId =
         getValue("studentId");
@@ -1547,8 +1547,8 @@ if(collectionForm){
         const yearLevel =
         getValue("yearLevel");
 
-        const paymentType =
-        getValue("paymentType");
+        //const paymentType =
+        //getValue("paymentType");
 
         const amount =
         Number(getValue("amount"));
@@ -1559,11 +1559,11 @@ if(collectionForm){
         const remarks =
         getValue("remarks");
 
-        if(!studentName){
+        //if(!studentName){
 
-            notify("Student name is required.");
+        //    notify("Student name is required.");
 
-            return;
+        //    return;
 
         }
 
@@ -1577,15 +1577,15 @@ if(collectionForm){
 
         await addCollection({
 
-            studentName,
+            //studentName,
 
-            studentId,
+            //studentId,
 
-            course,
+            //course,
 
             yearLevel,
 
-            paymentType,
+            //paymentType,
 
             amount,
 
