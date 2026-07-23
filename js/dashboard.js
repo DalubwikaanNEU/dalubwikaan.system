@@ -787,6 +787,8 @@ function loadProjects(){
                     const spent =
                         Number(data.actualExpenses) || 0;
 
+                    totalProjectActualExpenses += spent;
+
 
 
 
