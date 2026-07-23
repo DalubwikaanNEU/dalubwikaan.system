@@ -44,7 +44,7 @@ window.totalFunds = 0;
 
 window.currentExpenses = 0;
 
-window.totalProjectActualExpenses = 0;
+
 
 
 let projectExpenses = {};
