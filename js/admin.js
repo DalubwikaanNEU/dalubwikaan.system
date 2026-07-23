@@ -369,12 +369,37 @@ if (projectForm) {
         const budget = Number(getValue("projectBudget"));
         const description = getValue("description");
         const status = getValue("projectStatus");
-        const utilizationStatus = getValue("utilizationStatusInput") || "0% done";
-        const actualExpenses = Number(getValue("actualExpensesInput")) || 0; 
+        const utilizationStatus =
+            getValue("utilizationStatusInput") || "0% done";
+        const actualExpenses =
+            Number(getValue("actualExpensesInput")) || 0;
+
         if (!name) {
             notify("Project name is required.");
             return;
+        }
 
+        if (isNaN(budget) || budget <= 0) {
+            notify("Please enter a valid project budget.");
+            return;
+        }
+
+        await addProject({
+
+            name,
+            budget,
+            description,
+            status,
+            utilizationStatus,
+            actualExpenses
+
+        });
+
+        projectForm.reset();
+
+    });
+
+}
 
 // ========================================
 // EDIT PROJECT
@@ -1806,142 +1831,6 @@ async function loadSummary() {
     }
 
 }
-
-
-        // ----------------------------
-        // EXPENSES
-        // ----------------------------
-
-        const expenseSnap = await getDocs(
-            collection(db, "expenses")
-        );
-
-        expenseSnap.forEach(docSnap => {
-
-            const data = docSnap.data();
-
-            totalExpenses += Number(data.amount) || 0;
-
-        });
-
-        // ----------------------------
-        // PROJECT COUNT
-        // ----------------------------
-
-        const projectSnap = await getDocs(
-            collection(db, "projects")
-        );
-        let projectActualExpenses = 0;
-        projectSnap.forEach(docSnap => {
-            const pData = docSnap.data();
-            projectActualExpenses += Number(pData.actualExpenses) || 0;
-
-        });
-        
-        // ----------------------------
-        // RECORD COUNT
-        // ----------------------------
-
-        const recordSnap = await getDocs(
-            collection(db, "records")
-        );
-
-        // ----------------------------
-        // ANNOUNCEMENT COUNT
-        // ----------------------------
-
-        const announcementSnap = await getDocs(
-            collection(db, "announcements")
-        );
-
-        // ----------------------------
-        // BALANCE
-        // ----------------------------
-
-        const balance = totalCollections - totalExpenses - projectActualExpenses;
-
-        // ----------------------------
-        // MAIN SUMMARY
-        // ----------------------------
-
-        setText(
-            "summaryCollections",
-            peso(totalCollections)
-        );
-
-        setText(
-            "totalCollections",
-            peso(totalCollections)
-        );
-
-        setText(
-            "summaryExpenses",
-            peso(totalExpenses)
-        );
-
-        setText(
-            "totalExpenses",
-            peso(totalExpenses)
-        );
-
-        setText(
-            "currentBalance",
-            peso(balance)
-        );
-
-        setText(
-            "totalProjects",
-            projectSnap.size
-        );
-
-        setText(
-            "totalRecords",
-            recordSnap.size
-        );
-
-        setText(
-            "totalAnnouncements",
-            announcementSnap.size
-        );
-
-        // ----------------------------
-        // YEAR LEVEL SUMMARY
-        // ----------------------------
-
-        setText(
-            "firstYearCollection",
-            peso(firstYear)
-        );
-
-        setText(
-            "secondYearCollection",
-            peso(secondYear)
-        );
-
-        setText(
-            "thirdYearCollection",
-            peso(thirdYear)
-        );
-
-        setText(
-            "fourthYearCollection",
-            peso(fourthYear)
-        );
-
-        console.log("Summary Updated.");   
-        } catch (error) {
-        console.error(
-            "SUMMARY ERROR:",
-            error
-        );
-
-        notify(
-            error.message,
-            "error"
-        );
-
-    }
-
 
 // ========================================
 // ADVANCED SEARCH SYSTEM
