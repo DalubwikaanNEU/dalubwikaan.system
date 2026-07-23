@@ -428,18 +428,21 @@ function loadCollections(){
 
                     <td>
 
+
                     ${data.date || "N/A"}
+                    
 
                     </td>
-
-
-
 
                     <td>
 
-                    ${data.year || "N/A"}
+                    ${data.yearLevel || "N/A"}
+                    
 
                     </td>
+
+
+                    
 
 
 
@@ -449,20 +452,10 @@ function loadCollections(){
                     ${peso(amount)}
 
                     </td>
-
-
-
-
                     <td>
-
-
-                    <span class="verified">
-
-                    ✔ Recorded
-
-                    </span>
-
-
+                      <span class="${data.status ? data.status.toLowercase() : 'pending'}">
+                      ${data.status || "Recorded"}
+                      </span>
                     </td>
 
 
