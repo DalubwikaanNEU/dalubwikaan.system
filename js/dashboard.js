@@ -1753,47 +1753,62 @@ function updateBalance(){
 
 
             `;
+function updateFinancialSummary() {
 
+    window.currentExpenses =
+        Number(window.expenseTotal || 0) +
+        Number(window.projectActualExpenseTotal || 0);
 
+    const balance =
+        Number(window.totalFunds || 0) -
+        window.currentExpenses;
 
-            balanceElement.classList.remove(
-                "danger-status"
-            );
-
-
-
-        }
-
-
-
-    }
-
-
-
-
-
-
-
+    // Total Expenses
     setText(
-
-        "currentBalance",
-
-        peso(balance)
-
+        "totalExpenses",
+        peso(window.currentExpenses)
     );
 
+    // Current Balance (if this element exists)
+    setText(
+        "currentBalance",
+        peso(balance)
+    );
 
+    // Remaining Balance Card
+    const balanceElement =
+        document.getElementById("remainingBalance");
 
+    if (balanceElement) {
+
+        if (balance < 0) {
+
+            balanceElement.innerHTML = `
+                🔴 Abonado
+                <br>
+                ${peso(Math.abs(balance))}
+            `;
+
+            balanceElement.classList.add("danger-status");
+
+        } else {
+
+            balanceElement.innerHTML = `
+                🟢 Remaining
+                <br>
+                ${peso(balance)}
+            `;
+
+            balanceElement.classList.remove("danger-status");
+        }
+    }
+
+    reportData.expenses = window.currentExpenses;
+    reportData.remaining = balance;
+
+    updateBudgetChart();
 }
-
-
-
-
-
-
-
-
-
+            
 // =================================
 // YEAR COLLECTION PROGRESS
 // =================================
