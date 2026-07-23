@@ -1950,9 +1950,8 @@ async function loadSummary() {
 
         console.log("Summary Updated.");
 
-    
+}   
 
-}
     catch (error) {
 
         console.error(
