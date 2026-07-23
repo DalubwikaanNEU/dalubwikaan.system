@@ -1967,7 +1967,7 @@ async function loadSummary() {
 
     }
 
-}
+
 // ========================================
 // ADVANCED SEARCH SYSTEM
 // v16.0
