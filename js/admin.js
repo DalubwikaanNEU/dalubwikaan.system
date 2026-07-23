@@ -371,6 +371,7 @@ if (projectForm) {
         const description = getValue("description");
         const status = getValue("projectStatus");
         const utilizationStatus = getValue("utilizationStatusInput") || "0% done";
+        const actualExpenses = Number(getValue("actualExpensesInput")) || 0; 
         if (!name) {
             notify("Project name is required.");
             return;
@@ -384,6 +385,7 @@ if (projectForm) {
         await addProject({
             name,
             budget,
+            actualExpenses,
             description,
             status,
             utilizationStatus
