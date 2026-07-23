@@ -1928,12 +1928,8 @@ async function loadSummary() {
             peso(fourthYear)
         );
 
-        console.log("Summary Updated.");
-
-}   
-
-    catch (error) {
-
+        console.log("Summary Updated.");   
+        } catch (error) {
         console.error(
             "SUMMARY ERROR:",
             error
