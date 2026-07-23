@@ -622,6 +622,7 @@ function loadProjects(){
         projectQuery,
 
         async(projectSnapshot)=>{
+            let totalProjectActualExpenses = 0;
 
 
 
