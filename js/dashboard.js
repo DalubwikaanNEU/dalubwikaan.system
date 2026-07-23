@@ -1034,7 +1034,7 @@ window.projectActualExpenseTotal += actualExpense;
 
 
                     }
-            );
+                });
         }
 
 
