@@ -241,7 +241,7 @@ window.addEventListener("unhandledrejection", (event) => {
 projectCache = [];
 
 // ========================================
-// LOAD PROJECTS
+// LOAD PROJECTS (FIXED WITH BUDGET COMPUTATION)
 // ========================================
 
 async function loadProjects() {
@@ -278,6 +278,13 @@ async function loadProjects() {
 
             const data = docSnap.data();
 
+            // Kunin ang budget at actual expenses (default sa 0 kung walang laman)
+            const totalBudget = Number(data.budget || 0);
+            const actualExpenses = Number(data.actualExpenses || 0);
+            
+            // AUTOMATIC COMPUTATION: Ibawas ang expenses sa budget
+            const remainingBudget = totalBudget - actualExpenses;
+
             projectCache.push({
                 id: docSnap.id,
                 ...data
@@ -296,8 +303,20 @@ async function loadProjects() {
                     </p>
 
                     <p>
-                        <strong>Budget:</strong>
-                        ${peso(data.budget)}
+                        <strong>Budget Allocation:</strong>
+                        ${peso(totalBudget)}
+                    </p>
+
+                    <p>
+                        <strong>Actual Expenses:</strong>
+                        <span style="color: #dc3545;">${peso(actualExpenses)}</span>
+                    </p>
+
+                    <p>
+                        <strong>Remaining Budget:</strong>
+                        <span style="color: ${remainingBudget < 0 ? '#dc3545' : '#28a745'}; font-weight: bold;">
+                            ${peso(remainingBudget)}
+                        </span>
                     </p>
 
                     <br>
@@ -322,6 +341,7 @@ async function loadProjects() {
     }
 
 }
+
 
 // ========================================
 // ADD PROJECT
@@ -355,7 +375,7 @@ async function addProject(data) {
 }
 
 // ========================================
-// PROJECT FORM
+// PROJECT FORM (SYNTAX ERROR FIXED)
 // ========================================
 
 const projectForm = document.getElementById("projectForm");
@@ -371,32 +391,30 @@ if (projectForm) {
         const description = getValue("description");
         const status = getValue("projectStatus");
         const utilizationStatus = getValue("utilizationStatusInput") || "0% done";
-        const actualExpenses = Number(getValue("actualExpensesInput")) || 0); 
+        
+        // CORRECTION: Tinanggal ang sumobrang ) sa dulo ng linya na ito
+        const actualExpenses = Number(getValue("actualExpensesInput")) || 0; 
+
         if (!name) {
             notify("Project name is required.");
             return;
         }
 
-        if (budget < 0 || isNaN(budget)) {
-            notify("Invalid project budget.");
-            return;
-        }
-
+        // I-pasa ang kumpletong data kasama ang actual expenses sa addProject function
         await addProject({
             name,
             budget,
-            actualExpenses,
             description,
             status,
             utilizationStatus,
-        
+            actualExpenses
         });
 
+        // I-reset ang form pagkatapos mag-save
         projectForm.reset();
-
     });
-
 }
+
 
 // ========================================
 // EDIT PROJECT
