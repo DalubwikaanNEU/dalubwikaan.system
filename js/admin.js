@@ -1952,7 +1952,7 @@ async function loadSummary() {
 
     
 
-
+}
     catch (error) {
 
         console.error(
