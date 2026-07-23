@@ -1801,7 +1801,13 @@ async function loadSummary() {
         const projectSnap = await getDocs(
             collection(db, "projects")
         );
+        let projectActualExpenses = 0;
+        projectSnap.forEach(docSnap => {
+            const pData = docSnap.data();
+            projectActualExpenses += Number(pData.actualExpenses) || 0;
 
+        }];
+        
         // ----------------------------
         // RECORD COUNT
         // ----------------------------
@@ -1822,7 +1828,7 @@ async function loadSummary() {
         // BALANCE
         // ----------------------------
 
-        const balance = totalCollections - totalExpenses;
+        const balance = totalCollections - totalExpenses - projectActualExpenses;
 
         // ----------------------------
         // MAIN SUMMARY
