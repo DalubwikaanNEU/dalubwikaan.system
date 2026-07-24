@@ -742,8 +742,6 @@ if (expenseForm) {
         await addExpense({
             project,
 
-            category,
-
             amount,
 
             description
