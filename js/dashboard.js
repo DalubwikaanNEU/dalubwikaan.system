@@ -375,32 +375,29 @@ function loadExpenses() {
             totalExpenses += amount;
 
             const receiptHTML = data.receipt
-                ? `
-                    <div class="receipt-box">
-                        <img
-                            src="${data.receipt}"
-                            class="receipt-image"
-                            alt="Official Receipt"
-                            loading="lazy"
-                        >
-
-                        <br>
-
-                        <a
-                            href="${data.receipt}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="view-btn"
-                        >
-                            🧾 View Receipt
-                        </a>
-                    </div>
-                `
-                : `
-                    <p>
-                        📄 No receipt uploaded.
-                    </p>
-                `;
+  ? `
+    <div class="receipt-box">
+        <img 
+          src="${data.receipt}" 
+          class="receipt-image" 
+          alt="Official Receipt" 
+          loading="lazy"
+        >
+        <br>
+        <a 
+          href="${data.receipt}" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="view-btn"
+        >
+          📄 View Receipt
+        </a>
+    </div>
+  ` 
+  : `
+    <p>📄 No receipt uploaded.</p>
+  `; 
+              
 
             container.innerHTML += `
                 <div class="expense-card">
