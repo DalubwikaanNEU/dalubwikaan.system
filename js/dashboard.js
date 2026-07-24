@@ -690,7 +690,9 @@ function loadProjects(){
 
                     const projectName =
 
-                    expense.project;
+                    expense.project ||
+                        expense.category ||
+                        "Unknown project";
 
 
 
@@ -1069,10 +1071,16 @@ function loadProjects(){
 
 
             }
-updateFinancialSummary();
+window.expenseTotal = totalExpenses;
+        updateFinancialSummary();
+
         }
 );
 }
+
+
+
+
 
 
 
@@ -1306,7 +1314,7 @@ function loadExpenses(){
                     <h3>
 
 
-                    💸 ${data.project || "Unknown Project"}
+                    💸 ${data.projectName || "Unknown Project"}
 
 
                     </h3>
