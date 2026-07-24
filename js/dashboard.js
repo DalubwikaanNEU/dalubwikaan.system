@@ -1424,7 +1424,7 @@ setText(
     peso(window.currentExpenses)
 );
 
-updateFinancialSummary();
+updateBalance();
 
 updateBudgetChart();
 
@@ -1657,7 +1657,7 @@ function loadAnnouncements(){
 // =================================
 
 
-updateFinancialSummary();
+function updateBalance(){
 
 
 
