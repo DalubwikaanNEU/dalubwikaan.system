@@ -796,11 +796,18 @@ function loadProjects(){
 
 
 
-                    const spent =
-                        Number(data.actualExpenses) || 0;
+                    const actualExpense =
+    Number(data.actualExpenses) || 0;
 
-                    window.projectActualExpenseTotal += spent;
+const recordedExpenses =
+    Number(projectExpenses[name]) || 0;
 
+
+const spent =
+    actualExpense + recordedExpenses;
+
+
+window.projectActualExpenseTotal += actualExpense;
 
 
 
