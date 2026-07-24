@@ -740,6 +740,7 @@ if (expenseForm) {
         }
 
         await addExpense({
+            project,
 
             category,
 
