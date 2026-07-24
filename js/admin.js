@@ -717,7 +717,7 @@ if (expenseForm) {
 
         e.preventDefault();
 
-        const category = getValue("expenseProject");
+        const project = getValue("expenseProject");
 
         const amount = Number(getValue("expenseAmount"));
 
