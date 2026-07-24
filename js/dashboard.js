@@ -1314,7 +1314,7 @@ function loadExpenses(){
                     <h3>
 
 
-                    💸 ${data.projectName || "Dalubwikaan Project"}
+                    💸 ${data.projectName || "Unknown Project"}
 
 
                     </h3>
