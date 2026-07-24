@@ -216,6 +216,10 @@ function statusBadge(status){
 // FINANCIAL STATUS
 // =================================
 
+function financialStatus(statusText) {
+    return statusText || "0% done";
+}
+
 function updateFinancialSummary() {
 
     window.currentExpenses =
@@ -239,9 +243,11 @@ function updateFinancialSummary() {
     reportData.expenses = window.currentExpenses;
     reportData.remaining = balance;
 
+    updateBalance();
     updateBudgetChart();
 
 }
+
 
 // =================================
 // LOAD COLLECTIONS
@@ -796,18 +802,11 @@ function loadProjects(){
 
 
 
-                    const actualExpense =
-    Number(data.actualExpenses) || 0;
+                    const spent =
+                        Number(data.actualExpenses) || 0;
 
-const recordedExpenses =
-    Number(projectExpenses[name]) || 0;
+                    window.projectActualExpenseTotal += spent;
 
-
-const spent =
-    actualExpense + recordedExpenses;
-
-
-window.projectActualExpenseTotal += actualExpense;
 
 
 
@@ -1036,8 +1035,17 @@ window.projectActualExpenseTotal += actualExpense;
 
                     }
 
+
+
+
+
+
+
+                }
+
             );
-        }
+
+
 
 
 
