@@ -596,7 +596,7 @@ async function loadExpenses() {
 
                 <div class="data-card">
 
-                    <h3>💸 ${data.category || "Expense"}</h3>
+                    <h3>💸 ${data.project || "Expense"}</h3>
 
                     <p>${data.description || ""}</p>
 
@@ -717,15 +717,15 @@ if (expenseForm) {
 
         e.preventDefault();
 
-        const category = getValue("expenseProject");
+        const project = getValue("expenseProject");
 
         const amount = Number(getValue("expenseAmount"));
 
         const description = getValue("expenseDescription");
 
-        if (!category) {
+        if (!project) {
 
-            notify("Select an expense category.");
+            notify("Enter a project name.");
 
             return;
 
@@ -740,8 +740,7 @@ if (expenseForm) {
         }
 
         await addExpense({
-
-            category,
+            project,
 
             amount,
 
