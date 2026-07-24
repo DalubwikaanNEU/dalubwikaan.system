@@ -212,7 +212,6 @@ function statusBadge(status){
 
 
 // =================================
-// =================================
 // FINANCIAL STATUS
 // =================================
 
@@ -223,11 +222,11 @@ function financialStatus(statusText) {
 function updateFinancialSummary() {
 
     window.currentExpenses =
-        (window.expenseTotal || 0) +
-        (window.projectActualExpenseTotal || 0);
+        window.expenseTotal +
+        window.projectActualExpenseTotal;
 
     const balance =
-        (window.totalFunds || 0) -
+        window.totalFunds -
         window.currentExpenses;
 
     setText(
@@ -243,10 +242,10 @@ function updateFinancialSummary() {
     reportData.expenses = window.currentExpenses;
     reportData.remaining = balance;
 
-    updateBalance();
     updateBudgetChart();
 
 }
+
 
 
 // =================================
@@ -1053,27 +1052,47 @@ function loadProjects(){
 
 
 
-if (projectSnapshot.empty && table) {
+            if(
+                projectSnapshot.empty
+                &&
+                table
+            ){
 
-    table.innerHTML = `
-        <tr>
-            <td colspan="3">
+
+
+                table.innerHTML = `
+
+
+
+                <tr>
+
+
+                <td colspan="3">
+
+
                 No projects available.
-            </td>
-        </tr>
-    `;
 
-}
 
-// Update all financial totals AFTER processing every project
+                </td>
+
+
+                </tr>
+
+
+
+                `;
+
+
+
+            }
 updateFinancialSummary();
-
-// Refresh the chart
-updateBudgetChart();
-
-}
+        }
 );
-    
+}
+
+
+
+
 // =================================
 // LOAD EXPENSE TRANSPARENCY
 // RECEIPT MONITORING
@@ -1391,15 +1410,24 @@ if(snapshot.empty){
 
 }
 
-// Save the normal expenses globally
 reportData.expenses = totalExpenses;
-window.expenseTotal = totalExpenses;
 
-// Recompute the financial summary
-updateFinancialSummary();
+// Recompute total expenses if projects are already loaded
+window.currentExpenses =
+    totalExpenses + window.totalProjectActualExpenses;
+
+window.currentExpenses =
+    reportData.expenses + window.totalProjectActualExpenses;
+
+setText(
+    "totalExpenses",
+    peso(window.currentExpenses)
+);
+
+updateBalance();
 
 updateBudgetChart();
-            
+
     }
 
 );
@@ -1629,7 +1657,7 @@ function loadAnnouncements(){
 // =================================
 
 
-updateFinancialSummary();
+function updateBalance(){
 
 
 
