@@ -690,7 +690,9 @@ function loadProjects(){
 
                     const projectName =
 
-                    expense.project;
+                    expense.project ||
+                        expense.category ||
+                        "Unknown project";
 
 
 
