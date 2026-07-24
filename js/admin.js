@@ -596,7 +596,7 @@ async function loadExpenses() {
 
                 <div class="data-card">
 
-                    <h3>💸 ${data.category || "Expense"}</h3>
+                    <h3>💸 ${data.project || "Expense"}</h3>
 
                     <p>${data.description || ""}</p>
 
