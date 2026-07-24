@@ -219,32 +219,11 @@ function financialStatus(statusText) {
     return statusText || "0% done";
 }
 
-function updateFinancialSummary() {
 
-    window.currentExpenses =
-        window.expenseTotal +
-        window.projectActualExpenseTotal;
 
-    const balance =
-        window.totalFunds -
-        window.currentExpenses;
 
-    setText(
-        "totalExpenses",
-        peso(window.currentExpenses)
-    );
 
-    setText(
-        "currentBalance",
-        peso(balance)
-    );
 
-    reportData.expenses = window.currentExpenses;
-    reportData.remaining = balance;
-
-    updateBudgetChart();
-
-}
 
 
 
@@ -405,7 +384,7 @@ function loadCollections(){
 
                     </td>
                     <td>
-                      <span class="${data.status ? data.status.toLowerCase() : 'pending'}">
+                      <span class="${data.status ? data.status.toLowercase() : 'pending'}">
                       ${data.status || "Recorded"}
                       </span>
                     </td>
@@ -467,7 +446,7 @@ function loadCollections(){
 
             totalFunds;
 
-updateFinancialSummary();
+
 
 
 
@@ -587,6 +566,11 @@ updateFinancialSummary();
 
 
 
+
+
+
+
+            updateBalance();
 
 
 
@@ -1753,62 +1737,47 @@ function updateBalance(){
 
 
             `;
-function updateFinancialSummary() {
 
-    window.currentExpenses =
-        Number(window.expenseTotal || 0) +
-        Number(window.projectActualExpenseTotal || 0);
 
-    const balance =
-        Number(window.totalFunds || 0) -
-        window.currentExpenses;
 
-    // Total Expenses
-    setText(
-        "totalExpenses",
-        peso(window.currentExpenses)
-    );
+            balanceElement.classList.remove(
+                "danger-status"
+            );
 
-    // Current Balance (if this element exists)
-    setText(
-        "currentBalance",
-        peso(balance)
-    );
 
-    // Remaining Balance Card
-    const balanceElement =
-        document.getElementById("remainingBalance");
 
-    if (balanceElement) {
-
-        if (balance < 0) {
-
-            balanceElement.innerHTML = `
-                🔴 Abonado
-                <br>
-                ${peso(Math.abs(balance))}
-            `;
-
-            balanceElement.classList.add("danger-status");
-
-        } else {
-
-            balanceElement.innerHTML = `
-                🟢 Remaining
-                <br>
-                ${peso(balance)}
-            `;
-
-            balanceElement.classList.remove("danger-status");
         }
+
+
+
     }
 
-    reportData.expenses = window.currentExpenses;
-    reportData.remaining = balance;
 
-    updateBudgetChart();
+
+
+
+
+
+    setText(
+
+        "currentBalance",
+
+        peso(balance)
+
+    );
+
+
+
 }
-            
+
+
+
+
+
+
+
+
+
 // =================================
 // YEAR COLLECTION PROGRESS
 // =================================
