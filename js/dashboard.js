@@ -212,20 +212,36 @@ function statusBadge(status){
 
 
 // =================================
+// =================================
 // FINANCIAL STATUS
 // =================================
 
-function financialStatus(statusText) {
-    return statusText || "0% done";
+function updateFinancialSummary() {
+
+    window.currentExpenses =
+        (window.expenseTotal || 0) +
+        (window.projectActualExpenseTotal || 0);
+
+    const balance =
+        (window.totalFunds || 0) -
+        window.currentExpenses;
+
+    setText(
+        "totalExpenses",
+        peso(window.currentExpenses)
+    );
+
+    setText(
+        "currentBalance",
+        peso(balance)
+    );
+
+    reportData.expenses = window.currentExpenses;
+    reportData.remaining = balance;
+
+    updateBudgetChart();
+
 }
-
-
-
-
-
-
-
-
 
 // =================================
 // LOAD COLLECTIONS
@@ -384,7 +400,7 @@ function loadCollections(){
 
                     </td>
                     <td>
-                      <span class="${data.status ? data.status.toLowercase() : 'pending'}">
+                      <span class="${data.status ? data.status.toLowerCase() : 'pending'}">
                       ${data.status || "Recorded"}
                       </span>
                     </td>
@@ -446,7 +462,7 @@ function loadCollections(){
 
             totalFunds;
 
-
+updateFinancialSummary();
 
 
 
@@ -570,11 +586,6 @@ function loadCollections(){
 
 
 
-            updateBalance();
-
-
-
-
 
 
             hideLoader();
@@ -690,9 +701,7 @@ function loadProjects(){
 
                     const projectName =
 
-                    expense.project ||
-                        expense.category ||
-                        "Unknown project";
+                    expense.project;
 
 
 
@@ -1020,71 +1029,36 @@ function loadProjects(){
 
                     }
 
-
-
-
-
-
-
-                }
-
             );
-
-
-
-
-
-
-
-
-
-            if(
-                projectSnapshot.empty
-                &&
-                table
-            ){
-
-
-
-                table.innerHTML = `
-
-
-
-                <tr>
-
-
-                <td colspan="3">
-
-
-                No projects available.
-
-
-                </td>
-
-
-                </tr>
-
-
-
-                `;
-
-
-
-            }
-window.expenseTotal = totalExpenses;
-        updateFinancialSummary();
-
         }
-);
+
+
+
+
+
+
+
+if (projectSnapshot.empty && table) {
+
+    table.innerHTML = `
+        <tr>
+            <td colspan="3">
+                No projects available.
+            </td>
+        </tr>
+    `;
+
 }
 
+// Update all financial totals AFTER processing every project
+updateFinancialSummary();
 
+// Refresh the chart
+updateBudgetChart();
 
-
-
-
-
-
+}
+);
+    
 // =================================
 // LOAD EXPENSE TRANSPARENCY
 // RECEIPT MONITORING
@@ -1314,7 +1288,7 @@ function loadExpenses(){
                     <h3>
 
 
-                    💸 ${data.projectName || "Unknown Project"}
+                    💸 ${data.project || "Unknown Project"}
 
 
                     </h3>
@@ -1402,24 +1376,15 @@ if(snapshot.empty){
 
 }
 
+// Save the normal expenses globally
 reportData.expenses = totalExpenses;
+window.expenseTotal = totalExpenses;
 
-// Recompute total expenses if projects are already loaded
-window.currentExpenses =
-    totalExpenses + window.totalProjectActualExpenses;
-
-window.currentExpenses =
-    reportData.expenses + window.totalProjectActualExpenses;
-
-setText(
-    "totalExpenses",
-    peso(window.currentExpenses)
-);
-
-updateBalance();
+// Recompute the financial summary
+updateFinancialSummary();
 
 updateBudgetChart();
-
+            
     }
 
 );
@@ -1649,7 +1614,7 @@ function loadAnnouncements(){
 // =================================
 
 
-function updateBalance(){
+updateFinancialSummary();
 
 
 
@@ -1745,47 +1710,62 @@ function updateBalance(){
 
 
             `;
+function updateFinancialSummary() {
 
+    window.currentExpenses =
+        Number(window.expenseTotal || 0) +
+        Number(window.projectActualExpenseTotal || 0);
 
+    const balance =
+        Number(window.totalFunds || 0) -
+        window.currentExpenses;
 
-            balanceElement.classList.remove(
-                "danger-status"
-            );
-
-
-
-        }
-
-
-
-    }
-
-
-
-
-
-
-
+    // Total Expenses
     setText(
-
-        "currentBalance",
-
-        peso(balance)
-
+        "totalExpenses",
+        peso(window.currentExpenses)
     );
 
+    // Current Balance (if this element exists)
+    setText(
+        "currentBalance",
+        peso(balance)
+    );
 
+    // Remaining Balance Card
+    const balanceElement =
+        document.getElementById("remainingBalance");
 
+    if (balanceElement) {
+
+        if (balance < 0) {
+
+            balanceElement.innerHTML = `
+                🔴 Abonado
+                <br>
+                ${peso(Math.abs(balance))}
+            `;
+
+            balanceElement.classList.add("danger-status");
+
+        } else {
+
+            balanceElement.innerHTML = `
+                🟢 Remaining
+                <br>
+                ${peso(balance)}
+            `;
+
+            balanceElement.classList.remove("danger-status");
+        }
+    }
+
+    reportData.expenses = window.currentExpenses;
+    reportData.remaining = balance;
+
+    updateBudgetChart();
 }
-
-
-
-
-
-
-
-
-
+            
 // =================================
 // YEAR COLLECTION PROGRESS
 // =================================
