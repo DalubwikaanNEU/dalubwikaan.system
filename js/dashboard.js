@@ -44,7 +44,8 @@ window.totalFunds = 0;
 window.expenseTotal = 0;
 window.currentExpenses = 0;
 
-window.projectActualExpenseTotal = 0;
+window.totalProjectActualExpenses = 0;
+
 
 
 let projectExpenses = {};
@@ -215,6 +216,10 @@ function statusBadge(status){
 // FINANCIAL STATUS
 // =================================
 
+function financialStatus(statusText) {
+    return statusText || "0% done";
+}
+
 function updateFinancialSummary() {
 
     window.currentExpenses =
@@ -238,9 +243,11 @@ function updateFinancialSummary() {
     reportData.expenses = window.currentExpenses;
     reportData.remaining = balance;
 
+    updateBalance();
     updateBudgetChart();
 
 }
+
 
 // =================================
 // LOAD COLLECTIONS
@@ -795,18 +802,11 @@ function loadProjects(){
 
 
 
-                    const actualExpense =
-    Number(data.actualExpenses) || 0;
+                    const spent =
+                        Number(data.actualExpenses) || 0;
 
-const recordedExpenses =
-    Number(projectExpenses[name]) || 0;
+                    window.projectActualExpenseTotal += spent;
 
-
-const spent =
-    actualExpense + recordedExpenses;
-
-
-window.projectActualExpenseTotal += actualExpense;
 
 
 
@@ -1035,8 +1035,17 @@ window.projectActualExpenseTotal += actualExpense;
 
                     }
 
+
+
+
+
+
+
+                }
+
             );
-        }
+
+
 
 
 
@@ -1726,30 +1735,19 @@ function updateFinancialSummary() {
         Number(window.totalFunds || 0) -
         window.currentExpenses;
 
-// =================================
-// BALANCE COMPUTATION
-// =================================
-
-function updateFinancialSummary() {
-
-    window.currentExpenses =
-        Number(window.expenseTotal || 0) +
-        Number(window.projectActualExpenseTotal || 0);
-
-    const balance =
-        Number(window.totalFunds || 0) -
-        window.currentExpenses;
-
+    // Total Expenses
     setText(
         "totalExpenses",
         peso(window.currentExpenses)
     );
 
+    // Current Balance (if this element exists)
     setText(
         "currentBalance",
         peso(balance)
     );
 
+    // Remaining Balance Card
     const balanceElement =
         document.getElementById("remainingBalance");
 
@@ -1782,6 +1780,7 @@ function updateFinancialSummary() {
 
     updateBudgetChart();
 }
+            
 // =================================
 // YEAR COLLECTION PROGRESS
 // =================================
