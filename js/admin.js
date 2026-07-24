@@ -723,9 +723,9 @@ if (expenseForm) {
 
         const description = getValue("expenseDescription");
 
-        if (!category) {
+        if (!project) {
 
-            notify("Select an expense category.");
+            notify("Enter a project name.");
 
             return;
 
