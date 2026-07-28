@@ -1,21 +1,25 @@
 // =================================
 // DALUBWIKAAN PROJECT TRANSPARENCY
-// VERSION 3.0
-// PROJECT STATUS + BUDGET MONITORING
-// FINANCIAL UTILIZATION TRACKER
+// PROJECT DASHBOARD
+// VERSION 4.0 FINAL FIXED
+// AUTOMATIC EXPENSE COMPUTATION
 // =================================
 
+
+// =================================
+// FIREBASE IMPORT
+// =================================
 
 import { db } from "./firebase.js";
 
 
 import {
 
-collection,
-onSnapshot,
-getDocs,
-query,
-orderBy
+    collection,
+    getDocs,
+    query,
+    orderBy,
+    onSnapshot
 
 }
 
@@ -30,95 +34,89 @@ from
 // ELEMENT
 // =================================
 
-
 const container =
-
 document.getElementById(
-"projectContainer"
+    "projectContainer"
 );
 
 
 
 
 // =================================
-// HELPERS
+// FORMAT PESO
 // =================================
-
 
 function peso(value){
 
+    return "₱" +
 
-return "₱" +
+    Number(value || 0)
 
-Number(value || 0)
+    .toLocaleString(
+        "en-PH",
+        {
 
-.toLocaleString(
-"en-PH"
-);
+            minimumFractionDigits:2,
 
+            maximumFractionDigits:2
 
+        }
+
+    );
 
 }
 
 
 
 
-
-
+// =================================
+// STATUS BADGE
+// =================================
 
 function statusBadge(status){
 
 
-switch(status){
+    if(status === "Completed"){
+
+        return `
+
+        <span class="status completed">
+
+        🟢 Completed
+
+        </span>
+
+        `;
+
+    }
 
 
 
-case "Completed":
+    if(status === "Ongoing"){
 
-return `
+        return `
 
-<span class="status completed">
+        <span class="status ongoing">
 
-🟢 Completed
+        🔵 Ongoing
 
-</span>
+        </span>
 
-`;
+        `;
 
-
-
-
-case "Ongoing":
-
-return `
-
-<span class="status ongoing">
-
-🔵 Ongoing
-
-</span>
-
-`;
+    }
 
 
 
+    return `
 
-default:
+    <span class="status planning">
 
-return `
+    🟡 Planning
 
-<span class="status planning">
+    </span>
 
-🟡 Planning
-
-</span>
-
-`;
-
-
-
-}
-
+    `;
 
 
 }
@@ -127,112 +125,87 @@ return `
 
 
 
-
-
-
-
-function financialStatus(
-budget,
-spent
-){
-
-
-
-const balance =
-
-budget - spent;
-
-
-
-
-
-
-if(balance < 0){
-
-
-return `
-
-<div class="danger-status">
-
-🔴 Abonado:
-
-${peso(
-Math.abs(balance)
-)}
-
-</div>
-
-`;
-
-
-
-}
-
-
-
-
-
-
-return `
-
-<div class="success-status">
-
-🟢 Remaining:
-
-${peso(balance)}
-
-</div>
-
-`;
-
-
-
-}
-
-
-
-
-
-
-
-
+// =================================
+// CALCULATE UTILIZATION
+// =================================
 
 function calculateProgress(
-budget,
-spent
+    budget,
+    spent
 ){
 
 
-if(
-budget <= 0
-)
+    if(!budget || budget <= 0){
 
-return 0;
+        return 0;
 
-
+    }
 
 
+    let percent =
 
-let progress =
-
-(spent / budget) * 100;
+    (spent / budget) * 100;
 
 
 
+    return Math.round(percent);
 
 
-
-if(progress > 100)
-
-progress = 100;
+}
 
 
 
 
 
+// =================================
+// FINANCIAL STATUS
+// =================================
 
-return Math.round(progress);
+function financialStatus(
+    budget,
+    spent
+){
 
+
+    const remaining =
+
+    budget - spent;
+
+
+
+    if(remaining < 0){
+
+
+        return `
+
+        <div class="danger-status">
+
+        🔴 Over Budget:
+
+        ${peso(
+            Math.abs(remaining)
+        )}
+
+        </div>
+
+        `;
+
+
+    }
+
+
+
+    return `
+
+    <div class="success-status">
+
+    🟢 Remaining:
+
+    ${peso(remaining)}
+
+    </div>
+
+    `;
 
 
 }
@@ -242,239 +215,330 @@ return Math.round(progress);
 
 
 
+// =================================
+// LOAD EXPENSE MAP
+// =================================
+
+async function getExpenseMap(){
+
+
+    const expenseSnapshot =
+
+    await getDocs(
+
+        collection(
+            db,
+            "expenses"
+        )
+
+    );
 
 
 
+    const expenseMap = {};
+
+
+
+
+    expenseSnapshot.forEach(
+        
+        docSnap=>{
+
+
+            const expense =
+
+            docSnap.data();
+
+
+
+            const projectName =
+
+            expense.project;
+
+
+
+            if(!projectName){
+
+                return;
+
+            }
+
+
+
+            if(!expenseMap[projectName]){
+
+
+                expenseMap[projectName] = 0;
+
+
+            }
+
+
+
+            expenseMap[projectName]
+
+            +=
+
+            Number(
+                expense.amount || 0
+            );
+
+
+        }
+
+    );
+
+
+
+    return expenseMap;
+
+
+}
 // =================================
 // LOAD PROJECTS
+// REAL-TIME PROJECT MONITORING
 // =================================
 
 
-async function loadProjects(){
+function loadProjects(){
 
 
+    if(!container){
 
-if(!container)
+        console.warn(
+            "Project container not found."
+        );
 
-return;
+        return;
 
+    }
 
 
 
 
 
+    const projectQuery = query(
 
-try{
+        collection(
+            db,
+            "projects"
+        ),
 
+        orderBy(
+            "createdAt",
+            "desc"
+        )
 
+    );
 
-// ===============================
-// LOAD EXPENSES
-// ===============================
 
 
-const expenseSnapshot =
 
-await getDocs(
 
-collection(
-db,
-"expenses"
-)
+    onSnapshot(
 
-);
+        projectQuery,
 
+        async(snapshot)=>{
 
 
+            try{
 
 
-let expenseMap = {};
+                container.innerHTML = "";
 
 
 
+                if(snapshot.empty){
 
 
+                    container.innerHTML = `
 
+                    <div class="empty-state">
 
+                    📂 No projects available.
 
-expenseSnapshot.forEach(doc=>{
+                    </div>
 
+                    `;
 
 
-const expense =
+                    return;
 
-doc.data();
 
+                }
 
 
 
 
 
-const projectName =
+                // GET ALL EXPENSES
 
-expense.project;
+                const expenseMap =
 
+                await getExpenseMap();
 
 
 
-if(!expenseMap[projectName]){
 
 
-expenseMap[projectName]=0;
 
+                snapshot.forEach(
 
-}
+                    docSnap=>{
 
 
 
+                        const project =
 
+                        docSnap.data();
 
 
-expenseMap[projectName]
 
-+=
 
-Number(
-expense.amount || 0
-);
 
+                        const projectName =
 
+                        project.name ||
 
-});
+                        "Unnamed Project";
 
 
 
 
 
 
+                        const budget =
 
+                        Number(
+                            project.budget || 0
+                        );
 
 
-// ===============================
-// REAL TIME PROJECTS
-// ===============================
 
 
-const projectQuery = query(
 
-collection(
-db,
-"projects"
-),
 
-orderBy(
-"createdAt",
-"desc"
-)
 
-);
+                        // MATCH EXPENSE USING PROJECT NAME
 
+                        const actualExpense =
 
+                        expenseMap[projectName]
 
+                        ||
 
+                        0;
 
 
 
 
-onSnapshot(
 
-projectQuery,
 
-(snapshot)=>{
+                        const remaining =
 
+                        budget - actualExpense;
 
 
-container.innerHTML="";
 
 
 
 
 
+                        const progress =
 
-if(snapshot.empty){
+                        calculateProgress(
 
+                            budget,
 
+                            actualExpense
 
-container.innerHTML=`
+                        );
 
-<div class="empty-state">
 
-📂 No projects available.
 
-</div>
 
-`;
 
 
 
-return;
 
+                        const card =
 
+                        document.createElement(
+                            "div"
+                        );
 
-}
 
 
 
 
+                        card.className =
 
+                        "project-card";
 
 
 
-snapshot.forEach(doc=>{
 
 
 
-const project =
 
-doc.data();
 
 
+                        card.innerHTML = `
 
 
 
+                        <div class="project-header">
 
 
-const name =
+                            <h2>
 
-project.name ||
+                            🏗 ${projectName}
 
-"Unnamed Project";
+                            </h2>
 
 
 
+                            ${
 
+                            statusBadge(
+                                project.status
+                                ||
+                                "Planning"
+                            )
 
+                            }
 
 
-const budget =
+                        </div>
 
-Number(
-project.budget || 0
-);
 
 
 
 
 
+                        <div class="budget-info">
 
 
-const spent =
 
-expenseMap[name]
+                            <div class="budget-item">
 
-||
 
-0;
+                                <h4>
 
+                                Allocated Budget
 
+                                </h4>
 
 
+                                <p>
 
+                                ${peso(budget)}
 
+                                </p>
 
-const remaining =
 
-budget - spent;
+                            </div>
 
 
 
@@ -482,293 +546,235 @@ budget - spent;
 
 
 
-const progress =
+                            <div class="budget-item">
 
-calculateProgress(
-budget,
-spent
-);
 
+                                <h4>
 
+                                Actual Expenses
 
+                                </h4>
 
 
+                                <p>
 
-const status =
+                                ${peso(actualExpense)}
 
-project.status ||
+                                </p>
 
-"Planning";
 
+                            </div>
 
 
 
 
 
 
+                            <div class="budget-item">
 
-const card =
 
-document.createElement(
-"div"
-);
+                                <h4>
 
+                                Balance
 
+                                </h4>
 
 
+                                <p>
 
-card.className=
+                                ${peso(remaining)}
 
-"project-card";
+                                </p>
 
 
+                            </div>
 
 
 
+                        </div>
 
 
 
 
-card.innerHTML = `
 
 
+                        ${
 
-<div class="project-header">
+                        financialStatus(
 
+                            budget,
 
-<h2>
+                            actualExpense
 
-${name}
+                        )
 
-</h2>
+                        }
 
 
 
-${statusBadge(status)}
 
 
-</div>
 
 
 
+                        <div class="progress-section">
 
 
 
-<div class="budget-info">
+                            <p>
 
+                            Financial Utilization:
 
+                            <strong>
 
-<div>
+                            ${progress}%
 
-<strong>
-Allocated Budget
-</strong>
+                            </strong>
 
 
-<p>
+                            </p>
 
-${peso(budget)}
 
-</p>
 
-</div>
 
 
+                            <div class="progress-bar">
 
 
+                                <div
 
-<div>
+                                class="progress-fill"
 
-<strong>
-Actual Expenses
-</strong>
+                                style="width:${progress}%">
 
+                                </div>
 
-<p>
 
-${peso(spent)}
+                            </div>
 
-</p>
 
 
-</div>
 
 
 
+                            <small>
 
 
-${financialStatus(
-budget,
-spent
-)}
+                            ${
+                            
+                            progress >= 100
 
+                            ?
 
-</div>
+                            "Budget fully utilized"
 
+                            :
 
+                            "Monitoring expenses..."
 
+                            }
 
 
+                            </small>
 
 
 
-<p class="description">
+                        </div>
 
-${project.description ||
 
-"No project description available."
 
-}
 
-</p>
 
 
 
 
+                        <div class="description">
 
 
+                        <p>
 
-<div class="progress-section">
+                        ${
+                        
+                        project.description
 
+                        ||
 
+                        "No project description."
 
-<p>
+                        }
 
-Financial Utilization:
 
-<strong>
+                        </p>
 
-${progress}%
 
-</strong>
+                        </div>
 
 
-</p>
 
 
 
 
+                        `;
 
 
-<div class="progress-bar">
 
 
-<div
 
-class="progress-fill"
 
-style="width:${progress}%">
 
-</div>
 
+                        container.appendChild(card);
 
-</div>
 
 
+                    }
 
+                );
 
 
-<small>
 
-${progress >= 100
+            }
 
-?
+            catch(error){
 
-"Budget fully utilized"
 
-:
+                console.error(
 
-"Monitoring expenses..."
+                    "PROJECT DISPLAY ERROR:",
 
-}
+                    error
 
-</small>
+                );
 
 
 
-</div>
+                container.innerHTML = `
 
 
+                <div class="empty-state">
 
+                ⚠ Failed to load projects.
 
+                </div>
 
 
-`;
+                `;
 
 
+            }
 
 
 
+        }
 
 
-container.appendChild(card);
-
-
-
-});
-
-
-
-
-
-}
-
-
-
-);
-
-
-
-}
-
-
-
-catch(error){
-
-
-
-console.error(
-
-"Project Transparency Error:",
-
-error
-
-);
-
-
-
-
-
-container.innerHTML = `
-
-
-<div class="empty-state">
-
-⚠ Unable to load projects.
-
-</div>
-
-
-`;
+    );
 
 
 
 }
-
-
-
-}
-
-
-
-
-
-
-
-
-
 // =================================
-// START SYSTEM
+// START PROJECT SYSTEM
 // =================================
 
 
@@ -777,28 +783,57 @@ loadProjects();
 
 
 
+// =================================
+// OPTIONAL MANUAL REFRESH
+// =================================
+
+window.refreshProjects = function(){
+
+
+    loadProjects();
+
+
+    console.log(
+
+        "Projects refreshed."
+
+    );
+
+
+};
+
+
+
+
+// =================================
+// SYSTEM READY LOG
+// =================================
 
 
 console.log(`
 
-================================
 
-DALUBWIKAAN PROJECT TRANSPARENCY v3.0
+=================================
 
+DALUBWIKAAN PROJECT TRANSPARENCY
 
-✓ Project Status
-
-✓ Budget Monitoring
-
-✓ Expense Tracking
-
-✓ Progress Visualization
-
-✓ Abonado Detection
+VERSION 4.0 FINAL FIXED
 
 
-SYSTEM READY
+✅ Projects Loading
 
-================================
+✅ Expense Tracking Connected
+
+✅ Actual Expense Computation
+
+✅ Budget Monitoring
+
+✅ Utilization Calculation
+
+
+SYSTEM ONLINE
+
+=================================
+
 
 `);
