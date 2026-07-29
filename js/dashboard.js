@@ -235,26 +235,24 @@ function statusBadge(status){
 
 
 
-function financialStatus(budget, spent) {
 
-    budget = Number(budget || 0);
-    spent = Number(spent || 0);
 
-    if (budget <= 0) {
-        return "0% done";
-    }
 
-    const percent = Math.round((spent / budget) * 100);
 
-    if (percent >= 100) {
-        if (spent > budget) {
-            return `⚠️ ${percent}% Over Budget`;
-        }
-        return "✅ 100% Complete";
-    }
+function financialStatus(value){
 
-    return `${percent}% done`;
+
+    return value || "0% done";
+
+
 }
+
+
+
+
+
+
+
 
 // =================================
 // LOAD COLLECTIONS
@@ -623,15 +621,26 @@ function loadProjects(){
 
             );
 
+
+
+
+
+
             if(table){
 
                 table.innerHTML = "";
 
             }
 
+
+
+
+
             // =================================
             // LOAD EXPENSES
             // =================================
+
+
             const expenseSnapshot =
 
             await getDocs(
@@ -645,17 +654,37 @@ function loadProjects(){
                 )
 
             );
+
+
+
+
+
+
+
+
             expenseSnapshot.forEach(
 
                 (expenseDoc)=>{
+
+
 
                     const expense =
 
                     expenseDoc.data();
 
+
+
+
+
+
                     const expenseProject =
 
                     getProjectName(expense);
+
+
+
+
+
 
                     if(
 
@@ -663,9 +692,17 @@ function loadProjects(){
 
                     ){
 
+
                         projectExpenses[expenseProject] = 0;
 
+
                     }
+
+
+
+
+
+
 
                     projectExpenses[expenseProject]
 
@@ -678,27 +715,58 @@ function loadProjects(){
                     );
 
 
+
                 }
 
             );
 
+
+
+
+
+
+
+
+
             reportData.projects = [];
+
+
+
+
+
+
 
             projectSnapshot.forEach(
 
                 (projectDoc)=>{
 
+
+
                     const data =
 
                     projectDoc.data();
+
+
+
+
+
+
+
 
                     // =========================
                     // PROJECT NAME FIX
                     // =========================
 
+
                     const name =
 
                     getProjectName(data);
+
+
+
+
+
+
 
                     const budget =
 
@@ -712,9 +780,19 @@ function loadProjects(){
 
                     );
 
+
+
+
+
+
+
+
+
                     // =========================
                     // EXPENSE MATCHING FIX
                     // =========================
+
+
                     const savedExpense =
 
                     Number(
@@ -723,6 +801,13 @@ function loadProjects(){
 
                     );
 
+
+
+
+
+
+
+
                     const manualExpense =
 
                     Number(
@@ -730,6 +815,13 @@ function loadProjects(){
                         data.actualExpenses || 0
 
                     );
+
+
+
+
+
+
+
 
                     const spent =
 
@@ -743,31 +835,104 @@ function loadProjects(){
 
                     manualExpense;
 
+
+
+
+
+
+
+
+
                     window.totalProjectActualExpenses
+
                     +=
+
                     spent;
+
+
+
+
+
+
+
+
+
                     const remaining =
+
                     budget - spent;
+
+
+
+
+
+
+
+
+
+
                     const status =
+
                     data.status ||
+
                     "Planning";
+
+
+
+
+
+
+
+
+
                     const projectData = {
-                      name,
+
+
+
+                        name,
+
+
                         budget,
-                   spent,
+
+
+                        spent,
+
+
                         remaining,
+
+
                         status,
+
+
+
                         description:
 
                         data.description || ""
 
+
+
                     };
+
+
+
+
+
+
+
+
 
                     reportData.projects.push(
 
                         projectData
 
                     );
+
+
+
+
+
+
+
+
 
                     if(table){
 
@@ -783,53 +948,111 @@ function loadProjects(){
 
                         <td>
 
+
+
                         <strong>
 
                         ${name}
 
                         </strong>
 
+
+
                         <br><br>
+
+
 
                         ${statusBadge(status)}
 
+
+
                         </td>
 
-                        <td>
 
-<strong>Budget</strong>
 
-<br>
 
-${peso(budget)}
 
-<br><br>
 
-<strong>Expenses</strong>
 
-<br>
 
-${peso(spent)}
-
-<br><br>
-
-<strong>Progress</strong>
-
-<br>
-
-${financialStatus(budget, spent)}
-
-<br><br>
-
-<strong>Remaining</strong>
-
-<br>
-
-${peso(remaining)}
-
-</td>
 
                         <td>
+
+
+
+                        <strong>
+
+                        Budget
+
+                        </strong>
+
+
+
+                        <br>
+
+
+
+                        ${peso(budget)}
+
+
+
+
+
+
+                        <br><br>
+
+
+
+
+
+                        <strong>
+
+                        Expenses
+
+                        </strong>
+
+
+
+                        <br>
+
+
+
+                        ${peso(spent)}
+
+
+
+
+
+
+                        <br><br>
+
+
+
+
+
+                        Remaining:
+
+                        <br>
+
+
+
+                        ${peso(remaining)}
+
+
+
+                        </td>
+
+
+
+
+
+
+
+
+
+                        <td>
+
+
 
                         ${
 
@@ -839,16 +1062,38 @@ ${peso(remaining)}
 
                         }
 
+
+
                         </td>
+
+
 
                         </tr>
 
+
+
                         `;
+
+
+
                     }
+
+
+
+
+
 
                 }
 
             );
+
+
+
+
+
+
+
+
 
             if(
 
@@ -858,15 +1103,22 @@ ${peso(remaining)}
 
             ){
 
+
+
                 table.innerHTML = `
+
 
                 <tr>
 
+
                 <td colspan="3">
+
 
                 No projects available.
 
+
                 </td>
+
 
                 </tr>
 
@@ -876,9 +1128,23 @@ ${peso(remaining)}
 
             }
 
+
+
+
+
+
+
+
             updateFinancialSummary();
+
+
+
         }
+
+
     );
+
+
 }
 // =================================
 // LOAD EXPENSES
