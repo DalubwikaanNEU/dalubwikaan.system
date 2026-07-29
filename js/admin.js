@@ -1920,7 +1920,7 @@ async function loadSummary() {
 
 }
             
-        
+        });
 
         // ----------------------------
         // PROJECTS ACTUAL EXPENSES (AUTOMATIC COMPUTATION)
