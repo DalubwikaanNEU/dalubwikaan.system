@@ -1704,81 +1704,222 @@ async function(id){
 
 };
 
- //========================================
+ // ========================================
 // SUMMARY SYSTEM
-// v16.0
+// FINAL FIX v17.0
 // ========================================
 
 async function loadSummary() {
 
     try {
 
-        // ----------------------------
-        // Totals
-        // ----------------------------
-
-        let totalCollections = 0;
-        let totalExpenses = 0;
-
-        let firstYear = 0;
-        let secondYear = 0;
-        let thirdYear = 0;
-        let fourthYear = 0;
-
-        // ----------------------------
-        // COLLECTIONS
-        // ----------------------------
+        // -----------------------------
+        // LOAD COLLECTIONS
+        // -----------------------------
 
         const collectionSnap = await getDocs(
             collection(db, "collections")
         );
 
+        let totalCollections = 0;
+
+        collectionCache = [];
+
         collectionSnap.forEach(docSnap => {
 
             const data = docSnap.data();
 
-            const amount = Number(data.amount) || 0;
+            collectionCache.push({
+                id: docSnap.id,
+                ...data
+            });
 
-            totalCollections += amount;
+            totalCollections += Number(data.amount || 0);
 
-            const level = (data.yearLevel || "").toLowerCase();
+        });
 
-            if (
-                level.includes("1") ||
-                level.includes("first")
-            ) {
+        // -----------------------------
+        // LOAD PROJECTS
+        // -----------------------------
 
-                firstYear += amount;
+        const projectSnap = await getDocs(
+            collection(db, "projects")
+        );
+
+        let totalProjectExpenses = 0;
+
+        projectCache = [];
+
+        projectSnap.forEach(docSnap => {
+
+            const data = docSnap.data();
+
+            projectCache.push({
+                id: docSnap.id,
+                ...data
+            });
+
+            totalProjectExpenses +=
+                Number(data.actualExpenses || 0);
+
+        });
+
+        // -----------------------------
+        // LOAD EXPENSES
+        // -----------------------------
+
+        const expenseSnap = await getDocs(
+            collection(db, "expenses")
+        );
+
+        let manualExpenses = 0;
+
+        expenseCache = [];
+
+        expenseSnap.forEach(docSnap => {
+
+            const data = docSnap.data();
+
+            expenseCache.push({
+                id: docSnap.id,
+                ...data
+            });
+
+            manualExpenses +=
+                Number(data.amount || 0);
+
+        });
+
+        // -----------------------------
+        // LOAD RECORDS
+        // -----------------------------
+
+        const recordSnap = await getDocs(
+            collection(db, "records")
+        );
+
+        recordCache = [];
+
+        recordSnap.forEach(docSnap => {
+
+            recordCache.push({
+                id: docSnap.id,
+                ...docSnap.data()
+            });
+
+        });
+
+        // -----------------------------
+        // COMPUTE TOTALS
+        // -----------------------------
+
+        const totalExpenses =
+            manualExpenses +
+            totalProjectExpenses;
+
+        const availableBalance =
+            totalCollections -
+            totalExpenses;
+
+        // -----------------------------
+        // DASHBOARD COUNTS
+        // -----------------------------
+
+        setText(
+            "collectionCount",
+            collectionCache.length
+        );
+
+        setText(
+            "projectCount",
+            projectCache.length
+        );
+
+        setText(
+            "expenseCount",
+            expenseCache.length
+        );
+
+        setText(
+            "recordCount",
+            recordCache.length
+        );
+
+        // -----------------------------
+        // FINANCIAL SUMMARY
+        // -----------------------------
+
+        setText(
+            "totalCollections",
+            peso(totalCollections)
+        );
+
+        setText(
+            "totalExpenses",
+            peso(totalExpenses)
+        );
+
+        setText(
+            "currentBalance",
+            peso(availableBalance)
+        );
+
+        // -----------------------------
+        // TREASURY STATUS
+        // -----------------------------
+
+        const status =
+            document.getElementById(
+                "dashboardStatus"
+            );
+
+        if (status) {
+
+            if (availableBalance < 0) {
+
+                status.textContent =
+                    "🔴 Deficit";
 
             }
 
-            else if (
-                level.includes("2") ||
-                level.includes("second")
-            ) {
+            else if (availableBalance === 0) {
 
-                secondYear += amount;
+                status.textContent =
+                    "🟡 Balanced";
 
             }
 
-            else if (
-                level.includes("3") ||
-                level.includes("third")
-            ) {
+            else {
 
-                thirdYear += amount;
+                status.textContent =
+                    "🟢 Healthy";
 
             }
 
-            else if (
-                level.includes("4") ||
-                level.includes("fourth")
-            ) {
+        }
 
-                fourthYear += amount;
+        console.log(
+            "Summary Updated Successfully"
+        );
 
-            }
+    }
 
+    catch (error) {
+
+        console.error(
+            "SUMMARY ERROR:",
+            error
+        );
+
+        notify(
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+            
         });
 
         // ----------------------------
