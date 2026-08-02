@@ -1145,32 +1145,6 @@ function refreshDashboard(){
 }
 
 // =====================================================
-// SYSTEM INITIALIZER
-// =====================================================
-
-function initializeDashboard(){
-
-    console.log("--------------------------------");
-
-    console.log("DALUBWIKAAN DASHBOARD");
-
-    console.log("Version 19.0");
-
-    console.log("--------------------------------");
-
-    loadProjects();
-
-    loadExpenses();
-
-    loadCollections();
-
-    loadAnnouncements();
-
-    renderCharts();
-
-}
-
-// =====================================================
 // AUTH
 // =====================================================
 
