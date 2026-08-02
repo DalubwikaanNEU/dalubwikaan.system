@@ -1,2730 +1,1310 @@
-// =================================
+// ======================================================
 // DALUBWIKAAN TREASURY DASHBOARD
-// VERSION 6.0 FIXED
-// FIREBASE REAL-TIME
-// PROJECT NAME COMPATIBILITY FIX
-// =================================
-// =================================
+// VERSION 19.0
+// PART 1 - CORE SYSTEM
+// ======================================================
+
+// ======================================================
 // FIREBASE
-// =================================
+// ======================================================
+
 import { db } from "./firebase.js";
+
 import {
 
     collection,
-    onSnapshot,
     query,
     orderBy,
-    getDocs
-}
-from
-"https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-// =================================
-// GLOBAL VARIABLES
-// =================================
-let collectionChart = null;
-let budgetChart = null;
-let projectExpenses = {};
-window.totalFunds = 0;
-window.currentExpenses = 0;
-window.expenseTotal = 0;
-window.totalProjectActualExpenses = 0;
-window.projectActualExpenseTotal = 0;
-// =================================
-// REPORT STORAGE
-// =================================
-let reportData = {
-    funds:0,
-    expenses:0,
-    remaining:0,
-    years:{},
-    projects:[]
+    onSnapshot
+
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+
+// ======================================================
+// GLOBAL CACHE
+// ======================================================
+
+const cache = {
+
+    collections: [],
+    projects: [],
+    expenses: [],
+    announcements: []
+
 };
-// =================================
-// BASIC HELPERS
-// =================================
+
+
+// ======================================================
+// DASHBOARD STATE
+// ======================================================
+
+const dashboard = {
+
+    totalCollections: 0,
+    totalExpenses: 0,
+    totalBudget: 0,
+    remainingBalance: 0
+
+};
+
+
+// ======================================================
+// HELPERS
+// ======================================================
+
+function $(id){
+
+    return document.getElementById(id);
+
+}
+
 function setText(id,value){
-    const element = document.getElementById(id);
+
+    const element = $(id);
+
     if(element){
-      element.textContent = value;
+
+        element.textContent = value;
+
     }
+
 }
+
 function peso(value){
+
     return "₱" +
-    Number(value || 0)
-    .toLocaleString(
+
+    Number(value || 0).toLocaleString(
+
         "en-PH",
+
         {
-            minimumFractionDigits:2
-        }
-    );
-}
-// =================================
-// PROJECT NAME RESOLVER
-// FIX UNKNOWN PROJECT ISSUE
-// =================================
-function getProjectName(data){
-    return (
-        data.projectName ||
-        data.project ||
-        data.name ||
-        data.title ||
-        data.category ||
-        data.projectTitle ||
-        "Unknown Project"
-    );
-}
-// =================================
-// STATUS BADGE
-// =================================
-function statusBadge(status){
-    const current =
-    String(status || "Planning")
-    .trim();
-    if(current === "Completed"){
-        return `
-        <span class="status completed">
-        🟢 Completed
-        </span>
-        `;
-    }
 
-    if(current === "Ongoing"){
-        return `
-        <span class="status ongoing">
-        🔵 Ongoing
-        </span>
-        `;
-    }
-    return `
-    <span class="status planning">
-    🟡 Planning
-    </span>
-    `;
-}
-function financialStatus(budget, spent) {
-    budget = Number(budget || 0);
-    spent = Number(spent || 0);
-    if (budget <= 0) {
-        return "0% done";
-    }
-    const percent = Math.round((spent / budget) * 100);
-    if (percent >= 100) {
-        if (spent > budget) {
-            return `⚠️ ${percent}% Over Budget`;
-        }
-        return "✅ 100% Complete";
-    }
+            minimumFractionDigits:2,
+            maximumFractionDigits:2
 
-    return `${percent}% done`;
+        }
+
+    );
+
 }
-// =================================
-// LOAD COLLECTIONS
-// =================================
+
+function notify(message){
+
+    console.log(message);
+
+}
+
+
+// ======================================================
+// LOADER
+// ======================================================
+
+function hideLoader(){
+
+    const loader = $("loader");
+
+    if(!loader) return;
+
+    loader.style.opacity = "0";
+
+    setTimeout(()=>{
+
+        loader.style.display="none";
+
+    },400);
+
+}
+
+
+// ======================================================
+// INITIALIZER
+// ======================================================
+
+function initializeDashboard(){
+
+    console.log("Loading Dashboard v19...");
+
+    loadCollections();
+
+    loadProjects();
+
+    loadExpenses();
+
+    loadAnnouncements();
+
+}
+
+
+// ======================================================
+// COLLECTIONS MODULE
+// VERSION 19.0
+// PART 2
+// ======================================================
+
 function loadCollections(){
+
     const q = query(
-        collection(
-            db,
-            "collections"
-        ),
 
-        orderBy(
+        collection(db,"collections"),
 
-            "createdAt",
-
-            "desc"
-
-        )
+        orderBy("createdAt","desc")
 
     );
-    onSnapshot(
 
-        q,
+    onSnapshot(q,(snapshot)=>{
 
-        (snapshot)=>{
+        cache.collections = [];
 
-            let totalFunds = 0;
-            let yearTotals = {
-                "First Year":0,
-                "Second Year":0,
-                "Third Year":0,
-                "Fourth Year":0
-            };
-            const table =
-            document.getElementById(
-                "transactionTable"
-            );
-            if(table){
+        let totalCollections = 0;
 
-                table.innerHTML="";
+        const yearlyTotals = {
 
-            }
-            snapshot.forEach((doc)=>{
-                const data = doc.data();
-              const amount =
-             Number(
+            "First Year":0,
+            "Second Year":0,
+            "Third Year":0,
+            "Fourth Year":0
 
-                    data.amount || 0
+        };
 
-                );
-                totalFunds += amount;
-                if(
+        const table = $("transactionTable");
 
-                    data.yearLevel &&
+        if(table){
 
-                    yearTotals[data.yearLevel] !== undefined
+            table.innerHTML = "";
 
-                ){
+        }
 
-                    yearTotals[data.yearLevel] += amount;
+        snapshot.forEach(docSnap=>{
 
-                }
-                if(table){
-                    table.innerHTML += `
-                    <tr>
-                    <td>
-                    ${data.date || "N/A"}
+            const data = docSnap.data();
 
-                    </td>
-                    <td>
+            cache.collections.push({
 
-                    ${data.yearLevel || "N/A"}
+                id:docSnap.id,
 
-                    </td>
-                    <td>
-
-                    ${peso(amount)}
-
-                    </td>
-                    <td>
-
-                    ${data.status || "Recorded"}
-
-                    </td>
-
-
-
-                    </tr>
-
-
-                    `;
-
-
-                }
+                ...data
 
             });
 
-            if(snapshot.empty && table){
+            const amount = Number(data.amount || 0);
 
+            totalCollections += amount;
 
-                table.innerHTML = `
+            const year = data.yearLevel || "";
 
+            if(yearlyTotals[year] !== undefined){
 
-                <tr>
-
-                <td colspan="4">
-
-                No collection records yet.
-
-                </td>
-
-                </tr>
-
-
-                `;
-
+                yearlyTotals[year] += amount;
 
             }
-
-            window.totalFunds = totalFunds;
-            reportData.funds = totalFunds;
-            reportData.years = yearTotals;
-            setText(
-                "totalFunds",
-                peso(totalFunds)
-            );
-            setText(
-
-                "firstYear",
-
-                peso(yearTotals["First Year"])
-
-            );
-            setText(
-
-                "secondYear",
-
-                peso(yearTotals["Second Year"])
-
-            );
-
-
-
-            setText(
-
-                "thirdYear",
-
-                peso(yearTotals["Third Year"])
-
-            );
-
-
-
-            setText(
-
-                "fourthYear",
-
-                peso(yearTotals["Fourth Year"])
-
-            );
-
-
-
-
-
-
-
-            updateProgress(yearTotals);
-
-
-            createCollectionChart(yearTotals);
-
-
-            updateBalance();
-
-
-            hideLoader();
-
-
-
-        }
-
-
-    );
-
-
-}
-// =================================
-// LOAD PROJECTS
-// FIXED PROJECT TRANSPARENCY SYSTEM
-// =================================
-
-
-function loadProjects(){
-
-
-    const projectQuery = query(
-
-        collection(
-
-            db,
-
-            "projects"
-
-        ),
-
-        orderBy(
-
-            "createdAt",
-
-            "desc"
-
-        )
-
-    );
-
-
-
-
-
-
-    onSnapshot(
-
-        projectQuery,
-
-        async(projectSnapshot)=>{
-
-
-
-            window.totalProjectActualExpenses = 0;
-
-
-            projectExpenses = {};
-
-
-
-
-
-            const table =
-
-            document.getElementById(
-
-                "projectTable"
-
-            );
 
             if(table){
 
-                table.innerHTML = "";
-
-            }
-
-            // =================================
-            // LOAD EXPENSES
-            // =================================
-            const expenseSnapshot =
-
-            await getDocs(
-
-                collection(
-
-                    db,
-
-                    "expenses"
-
-                )
-
-            );
-            expenseSnapshot.forEach(
-
-                (expenseDoc)=>{
-
-                    const expense =
-
-                    expenseDoc.data();
-
-                    const expenseProject =
-
-                    getProjectName(expense);
-
-                    if(
-
-                        !projectExpenses[expenseProject]
-
-                    ){
-
-                        projectExpenses[expenseProject] = 0;
-
-                    }
-
-                    projectExpenses[expenseProject]
-
-                    +=
-
-                    Number(
-
-                        expense.amount || 0
-
-                    );
-
-
-                }
-
-            );
-
-            reportData.projects = [];
-
-            projectSnapshot.forEach(
-
-                (projectDoc)=>{
-
-                    const data =
-
-                    projectDoc.data();
-
-                    // =========================
-                    // PROJECT NAME FIX
-                    // =========================
-
-                    const name =
-
-                    getProjectName(data);
-
-                    const budget =
-
-                    Number(
-
-                        data.budget ||
-
-                        data.amount ||
-
-                        0
-
-                    );
-
-                    // =========================
-                    // EXPENSE MATCHING FIX
-                    // =========================
-                    const savedExpense =
-
-                    Number(
-
-                        projectExpenses[name] || 0
-
-                    );
-
-                    const manualExpense =
-
-                    Number(
-
-                        data.actualExpenses || 0
-
-                    );
-
-                    const spent =
-
-                    savedExpense > 0
-
-                    ?
-
-                    savedExpense
-
-                    :
-
-                    manualExpense;
-
-                    window.totalProjectActualExpenses
-                    +=
-                    spent;
-                    const remaining =
-                    budget - spent;
-                    const status =
-                    data.status ||
-                    "Planning";
-                    const projectData = {
-                      name,
-                        budget,
-                   spent,
-                        remaining,
-                        status,
-                        description:
-
-                        data.description || ""
-
-                    };
-
-                    reportData.projects.push(
-
-                        projectData
-
-                    );
-
-                    if(table){
-
-
-
-                        table.innerHTML += `
-
-
-
-                        <tr>
-
-
-
-                        <td>
-
-                        <strong>
-
-                        ${name}
-
-                        </strong>
-
-                        <br><br>
-
-                        ${statusBadge(status)}
-
-                        </td>
-
-                        <td>
-
-<strong>Budget</strong>
-
-<br>
-
-${peso(budget)}
-
-<br><br>
-
-<strong>Expenses</strong>
-
-<br>
-
-${peso(spent)}
-
-<br><br>
-
-<strong>Progress</strong>
-
-<br>
-
-${financialStatus(budget, spent)}
-
-<br><br>
-
-<strong>Remaining</strong>
-
-<br>
-
-${peso(remaining)}
-
-</td>
-
-                        <td>
-
-                        ${
-
-                            data.description ||
-
-                            "No project description."
-
-                        }
-
-                        </td>
-
-                        </tr>
-
-                        `;
-                    }
-
-                }
-
-            );
-
-            if(
-
-                projectSnapshot.empty &&
-
-                table
-
-            ){
-
-                table.innerHTML = `
+                table.innerHTML += `
 
                 <tr>
 
-                <td colspan="3">
+                    <td>${data.date || "-"}</td>
 
-                No projects available.
+                    <td>${year || "-"}</td>
 
-                </td>
+                    <td>${peso(amount)}</td>
+
+                    <td>${data.paymentType || "-"}</td>
 
                 </tr>
 
-
                 `;
-
 
             }
 
-            updateFinancialSummary();
-        }
-    );
-}
-// =================================
-// LOAD EXPENSES
-// RECEIPT MONITORING
-// FIXED PROJECT NAME MATCHING
-// =================================
+        });
 
+        if(table && snapshot.empty){
 
-function loadExpenses(){
+            table.innerHTML = `
 
+            <tr>
 
+                <td colspan="4">
 
-    const expenseQuery = query(
+                    No collections found.
 
-        collection(
+                </td>
 
-            db,
-
-            "expenses"
-
-        ),
-
-
-        orderBy(
-
-            "createdAt",
-
-            "desc"
-
-        )
-
-    );
-
-
-
-
-
-
-
-    onSnapshot(
-
-        expenseQuery,
-
-        (snapshot)=>{
-
-
-
-
-
-            const container =
-
-            document.getElementById(
-
-                "expensePreview"
-
-            );
-
-
-
-
-
-
-            if(!container)
-
-            return;
-
-
-
-
-
-
-
-            container.innerHTML = "";
-
-
-
-
-
-
-            let totalExpenses = 0;
-
-
-
-
-
-
-
-
-
-            snapshot.forEach(
-
-                (expenseDoc)=>{
-
-
-
-                    const data =
-
-                    expenseDoc.data();
-
-
-
-
-
-
-
-                    const amount =
-
-                    Number(
-
-                        data.amount || 0
-
-                    );
-
-
-
-
-
-
-
-                    totalExpenses += amount;
-
-
-
-
-
-
-
-
-                    const projectName =
-
-                    getProjectName(data);
-
-
-
-
-
-
-
-
-                    let receiptHTML = "";
-
-
-
-
-
-
-
-
-
-                    if(data.receipt){
-
-
-
-                        receiptHTML = `
-
-
-                        <div class="receipt-box">
-
-
-                        <img
-
-                        src="${data.receipt}"
-
-                        class="receipt-image"
-
-                        alt="Official Receipt"
-
-
-                        >
-
-
-
-
-
-                        <br>
-
-
-
-
-
-                        <a
-
-                        href="${data.receipt}"
-
-                        target="_blank"
-
-                        class="view-btn"
-
-                        >
-
-                        🧾 View Receipt
-
-                        </a>
-
-
-
-                        </div>
-
-
-
-                        `;
-
-
-
-                    }
-
-                    else{
-
-
-
-                        receiptHTML = `
-
-
-                        <p>
-
-                        📄 No receipt uploaded.
-
-                        </p>
-
-
-                        `;
-
-
-
-                    }
-
-
-
-
-
-
-
-
-
-                    container.innerHTML += `
-
-
-
-                    <div class="expense-card">
-
-
-
-
-
-
-                    <h3>
-
-                    💸 ${projectName}
-
-
-                    </h3>
-
-
-
-
-
-
-
-
-
-                    <p>
-
-
-                    <strong>
-
-                    Amount:
-
-                    </strong>
-
-
-                    ${peso(amount)}
-
-
-
-                    </p>
-
-
-
-
-
-
-
-
-
-                    <p>
-
-
-                    <strong>
-
-                    Description:
-
-                    </strong>
-
-
-                    <br>
-
-
-                    ${
-
-                        data.description ||
-
-                        "No description provided."
-
-                    }
-
-
-
-                    </p>
-
-
-
-
-
-
-
-
-
-                    ${receiptHTML}
-
-
-
-
-
-
-                    </div>
-
-
-
-                    `;
-
-
-
-                }
-
-            );
-
-
-
-
-
-
-
-
-
-            if(snapshot.empty){
-
-
-
-                container.innerHTML = `
-
-
-                <p>
-
-
-                No expense records available.
-
-
-                </p>
-
-
-                `;
-
-
-
-            }
-
-
-
-
-
-
-
-
-            reportData.expenses =
-
-            totalExpenses;
-
-
-
-
-
-
-
-
-            window.expenseTotal =
-
-            totalExpenses;
-
-
-
-
-
-
-
-
-            window.currentExpenses =
-
-            Number(
-
-                reportData.expenses || 0
-
-            )
-
-            +
-
-            Number(
-
-                window.totalProjectActualExpenses || 0
-
-            );
-
-
-
-
-
-
-
-
-
-            setText(
-
-                "totalExpenses",
-
-                peso(
-
-                    window.currentExpenses
-
-                )
-
-            );
-
-
-
-
-
-
-
-
-            updateBalance();
-
-
-
-
-
-
-
-
-            updateBudgetChart();
-
-
-
-
-
-        }
-
-
-    );
-
-
-
-}
-// =================================
-// ANNOUNCEMENT BOARD
-// =================================
-
-
-function loadAnnouncements(){
-
-
-    const container =
-
-    document.getElementById(
-
-        "announcementContainer"
-
-    );
-
-
-
-
-    if(!container)
-
-    return;
-
-
-
-
-
-
-
-    const q = query(
-
-        collection(
-
-            db,
-
-            "announcements"
-
-        ),
-
-
-        orderBy(
-
-            "createdAt",
-
-            "desc"
-
-        )
-
-
-    );
-
-
-
-
-
-
-
-
-
-    onSnapshot(
-
-        q,
-
-        (snapshot)=>{
-
-
-
-
-
-            if(snapshot.empty){
-
-
-
-                container.innerHTML = `
-
-
-                <div class="empty-state">
-
-
-                <p>
-
-                📢 No announcements yet.
-
-                </p>
-
-
-                </div>
-
-
-                `;
-
-
-                return;
-
-
-            }
-
-
-
-
-
-
-
-            container.innerHTML = "";
-
-
-
-
-
-
-
-
-            snapshot.forEach(
-
-                (docSnap)=>{
-
-
-
-                    const data =
-
-                    docSnap.data();
-
-
-
-
-
-
-                    container.innerHTML += `
-
-
-
-                    <div class="announcement-card">
-
-
-                    <h3>
-
-
-                    📢 ${
-
-                        data.title ||
-
-                        "Announcement"
-
-                    }
-
-
-                    </h3>
-
-
-
-
-
-
-
-                    <p>
-
-
-                    ${
-
-                        data.message ||
-
-                        ""
-
-                    }
-
-
-                    </p>
-
-
-
-
-
-
-
-                    <small>
-
-
-                    Posted by:
-
-                    ${
-
-                        data.createdBy ||
-
-                        data.user ||
-
-                        "Administrator"
-
-                    }
-
-
-                    </small>
-
-
-                    </div>
-
-
-
-                    `;
-
-
-
-                }
-
-            );
-
-
-
-
-        }
-
-
-    );
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// =================================
-// BALANCE COMPUTATION
-// =================================
-
-
-function updateBalance(){
-
-
-
-    const balance =
-
-
-    Number(
-
-        window.totalFunds || 0
-
-    )
-
-    -
-
-    Number(
-
-        window.currentExpenses || 0
-
-    );
-
-
-
-
-
-
-
-
-
-    reportData.remaining = balance;
-
-
-
-
-
-
-
-
-    const balanceElement =
-
-    document.getElementById(
-
-        "remainingBalance"
-
-    );
-
-
-
-
-
-
-
-
-
-    if(balanceElement){
-
-
-
-        if(balance < 0){
-
-
-
-            balanceElement.innerHTML = `
-
-
-
-            🔴 Abonado
-
-            <br>
-
-            ${peso(
-
-                Math.abs(balance)
-
-            )}
-
-
+            </tr>
 
             `;
 
+        }
+
+        dashboard.totalCollections = totalCollections;
+
+        setText(
+
+            "totalFunds",
+
+            peso(totalCollections)
+
+        );
+
+        setText(
+
+            "firstYear",
+
+            peso(yearlyTotals["First Year"])
+
+        );
+
+        setText(
+
+            "secondYear",
+
+            peso(yearlyTotals["Second Year"])
+
+        );
+
+        setText(
+
+            "thirdYear",
+
+            peso(yearlyTotals["Third Year"])
+
+        );
+
+        setText(
+
+            "fourthYear",
+
+            peso(yearlyTotals["Fourth Year"])
+
+        );
+
+        loadSummary();
+
+        renderCharts();
+
+    },
+
+    (error)=>{
+
+        console.error(error);
+
+    });
+
+}
+
+// ======================================================
+// START SYSTEM
+// ======================================================
+
+window.addEventListener("load",()=>{
+
+    initializeDashboard();
+
+    setTimeout(hideLoader,800);
+
+});
 
 
-            balanceElement.classList.add(
+// ======================================================
+// GLOBAL ERROR HANDLER
+// ======================================================
 
-                "danger-status"
+window.addEventListener("error",(event)=>{
 
-            );
+    console.error(event.error);
+
+});
+
+window.addEventListener("unhandledrejection",(event)=>{
+
+    console.error(event.reason);
+
+});
 
 
+console.log("Dashboard Core Ready.");
+
+// ======================================================
+// EXPENSES MODULE
+// VERSION 19.0
+// PART 3
+// ======================================================
+
+// ======================================================
+// LOAD EXPENSES (REALTIME)
+// ======================================================
+
+function loadExpenses() {
+
+    const container = $("expenseContainer");
+
+    if (!container) return;
+
+    const q = query(
+        collection(db, "expenses"),
+        orderBy("createdAt", "desc")
+    );
+
+    onSnapshot(q, (snapshot) => {
+
+        cache.expenses = [];
+
+        snapshot.forEach(docSnap => {
+
+            cache.expenses.push({
+
+                id: docSnap.id,
+
+                ...docSnap.data()
+
+            });
+
+        });
+
+        renderExpenses();
+
+        loadSummary();
+
+    }, (error) => {
+
+        console.error(error);
+
+        notify(error.message, "error");
+
+    });
+
+}
+
+// ======================================================
+// RENDER EXPENSES
+// ======================================================
+
+function renderExpenses() {
+
+    const container = $("expenseContainer");
+
+    if (!container) return;
+
+    if (cache.expenses.length === 0) {
+
+        container.innerHTML = `
+            <div class="empty-state">
+                No expenses found.
+            </div>
+        `;
+
+        return;
+
+    }
+
+    container.innerHTML = "";
+
+    cache.expenses.forEach(expense => {
+
+        container.innerHTML += `
+
+        <div class="data-card">
+
+            <h3>${expense.project || "Expense"}</h3>
+
+            <p>${expense.description || ""}</p>
+
+            <p>
+                <strong>Amount:</strong>
+                ${peso(expense.amount)}
+            </p>
+
+            <button onclick="deleteExpense('${expense.id}')">
+                Delete
+            </button>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+// ======================================================
+// ADD EXPENSE
+// ======================================================
+
+async function addExpense(data) {
+
+    try {
+
+        await addDoc(
+
+            collection(db, "expenses"),
+
+            {
+
+                ...data,
+
+                createdAt: serverTimestamp()
+
+            }
+
+        );
+
+        notify("Expense added.");
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        notify(error.message,"error");
+
+    }
+
+}
+
+// ======================================================
+// DELETE EXPENSE
+// ======================================================
+
+window.deleteExpense = async function(id){
+
+    if(!confirm("Delete expense?")) return;
+
+    try{
+
+        await deleteDoc(
+
+            doc(db,"expenses",id)
+
+        );
+
+        notify("Expense deleted.");
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        notify(error.message,"error");
+
+    }
+
+};
+
+// ======================================================
+// EXPENSE FORM
+// ======================================================
+
+const expenseForm = $("expenseForm");
+
+if(expenseForm){
+
+    expenseForm.addEventListener("submit", async(e)=>{
+
+        e.preventDefault();
+
+        await addExpense({
+
+            project: getValue("expenseProject"),
+
+            description: getValue("expenseDescription"),
+
+            amount: Number(
+                getValue("expenseAmount")
+            )
+
+        });
+
+        expenseForm.reset();
+
+    });
+
+}
+
+// ======================================================
+// COLLECTIONS MODULE
+// VERSION 19.0
+// PART 4
+// ======================================================
+
+// ======================================================
+// LOAD COLLECTIONS (REALTIME)
+// ======================================================
+
+function loadCollections() {
+
+    const container = $("collectionContainer");
+
+    if (!container) return;
+
+    const q = query(
+        collection(db, "collections"),
+        orderBy("createdAt", "desc")
+    );
+
+    onSnapshot(q, (snapshot) => {
+
+        cache.collections = [];
+
+        snapshot.forEach(docSnap => {
+
+            cache.collections.push({
+
+                id: docSnap.id,
+
+                ...docSnap.data()
+
+            });
+
+        });
+
+        renderCollections();
+
+        loadSummary();
+
+    }, (error) => {
+
+        console.error(error);
+
+        notify(error.message, "error");
+
+    });
+
+}
+
+// ======================================================
+// RENDER COLLECTIONS
+// ======================================================
+
+function renderCollections() {
+
+    const container = $("collectionContainer");
+
+    if (!container) return;
+
+    if (cache.collections.length === 0) {
+
+        container.innerHTML = `
+            <div class="empty-state">
+                No collections found.
+            </div>
+        `;
+
+        return;
+
+    }
+
+    container.innerHTML = "";
+
+    cache.collections.forEach(item => {
+
+        container.innerHTML += `
+
+        <div class="data-card">
+
+            <h3>${item.studentName || "Student"}</h3>
+
+            <p>
+                <strong>Year:</strong>
+                ${item.yearLevel || "-"}
+            </p>
+
+            <p>
+                <strong>Payment:</strong>
+                ${item.paymentType || "-"}
+            </p>
+
+            <p>
+                <strong>Amount:</strong>
+                ${peso(item.amount)}
+            </p>
+
+            <p>
+                <strong>Date:</strong>
+                ${item.date || "-"}
+            </p>
+
+            <button onclick="deleteCollection('${item.id}')">
+                Delete
+            </button>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+// ======================================================
+// ADD COLLECTION
+// ======================================================
+
+async function addCollection(data){
+
+    try{
+
+        await addDoc(
+
+            collection(db,"collections"),
+
+            {
+
+                ...data,
+
+                createdAt: serverTimestamp()
+
+            }
+
+        );
+
+        notify("Collection saved.");
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        notify(error.message,"error");
+
+    }
+
+}
+
+// ======================================================
+// DELETE COLLECTION
+// ======================================================
+
+window.deleteCollection = async function(id){
+
+    if(!confirm("Delete collection?")) return;
+
+    try{
+
+        await deleteDoc(
+
+            doc(db,"collections",id)
+
+        );
+
+        notify("Collection deleted.");
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        notify(error.message,"error");
+
+    }
+
+};
+
+// ======================================================
+// COLLECTION FORM
+// ======================================================
+
+const collectionForm = $("collectionForm");
+
+if(collectionForm){
+
+    collectionForm.addEventListener("submit", async(e)=>{
+
+        e.preventDefault();
+
+        await addCollection({
+
+            studentName: getValue("studentName"),
+
+            studentId: getValue("studentId"),
+
+            course: getValue("course"),
+
+            yearLevel: getValue("yearLevel"),
+
+            paymentType: getValue("paymentType"),
+
+            amount: Number(
+                getValue("amount")
+            ),
+
+            date: getValue("date"),
+
+            remarks: getValue("remarks")
+
+        });
+
+        collectionForm.reset();
+
+    });
+
+}
+
+// =====================================================
+// DASHBOARD SUMMARY
+// VERSION 19.0
+// PART 5
+// =====================================================
+
+function loadSummary() {
+
+    // -------------------------
+    // COLLECTIONS
+    // -------------------------
+
+    const totalCollections = cache.collections.reduce(
+
+        (sum, item) =>
+
+            sum + Number(item.amount || 0),
+
+        0
+
+    );
+
+    // -------------------------
+    // EXPENSES
+    // -------------------------
+
+    const manualExpenses = cache.expenses.reduce(
+
+        (sum, item) =>
+
+            sum + Number(item.amount || 0),
+
+        0
+
+    );
+
+    // -------------------------
+    // PROJECT ACTUAL EXPENSES
+    // -------------------------
+
+    const projectExpenses = cache.projects.reduce(
+
+        (sum, project) =>
+
+            sum + Number(project.actualExpenses || 0),
+
+        0
+
+    );
+
+    const totalExpenses =
+        manualExpenses +
+        projectExpenses;
+
+    const currentBalance =
+        totalCollections -
+        totalExpenses;
+
+    // -------------------------
+    // COUNTS
+    // -------------------------
+
+    setText(
+        "projectCount",
+        cache.projects.length
+    );
+
+    setText(
+        "expenseCount",
+        cache.expenses.length
+    );
+
+    setText(
+        "collectionCount",
+        cache.collections.length
+    );
+
+    // -------------------------
+    // MONEY
+    // -------------------------
+
+    setText(
+        "totalCollections",
+        peso(totalCollections)
+    );
+
+    setText(
+        "totalExpenses",
+        peso(totalExpenses)
+    );
+
+    setText(
+        "currentBalance",
+        peso(currentBalance)
+    );
+
+    // -------------------------
+    // YEAR LEVEL TOTALS
+    // -------------------------
+
+    let firstYear = 0;
+    let secondYear = 0;
+    let thirdYear = 0;
+    let fourthYear = 0;
+
+    cache.collections.forEach(item=>{
+
+        const year =
+            String(item.yearLevel || "")
+            .toLowerCase();
+
+        const amount =
+            Number(item.amount || 0);
+
+        if(
+            year.includes("1") ||
+            year.includes("first")
+        ){
+
+            firstYear += amount;
+
+        }
+
+        else if(
+            year.includes("2") ||
+            year.includes("second")
+        ){
+
+            secondYear += amount;
+
+        }
+
+        else if(
+            year.includes("3") ||
+            year.includes("third")
+        ){
+
+            thirdYear += amount;
+
+        }
+
+        else if(
+            year.includes("4") ||
+            year.includes("fourth")
+        ){
+
+            fourthYear += amount;
+
+        }
+
+    });
+
+    setText(
+        "firstYearCollection",
+        peso(firstYear)
+    );
+
+    setText(
+        "secondYearCollection",
+        peso(secondYear)
+    );
+
+    setText(
+        "thirdYearCollection",
+        peso(thirdYear)
+    );
+
+    setText(
+        "fourthYearCollection",
+        peso(fourthYear)
+    );
+
+    // -------------------------
+    // STATUS
+    // -------------------------
+
+    const status =
+        $("dashboardStatus");
+
+    if(status){
+
+        if(currentBalance < 0){
+
+            status.textContent =
+                "🔴 Deficit";
+
+        }
+
+        else if(currentBalance === 0){
+
+            status.textContent =
+                "🟡 Balanced";
 
         }
 
         else{
 
-
-
-            balanceElement.innerHTML = `
-
-
-
-            🟢 Remaining
-
-            <br>
-
-            ${peso(balance)}
-
-
-
-            `;
-
-
-
-            balanceElement.classList.remove(
-
-                "danger-status"
-
-            );
-
-
+            status.textContent =
+                "🟢 Healthy";
 
         }
-
-
 
     }
 
+    console.log("Dashboard Summary Updated");
 
+}
+// =====================================================
+// ANNOUNCEMENTS MODULE
+// VERSION 19.0
+// PART 6
+// =====================================================
 
+// =====================================================
+// LOAD ANNOUNCEMENTS (REALTIME)
+// =====================================================
 
+function loadAnnouncements() {
 
+    const container = $("announcementContainer");
 
+    if (!container) return;
 
-    setText(
-
-        "currentBalance",
-
-        peso(balance)
-
+    const q = query(
+        collection(db, "announcements"),
+        orderBy("createdAt", "desc")
     );
 
+    onSnapshot(q, (snapshot) => {
 
+        cache.announcements = [];
+
+        snapshot.forEach(docSnap => {
+
+            cache.announcements.push({
+
+                id: docSnap.id,
+
+                ...docSnap.data()
+
+            });
+
+        });
+
+        renderAnnouncements();
+
+    }, (error) => {
+
+        console.error(error);
+
+        notify(error.message, "error");
+
+    });
 
 }
 
+// =====================================================
+// RENDER ANNOUNCEMENTS
+// =====================================================
 
+function renderAnnouncements() {
 
+    const container = $("announcementContainer");
 
+    if (!container) return;
 
+    if (cache.announcements.length === 0) {
 
+        container.innerHTML = `
+            <div class="empty-state">
+                No announcements available.
+            </div>
+        `;
 
-
-
-// =================================
-// YEAR COLLECTION PROGRESS
-// =================================
-
-
-function updateProgress(data){
-
-
-
-    const max = Math.max(
-
-
-        data["First Year"],
-
-
-        data["Second Year"],
-
-
-        data["Third Year"],
-
-
-        data["Fourth Year"]
-
-
-
-    );
-
-
-
-
-
-
-
-    if(max === 0)
-
-    return;
-
-
-
-
-
-
-
-
-
-    const progressData = {
-
-
-
-        firstProgress:
-
-        data["First Year"],
-
-
-
-
-
-        secondProgress:
-
-        data["Second Year"],
-
-
-
-
-
-        thirdProgress:
-
-        data["Third Year"],
-
-
-
-
-
-        fourthProgress:
-
-        data["Fourth Year"]
-
-
-
-    };
-
-
-
-
-
-
-
-
-
-    Object.entries(progressData)
-
-    .forEach(
-
-        ([id,value])=>{
-
-
-
-            const bar =
-
-            document.getElementById(id);
-
-
-
-
-
-
-            if(bar){
-
-
-
-                bar.style.width =
-
-                (
-
-                    value /
-
-                    max *
-
-                    100
-
-                )
-
-                +
-
-                "%";
-
-
-
-            }
-
-
-
-        }
-
-
-    );
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// =================================
-// COLLECTION CHART
-// =================================
-
-
-function createCollectionChart(data){
-
-
-
-    const canvas =
-
-    document.getElementById(
-
-        "collectionChart"
-
-    );
-
-
-
-
-
-
-
-
-    if(!canvas)
-
-    return;
-
-
-
-
-
-
-
-    if(collectionChart){
-
-
-
-        collectionChart.destroy();
-
-
+        return;
 
     }
 
+    container.innerHTML = "";
 
+    cache.announcements.forEach(item => {
 
+        container.innerHTML += `
 
+            <div class="announcement-card">
 
+                <h3>${item.title || "Announcement"}</h3>
 
+                <p>${item.message || ""}</p>
 
-    collectionChart =
+                <small>
 
-    new Chart(
+                    ${item.author || "Administrator"}
 
-        canvas,
+                </small>
 
-        {
+            </div>
 
+        `;
 
-            type:"bar",
-
-
-
-
-            data:{
-
-
-                labels:
-
-                Object.keys(data),
-
-
-
-
-                datasets:[{
-
-
-                    label:
-
-                    "Collected Funds",
-
-
-
-                    data:
-
-                    Object.values(data)
-
-
-
-                }]
-
-
-
-            },
-
-
-
-
-
-            options:{
-
-
-                responsive:true
-
-
-            }
-
-
-
-        }
-
-
-    );
-
-
+    });
 
 }
 
+// =====================================================
+// ADD ANNOUNCEMENT
+// =====================================================
 
+async function addAnnouncement(data){
 
+    try{
 
+        await addDoc(
 
+            collection(db,"announcements"),
 
+            {
 
+                ...data,
 
+                author: auth.currentUser?.email || "Admin",
 
-// =================================
-// BUDGET MONITORING CHART
-// =================================
-
-
-function updateBudgetChart(){
-
-
-
-    const canvas =
-
-    document.getElementById(
-
-        "budgetChart"
-
-    );
-
-
-
-
-
-
-
-    if(!canvas)
-
-    return;
-
-
-
-
-
-
-
-
-    if(budgetChart){
-
-
-        budgetChart.destroy();
-
-
-    }
-
-
-
-
-
-
-
-
-    const remaining =
-
-    Number(
-
-        window.totalFunds || 0
-
-    )
-
-    -
-
-    Number(
-
-        window.currentExpenses || 0
-
-    );
-
-
-
-
-
-
-
-
-
-    budgetChart =
-
-    new Chart(
-
-        canvas,
-
-        {
-
-
-            type:"doughnut",
-
-
-
-
-            data:{
-
-
-
-                labels:[
-
-
-                    "Expenses",
-
-
-
-                    remaining < 0
-
-                    ?
-
-                    "Abonado"
-
-                    :
-
-                    "Remaining"
-
-
-
-                ],
-
-
-
-
-                datasets:[{
-
-
-                    data:[
-
-
-
-                        Number(
-
-                            window.currentExpenses || 0
-
-                        ),
-
-
-
-                        Math.abs(
-
-                            remaining
-
-                        )
-
-
-
-                    ]
-
-
-
-                }]
-
-
-
-            },
-
-
-
-
-
-            options:{
-
-
-                responsive:true
-
-
-            }
-
-
-
-        }
-
-
-    );
-
-
-
-}
-// =================================
-// PDF TREASURY REPORT
-// =================================
-
-
-function generatePDF(){
-
-
-    const button =
-
-    document.getElementById(
-
-        "generateReport"
-
-    );
-
-
-
-
-
-    if(!button)
-
-    return;
-
-
-
-
-
-
-
-    button.onclick = ()=>{
-
-
-
-        const {
-
-            jsPDF
-
-        } = window.jspdf;
-
-
-
-
-
-
-        const pdf =
-
-        new jsPDF();
-
-
-
-
-
-
-
-        let y = 20;
-
-
-
-
-
-
-
-        pdf.setFontSize(18);
-
-
-
-        pdf.text(
-
-            "DALUBWIKAAN TREASURY REPORT",
-
-            20,
-
-            y
-
-        );
-
-
-
-
-
-
-
-        y += 15;
-
-
-
-
-
-
-
-        pdf.setFontSize(12);
-
-
-
-        pdf.text(
-
-            "Academic Year 2026-2027",
-
-            20,
-
-            y
-
-        );
-
-
-
-
-
-
-
-        y += 10;
-
-
-
-
-
-
-
-        pdf.text(
-
-            "Generated: " +
-
-            new Date()
-
-            .toLocaleDateString(),
-
-            20,
-
-            y
-
-        );
-
-
-
-
-
-
-
-        y += 20;
-
-
-
-
-
-
-
-        pdf.text(
-
-            "FINANCIAL SUMMARY",
-
-            20,
-
-            y
-
-        );
-
-
-
-
-
-
-
-        y += 10;
-
-
-
-
-
-
-
-        pdf.text(
-
-            "Total Funds: " +
-
-            peso(reportData.funds),
-
-            20,
-
-            y
-
-        );
-
-
-
-
-
-
-
-        y += 10;
-
-
-
-
-
-
-
-        pdf.text(
-
-            "Total Expenses: " +
-
-            peso(reportData.expenses),
-
-            20,
-
-            y
-
-        );
-
-
-
-
-
-
-
-        y += 10;
-
-
-
-
-
-
-
-        pdf.text(
-
-            "Balance: " +
-
-            peso(reportData.remaining),
-
-            20,
-
-            y
-
-        );
-
-
-
-
-
-
-
-        y += 20;
-
-
-
-
-
-
-
-        pdf.text(
-
-            "PROJECT TRANSPARENCY",
-
-            20,
-
-            y
-
-        );
-
-
-
-
-
-
-
-        y += 10;
-
-
-
-
-
-
-
-
-        reportData.projects.forEach(
-
-            (project)=>{
-
-
-
-                pdf.text(
-
-`
-${project.name}
-
-Status:
-${project.status}
-
-Budget:
-${peso(project.budget)}
-
-Spent:
-${peso(project.spent)}
-
-Remaining:
-${peso(project.remaining)}
-`,
-
-                20,
-
-                y
-
-                );
-
-
-
-
-
-
-
-
-                y += 40;
-
-
-
-
-
-
-
-
-                if(y > 260){
-
-
-
-                    pdf.addPage();
-
-
-                    y = 20;
-
-
-                }
-
-
+                createdAt: serverTimestamp()
 
             }
 
         );
 
+        notify("Announcement posted.");
 
+    }
 
+    catch(error){
 
+        console.error(error);
 
+        notify(error.message,"error");
 
+    }
 
+}
 
-        pdf.save(
+// =====================================================
+// DELETE ANNOUNCEMENT
+// =====================================================
 
-            "Dalubwikaan_Treasury_Report.pdf"
+window.deleteAnnouncement = async function(id){
+
+    if(!confirm("Delete announcement?")) return;
+
+    try{
+
+        await deleteDoc(
+
+            doc(db,"announcements",id)
 
         );
 
+        notify("Announcement deleted.");
 
+    }
 
-    };
+    catch(error){
 
+        console.error(error);
 
+        notify(error.message,"error");
+
+    }
+
+};
+
+// =====================================================
+// ANNOUNCEMENT FORM
+// =====================================================
+
+const announcementForm = $("announcementForm");
+
+if(announcementForm){
+
+    announcementForm.addEventListener("submit", async(e)=>{
+
+        e.preventDefault();
+
+        await addAnnouncement({
+
+            title: getValue("announcementTitle"),
+
+            message: getValue("announcementMessage")
+
+        });
+
+        announcementForm.reset();
+
+    });
 
 }
 
+// =====================================================
+// DASHBOARD STARTUP
+// VERSION 19.0
+// PART 7 (FINAL)
+// =====================================================
 
+// =====================================================
+// OPTIONAL CHART PLACEHOLDER
+// =====================================================
 
+function renderCharts(){
 
+    if(typeof Chart === "undefined"){
 
+        console.log("Chart.js not loaded.");
 
+        return;
 
+    }
 
-
-// =================================
-// SEARCH SYSTEM
-// =================================
-
-
-function enableSearch(){
-
-
-
-    const search =
-
-    document.getElementById(
-
-        "searchRecord"
-
-    );
-
-
-
-
-
-
-
-    if(!search)
-
-    return;
-
-
-
-
-
-
-
-
-    search.addEventListener(
-
-        "input",
-
-        ()=>{
-
-
-
-
-
-            const keyword =
-
-            search.value
-
-            .toLowerCase();
-
-
-
-
-
-
-
-
-            document
-
-            .querySelectorAll(
-
-                "#projectTable tr, #transactionTable tr"
-
-            )
-
-            .forEach(
-
-                (row)=>{
-
-
-
-                    row.style.display =
-
-                    row.innerText
-
-                    .toLowerCase()
-
-                    .includes(keyword)
-
-                    ?
-
-                    ""
-
-                    :
-
-                    "none";
-
-
-
-                }
-
-            );
-
-
-
-        }
-
-    );
-
-
+    console.log("Charts ready.");
 
 }
 
+// =====================================================
+// REFRESH DASHBOARD
+// =====================================================
 
+function refreshDashboard(){
 
+    loadProjects();
 
+    loadExpenses();
 
+    loadCollections();
 
+    loadAnnouncements();
 
+    loadSummary();
 
+    renderCharts();
 
-// =================================
-// LOADER
-// =================================
-
-
-function hideLoader(){
-
-
-
-    const loader =
-
-    document.getElementById(
-
-        "loader"
-
-    );
-
-
-
-
-
-
-
-    if(loader){
-
-
-
-        loader.style.opacity = "0";
-
-
-
-
-
-
-
-        setTimeout(()=>{
-
-
-
-            loader.style.display = "none";
-
-
-
-        },500);
-
-
-
-    }
-
-
+    console.log("Dashboard refreshed.");
 
 }
 
+// =====================================================
+// SYSTEM INITIALIZER
+// =====================================================
 
+function initializeDashboard(){
 
+    console.log("--------------------------------");
 
+    console.log("DALUBWIKAAN DASHBOARD");
 
+    console.log("Version 19.0");
 
+    console.log("--------------------------------");
 
+    loadProjects();
 
+    loadExpenses();
 
-// =================================
-// DARK MODE
-// =================================
+    loadCollections();
 
+    loadAnnouncements();
 
-function initializeTheme(){
-
-
-
-    const button =
-
-    document.getElementById(
-
-        "themeToggle"
-
-    );
-
-
-
-
-
-
-
-
-    const saved =
-
-    localStorage.getItem(
-
-        "theme"
-
-    );
-
-
-
-
-
-
-
-
-    if(saved === "dark"){
-
-
-
-        document.body.classList.add(
-
-            "dark"
-
-        );
-
-
-
-        if(button)
-
-        button.textContent = "☀";
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    if(button){
-
-
-
-        button.onclick = ()=>{
-
-
-
-            document.body.classList.toggle(
-
-                "dark"
-
-            );
-
-
-
-
-
-
-
-            const dark =
-
-            document.body.classList.contains(
-
-                "dark"
-
-            );
-
-
-
-
-
-
-
-            localStorage.setItem(
-
-                "theme",
-
-                dark
-
-                ?
-
-                "dark"
-
-                :
-
-                "light"
-
-            );
-
-
-
-
-
-
-
-            button.textContent =
-
-            dark
-
-            ?
-
-            "☀"
-
-            :
-
-            "🌙";
-
-
-
-        };
-
-
-
-    }
-
-
+    renderCharts();
 
 }
 
+// =====================================================
+// AUTH
+// =====================================================
 
+onAuthStateChanged(auth,(user)=>{
 
+    if(!user){
 
+        window.location.href="login.html";
 
-
-
-
-
-// =================================
-// INITIALIZATION
-// =================================
-
-
-window.addEventListener(
-
-    "load",
-
-    ()=>{
-
-
-
-        loadCollections();
-
-
-        loadProjects();
-
-
-        loadExpenses();
-
-
-        loadAnnouncements();
-
-
-
-        generatePDF();
-
-
-        enableSearch();
-
-
-        initializeTheme();
-
-
-
-
-
-
-
-        setTimeout(()=>{
-
-
-            hideLoader();
-
-
-
-        },800);
-
-
+        return;
 
     }
 
-);
+    initializeDashboard();
 
+});
 
+// =====================================================
+// OPTIONAL REFRESH BUTTON
+// =====================================================
 
+const refreshButton = $("refreshDashboard");
 
+if(refreshButton){
 
+    refreshButton.addEventListener(
 
+        "click",
 
-
-
-// =================================
-// AUTO SYNC MONITOR
-// =================================
-
-
-setInterval(()=>{
-
-
-    console.log(
-
-        "Dalubwikaan Treasury Dashboard Sync..."
+        refreshDashboard
 
     );
 
+}
 
-},30000);
+// =====================================================
+// SEARCH
+// =====================================================
 
+const searchInput = $("searchInput");
 
+if(searchInput){
 
+    searchInput.addEventListener("input",()=>{
 
+        const keyword =
+        searchInput.value.toLowerCase();
 
+        document
+        .querySelectorAll(
+            ".data-card,.announcement-card"
+        )
+        .forEach(card=>{
 
+            card.style.display =
+            card.innerText
+            .toLowerCase()
+            .includes(keyword)
+            ? ""
+            : "none";
 
+        });
 
+    });
 
-// =================================
-// GLOBAL ERROR HANDLING
-// =================================
+}
 
+// =====================================================
+// WINDOW ERROR LOGGER
+// =====================================================
 
-window.addEventListener(
+window.addEventListener("error",(event)=>{
 
-    "error",
+    console.error(
 
-    (event)=>{
+        "Dashboard Error:",
 
+        event.error
 
-        console.error(
+    );
 
-            "Dashboard Error:",
-
-            event.error
-
-        );
-
-
-    }
-
-);
-
-
-
-
-
-
+});
 
 window.addEventListener(
 
     "unhandledrejection",
 
-    (event)=>{
-
+    event=>{
 
         console.error(
 
@@ -2734,45 +1314,12 @@ window.addEventListener(
 
         );
 
-
     }
 
 );
 
+// =====================================================
+// READY
+// =====================================================
 
-
-
-
-
-
-
-
-console.log(`
-
-========================================
-
-DALUBWIKAAN TREASURY DASHBOARD v6.0
-
-✓ Firebase Real-Time Sync
-
-✓ Project Name Compatibility Fix
-
-✓ Unknown Project Removed
-
-✓ Budget Monitoring
-
-✓ Expense Tracking
-
-✓ Receipt Monitoring
-
-✓ Announcement Board
-
-✓ PDF Transparency Report
-
-✓ Dark Mode
-
-SYSTEM READY
-
-========================================
-
-`);
+console.log("Dashboard.js loaded successfully.");
