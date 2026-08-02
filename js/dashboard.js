@@ -530,52 +530,6 @@ if(expenseForm){
 // VERSION 19.0
 // PART 4
 // ======================================================
-
-// ======================================================
-// LOAD COLLECTIONS (REALTIME)
-// ======================================================
-
-function loadCollections() {
-
-    const container = $("collectionContainer");
-
-    if (!container) return;
-
-    const q = query(
-        collection(db, "collections"),
-        orderBy("createdAt", "desc")
-    );
-
-    onSnapshot(q, (snapshot) => {
-
-        cache.collections = [];
-
-        snapshot.forEach(docSnap => {
-
-            cache.collections.push({
-
-                id: docSnap.id,
-
-                ...docSnap.data()
-
-            });
-
-        });
-
-        renderCollections();
-
-        loadSummary();
-
-    }, (error) => {
-
-        console.error(error);
-
-        notify(error.message, "error");
-
-    });
-
-}
-
 // ======================================================
 // RENDER COLLECTIONS
 // ======================================================
