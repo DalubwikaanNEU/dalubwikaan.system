@@ -1,260 +1,585 @@
-// ======================================================
-// DALUBWIKAAN TREASURY SYSTEM
-// ADMIN PANEL
-// VERSION 20.0
-// PART 1 - CORE
-// ======================================================
+// ========================================
+// DALUBWIKAAN TREASURY MANAGEMENT SYSTEM
+// ADMIN PANEL v16.0
+// PART 1 - CORE SYSTEM
+// ========================================
+
+// ========================================
+// FIREBASE IMPORTS
+// ========================================
+
+import { db, storage } from "./firebase.js";
 
 import {
-    db,
-    auth,
-    storage
-} from "./firebase.js";
-
-import {
-
     collection,
     addDoc,
-    updateDoc,
-    deleteDoc,
-    doc,
-    getDoc,
     getDocs,
+    getDoc,
+    deleteDoc,
+    updateDoc,
+    doc,
+    serverTimestamp,
     query,
-    orderBy,
-    onSnapshot,
-    serverTimestamp
-
+    orderBy
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 import {
-
-    onAuthStateChanged,
-    signOut
-
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-
-import {
-
     ref,
     uploadBytes,
-    getDownloadURL,
-    deleteObject
-
+    getDownloadURL
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
 
+import {
+    getAuth,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-// ======================================================
-// GLOBAL CACHE
-// ======================================================
+// ========================================
+// GLOBAL VARIABLES
+// ========================================
 
-const cache = {
+const auth = getAuth();
 
-    students: [],
-    collections: [],
-    projects: [],
-    expenses: [],
-    records: [],
-    announcements: [],
-    receipts: []
+let currentUser = null;
+let selectedReceiptFile = null;
 
-};
+// Cache
+let projectCache = [];
+let expenseCache = [];
+let recordCache = [];
+let announcementCache = [];
+let collectionCache = [];
 
+// ========================================
+// HELPER FUNCTIONS
+// ========================================
 
-// ======================================================
-// SHORTCUT
-// ======================================================
+function getValue(id) {
+    const element = document.getElementById(id);
 
-const $ = id => document.getElementById(id);
-
-
-// ======================================================
-// FORMAT MONEY
-// ======================================================
-
-function peso(value = 0){
-
-    return new Intl.NumberFormat(
-
-        "en-PH",
-
-        {
-
-            style:"currency",
-
-            currency:"PHP"
-
-        }
-
-    ).format(Number(value));
-
-}
-
-
-// ======================================================
-// SET TEXT
-// ======================================================
-
-function setText(id,value){
-
-    const el=$(id);
-
-    if(el){
-
-        el.textContent=value;
-
+    if (!element) {
+        console.warn(`Missing element: ${id}`);
+        return "";
     }
 
+    return element.value.trim();
 }
 
+function setText(id, value) {
+    const element = document.getElementById(id);
 
-// ======================================================
-// GET VALUE
-// ======================================================
-
-function getValue(id){
-
-    const el=$(id);
-
-    return el ? el.value.trim() : "";
-
+    if (element) {
+        element.textContent = value;
+    }
 }
 
+function peso(value) {
+    return "₱" + Number(value || 0).toLocaleString("en-PH", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
 
-// ======================================================
-// NOTIFICATION
-// ======================================================
+function notify(message, type = "info") {
 
-function notify(message,type="success"){
+    console.log(`[${type}] ${message}`);
 
-    console.log(`[${type.toUpperCase()}] ${message}`);
-
+    // Replace this with Toastify/SweetAlert later if desired.
     alert(message);
-
 }
 
+// ========================================
+// LOADER
+// ========================================
 
-// ======================================================
-// LOADING
-// ======================================================
+function hideLoader() {
 
-function showLoading(show=true){
+    const loader = document.getElementById("loader");
 
-    const loader=$("loadingOverlay");
+    if (!loader) return;
 
-    if(loader){
+    loader.style.opacity = "0";
 
-        loader.style.display=
+    setTimeout(() => {
 
-            show ? "flex" : "none";
+        loader.style.display = "none";
 
-    }
-
+    }, 300);
 }
 
+window.addEventListener("load", () => {
 
-// ======================================================
-// LOGOUT
-// ======================================================
-
-window.logout=async()=>{
-
-    if(!confirm("Logout?")) return;
-
-    await signOut(auth);
-
-};
-
-
-// ======================================================
-// AUTH CHECK
-// ======================================================
-
-onAuthStateChanged(auth,user=>{
-
-    if(!user){
-
-        location.href="login.html";
-
-        return;
-
-    }
-
-    initializeSystem();
+    setTimeout(hideLoader, 800);
 
 });
 
+// ========================================
+// AUTHENTICATION
+// ========================================
 
-// ======================================================
-// PLACEHOLDERS
-// (Real code will come in the next parts.)
-// ======================================================
+onAuthStateChanged(auth, async (user) => {
 
-function loadStudents(){}
+    if (!user) {
+        window.location.href = "login.html";
+        return;
+    }
 
-function loadProjects(){}
+    try {
 
-function loadExpenses(){}
+        const adminRef = doc(db, "admins", user.uid);
+        const adminSnap = await getDoc(adminRef);
 
-function loadRecords(){}
+        if (!adminSnap.exists()) {
 
-function loadAnnouncements(){}
+            notify("Unauthorized admin account.", "error");
 
-function loadSummary(){}
+            await signOut(auth);
 
+            window.location.href = "login.html";
 
-// ======================================================
-// INITIALIZER
-// ======================================================
+            return;
+        }
 
-function initializeSystem(){
+        currentUser = user;
 
-    console.log("DALUBWIKAAN ADMIN v20");
+        const email = document.getElementById("adminEmail");
 
-    loadStudents();
+        if (email) {
+            email.textContent = user.email;
+        }
 
-    loadCollections();
+        await initializeDashboard();
 
-    loadProjects();
+    } catch (error) {
 
-    loadExpenses();
+        console.error("AUTH ERROR:", error);
 
-    loadRecords();
+        notify(error.message, "error");
+    }
+});
 
-    loadAnnouncements();
+// ========================================
+// LOGOUT
+// ========================================
 
-    loadSummary();
+const logoutButton = document.getElementById("logout");
+
+if (logoutButton) {
+
+    logoutButton.onclick = async () => {
+
+        await signOut(auth);
+
+        window.location.href = "login.html";
+
+    };
 
 }
-// ======================================================
-// STUDENTS MODULE
-// VERSION 20.0
-// PART 2
-// ======================================================
 
-// ------------------------------------------------------
-// LOAD STUDENTS (Realtime)
-// ------------------------------------------------------
+// ========================================
+// DASHBOARD INITIALIZER
+// ========================================
 
-function loadStudents() {
+async function initializeDashboard() {
 
-    const container = $("studentContainer");
+    console.log("Loading Dalubwikaan Treasury System...");
 
-    const q = query(
+    try {
 
-        collection(db, "students"),
+        await Promise.all([
 
-        orderBy("studentName")
+            loadProjects(),
 
-    );
+            loadExpenses(),
 
-    onSnapshot(q, (snapshot) => {
+            loadRecords(),
 
-        cache.students = [];
+            loadAnnouncements(),
 
-        if (container) {
+            // We'll create this in Part 6
+            typeof loadCollections === "function"
+                ? loadCollections()
+                : Promise.resolve(),
 
-            container.innerHTML = "";
+            loadSummary()
+
+        ]);
+
+        console.log("SYSTEM READY");
+
+    } catch (error) {
+
+        console.error("Dashboard Error:", error);
+
+        notify("Failed to initialize dashboard.", "error");
+    }
+
+}
+
+// ========================================
+// GLOBAL ERROR MONITOR
+// ========================================
+
+window.addEventListener("error", (event) => {
+
+    console.error("JavaScript Error:", event.error);
+
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+
+    console.error("Unhandled Promise:", event.reason);
+
+});
+// ========================================
+// PROJECT MANAGEMENT
+// v16.0
+// ========================================
+
+// Cache
+projectCache = [];
+
+// ========================================
+// LOAD PROJECTS
+// ========================================
+
+async function loadProjects() {
+
+    const container = document.getElementById("projectContainer");
+
+    if (!container) return;
+
+    try {
+
+        const snapshot = await getDocs(
+            query(
+                collection(db, "projects"),
+                orderBy("createdAt", "desc")
+            )
+        );
+
+        projectCache = [];
+
+        container.innerHTML = "";
+
+        if (snapshot.empty) {
+
+            container.innerHTML = `
+                <div class="empty-state">
+                    No projects found.
+                </div>
+            `;
+
+            return;
+        }
+
+        snapshot.forEach(docSnap => {
+
+            const data = docSnap.data();
+
+            projectCache.push({
+                id: docSnap.id,
+                ...data
+            });
+
+            container.innerHTML += `
+                <div class="data-card">
+
+                    <h3>🏗 ${data.name || "Project"}</h3>
+
+                    <p>${data.description || ""}</p>
+
+                    <p>
+                        <strong>Status:</strong>
+                        ${data.status || "N/A"}
+                    </p>
+
+                    <p>
+                        <strong>Budget:</strong>
+                        ${peso(data.budget)}
+                    </p>
+
+                    <br>
+
+                    <button onclick="editProject('${docSnap.id}')">
+                        ✏ Edit
+                    </button>
+
+                    <button onclick="deleteProject('${docSnap.id}')">
+                        🗑 Delete
+                    </button>
+
+                </div>
+            `;
+        });
+
+    } catch (error) {
+
+        console.error("LOAD PROJECT ERROR:", error);
+
+        notify(error.message, "error");
+    }
+
+}
+// ========================================
+// ADD PROJECT
+// ========================================
+
+async function addProject(data) {
+
+    try {
+
+        await addDoc(
+            collection(db, "projects"),
+            {
+                ...data,
+                createdAt: serverTimestamp()
+            }
+        );
+
+        notify("Project saved!");
+
+        await loadProjects();
+
+        await loadSummary();
+
+    } catch (error) {
+
+        console.error(error);
+
+        notify(error.message, "error");
+    }
+
+}
+
+// ========================================
+// PROJECT FORM
+// ========================================
+
+const projectForm = document.getElementById("projectForm");
+
+if (projectForm) {
+
+    projectForm.addEventListener("submit", async (e) => {
+
+        e.preventDefault();
+
+        const name = getValue("projectName");
+        const budget = Number(getValue("projectBudget"));
+        const description = getValue("description");
+        const status = getValue("projectStatus");
+        const utilizationStatus =
+            getValue("utilizationStatusInput") || "0% done";
+        const actualExpenses =
+            Number(getValue("actualExpensesInput")) || 0;
+
+        if (!name) {
+            notify("Project name is required.");
+            return;
+        }
+
+        if (isNaN(budget) || budget <= 0) {
+            notify("Please enter a valid project budget.");
+            return;
+        }
+
+        await addProject({
+
+            name,
+            budget,
+            description,
+            status,
+            utilizationStatus,
+            actualExpenses
+
+        });
+
+        projectForm.reset();
+
+    });
+
+}
+
+// ========================================
+// EDIT PROJECT
+// ========================================
+
+window.editProject = async function(id) {
+
+    try {
+
+        const refDoc = doc(db, "projects", id);
+
+        const snap = await getDoc(refDoc);
+
+        if (!snap.exists()) return;
+
+        const data = snap.data();
+
+        const name = prompt(
+            "Project Name",
+            data.name || ""
+        );
+
+        if (name === null) return;
+
+        const budget = prompt(
+            "Project Budget",
+            data.budget || 0
+        );
+
+        if (budget === null) return;
+
+        const description = prompt(
+            "Description",
+            data.description || ""
+        );
+
+        if (description === null) return;
+
+        const status = prompt(
+            "Status",
+            data.status || ""
+        );
+
+        if (status === null) return;
+
+        await updateDoc(refDoc, {
+
+            name,
+
+            budget: Number(budget),
+
+            description,
+
+            status,
+
+            updatedAt: serverTimestamp()
+
+        });
+
+        notify("Project updated!");
+
+        await loadProjects();
+
+        await loadSummary();
+
+    } catch (error) {
+
+        console.error(error);
+
+        notify(error.message, "error");
+
+    }
+
+};
+
+// ========================================
+// DELETE PROJECT
+// ========================================
+
+window.deleteProject = async function(id) {
+
+    if (!confirm("Delete this project?")) return;
+
+    try {
+
+        await deleteDoc(
+            doc(db, "projects", id)
+        );
+
+        notify("Project deleted!");
+
+        await loadProjects();
+
+        await loadSummary();
+
+    } catch (error) {
+
+        console.error(error);
+
+        notify(error.message, "error");
+
+    }
+
+};
+// ========================================
+// EXPENSE MANAGEMENT
+// v16.0
+// ========================================
+
+// Cache
+expenseCache = [];
+
+selectedReceiptFile = null;
+
+// ========================================
+// RECEIPT INPUT
+// ========================================
+
+const receiptInput = document.getElementById("receipt");
+
+if (receiptInput) {
+
+    receiptInput.addEventListener("change", (event) => {
+
+        selectedReceiptFile = event.target.files[0] || null;
+
+        const preview = document.getElementById("receiptPreview");
+
+        if (!preview) return;
+
+        if (selectedReceiptFile) {
+
+            preview.innerHTML = `
+                <div>
+                    🧾 ${selectedReceiptFile.name}
+                </div>
+            `;
+
+        } else {
+
+            preview.innerHTML = "";
+
+        }
+
+    });
+
+}
+
+// ========================================
+// LOAD EXPENSES
+// ========================================
+
+async function loadExpenses() {
+
+    const container = document.getElementById("expenseContainer");
+
+    if (!container) return;
+
+    try {
+
+        const snapshot = await getDocs(
+            query(
+                collection(db, "expenses"),
+                orderBy("createdAt", "desc")
+            )
+        );
+
+        expenseCache = [];
+
+        container.innerHTML = "";
+
+        if (snapshot.empty) {
+
+            container.innerHTML = `
+                <div class="empty-state">
+                    No expenses found.
+                </div>
+            `;
+
+            return;
 
         }
 
@@ -262,79 +587,91 @@ function loadStudents() {
 
             const data = docSnap.data();
 
-            cache.students.push({
-
+            expenseCache.push({
                 id: docSnap.id,
-
                 ...data
-
             });
 
-            if (container) {
-
-                container.innerHTML += `
+            container.innerHTML += `
 
                 <div class="data-card">
 
-                    <h3>${data.studentName || "-"}</h3>
+                    <h3>💸 ${data.project || "Expense"}</h3>
 
-                    <p><b>ID:</b> ${data.studentId || "-"}</p>
+                    <p>${data.description || ""}</p>
 
-                    <p><b>Course:</b> ${data.course || "-"}</p>
+                    <p>
+                        <strong>Amount:</strong>
+                        ${peso(data.amount)}
+                    </p>
 
-                    <p><b>Year:</b> ${data.yearLevel || "-"}</p>
+                    ${
+                        data.receiptURL
+                        ?
+                        `<p>
+                            <a href="${data.receiptURL}" target="_blank">
+                                📄 View Receipt
+                            </a>
+                        </p>`
+                        :
+                        ""
+                    }
 
-                    <div class="action-buttons">
-
-                        <button onclick="editStudent('${docSnap.id}')">
-
-                            Edit
-
-                        </button>
-
-                        <button onclick="deleteStudent('${docSnap.id}')">
-
-                            Delete
-
-                        </button>
-
-                    </div>
+                    <button onclick="deleteExpense('${docSnap.id}')">
+                        🗑 Delete
+                    </button>
 
                 </div>
 
-                `;
-
-            }
+            `;
 
         });
 
-        populateStudentDropdown();
+    } catch (error) {
 
-    }, (error) => {
-
-        console.error(error);
+        console.error("LOAD EXPENSE ERROR:", error);
 
         notify(error.message, "error");
 
-    });
+    }
 
 }
 
-// ------------------------------------------------------
-// ADD STUDENT
-// ------------------------------------------------------
+// ========================================
+// ADD EXPENSE
+// ========================================
 
-async function addStudent(data) {
+async function addExpense(data) {
 
     try {
 
+        let receiptURL = "";
+
+        if (selectedReceiptFile) {
+
+            const storageRef = ref(
+
+                storage,
+
+                `receipts/${Date.now()}_${selectedReceiptFile.name}`
+
+            );
+
+            await uploadBytes(storageRef, selectedReceiptFile);
+
+            receiptURL = await getDownloadURL(storageRef);
+
+        }
+
         await addDoc(
 
-            collection(db, "students"),
+            collection(db, "expenses"),
 
             {
 
                 ...data,
+
+                receiptURL,
 
                 createdAt: serverTimestamp()
 
@@ -342,7 +679,19 @@ async function addStudent(data) {
 
         );
 
-        notify("Student added.");
+        selectedReceiptFile = null;
+
+        if (receiptInput) receiptInput.value = "";
+
+        const preview = document.getElementById("receiptPreview");
+
+        if (preview) preview.innerHTML = "";
+
+        notify("Expense saved!");
+
+        await loadExpenses();
+
+        await loadSummary();
 
     }
 
@@ -356,27 +705,2034 @@ async function addStudent(data) {
 
 }
 
-// ------------------------------------------------------
+// ========================================
+// EXPENSE FORM
+// ========================================
+
+const expenseForm = document.getElementById("expenseForm");
+
+if (expenseForm) {
+
+    expenseForm.addEventListener("submit", async (e) => {
+
+        e.preventDefault();
+
+        const project = getValue("expenseProject");
+
+        const amount = Number(getValue("expenseAmount"));
+
+        const description = getValue("expenseDescription");
+
+        if (!project) {
+
+            notify("Enter a project name.");
+
+            return;
+
+        }
+
+        if (isNaN(amount) || amount <= 0) {
+
+            notify("Invalid amount.");
+
+            return;
+
+        }
+
+        await addExpense({
+            project,
+
+            amount,
+
+            description
+
+        });
+
+        expenseForm.reset();
+
+    });
+
+}
+
+// ========================================
+// DELETE EXPENSE
+// ========================================
+
+window.deleteExpense = async function(id) {
+
+    if (!confirm("Delete this expense?")) return;
+
+    try {
+
+        await deleteDoc(
+
+            doc(db, "expenses", id)
+
+        );
+
+        notify("Expense deleted!");
+
+        await loadExpenses();
+
+        await loadSummary();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        notify(error.message, "error");
+
+    }
+
+};
+// ========================================
+// FINANCIAL RECORDS SYSTEM
+// v16.0
+// ========================================
+
+// Cache
+recordCache = [];
+
+// ========================================
+// LOAD RECORDS
+// ========================================
+
+async function loadRecords() {
+
+    const container = document.getElementById("recordContainer");
+
+    if (!container) return;
+
+    try {
+
+        const snapshot = await getDocs(
+            query(
+                collection(db, "records"),
+                orderBy("createdAt", "desc")
+            )
+        );
+
+        recordCache = [];
+
+        container.innerHTML = "";
+
+        if (snapshot.empty) {
+
+            container.innerHTML = `
+                <div class="empty-state">
+                    No records found.
+                </div>
+            `;
+
+            return;
+
+        }
+
+        snapshot.forEach(docSnap => {
+
+            const data = docSnap.data();
+
+            recordCache.push({
+                id: docSnap.id,
+                ...data
+            });
+
+            container.innerHTML += `
+
+                <div class="data-card">
+
+                    <h3>
+                        📋 ${data.title || "Untitled Record"}
+                    </h3>
+
+                    <p>
+                        <strong>Type:</strong>
+                        ${data.type || "N/A"}
+                    </p>
+
+                    <p>
+                        <strong>Amount:</strong>
+                        ${peso(data.amount)}
+                    </p>
+
+                    <p>
+                        <strong>Status:</strong>
+                        ${data.status || "Active"}
+                    </p>
+
+                    <br>
+
+                    <button onclick="editRecord('${docSnap.id}')">
+                        ✏ Edit
+                    </button>
+
+                    <button onclick="deleteRecord('${docSnap.id}')">
+                        🗑 Delete
+                    </button>
+
+                </div>
+
+            `;
+
+        });
+
+    }
+
+    catch (error) {
+
+        console.error("LOAD RECORDS ERROR:", error);
+
+        notify(error.message, "error");
+
+    }
+
+}
+
+// ========================================
+// ADD RECORD
+// ========================================
+
+async function addRecord(data) {
+
+    try {
+
+        await addDoc(
+
+            collection(db, "records"),
+
+            {
+
+                ...data,
+
+                createdAt: serverTimestamp()
+
+            }
+
+        );
+
+        notify("Record added successfully!");
+
+        await loadRecords();
+
+        await loadSummary();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        notify(error.message, "error");
+
+    }
+
+}
+
+// ========================================
+// RECORD FORM
+// ========================================
+
+const recordForm = document.getElementById("recordForm");
+
+if (recordForm) {
+
+    recordForm.addEventListener("submit", async (e) => {
+
+        e.preventDefault();
+
+        const title = getValue("recordTitle");
+
+        const type = getValue("recordType");
+
+        const amount = Number(getValue("recordAmount"));
+
+        const status = getValue("recordStatus");
+
+        if (!title) {
+
+            notify("Record title is required.");
+
+            return;
+
+        }
+
+        if (isNaN(amount) || amount < 0) {
+
+            notify("Invalid amount.");
+
+            return;
+
+        }
+
+        await addRecord({
+
+            title,
+
+            type,
+
+            amount,
+
+            status
+
+        });
+
+        recordForm.reset();
+
+    });
+
+}
+
+// ========================================
+// EDIT RECORD
+// ========================================
+
+window.editRecord = async function(id) {
+
+    try {
+
+        const recordRef = doc(db, "records", id);
+
+        const snap = await getDoc(recordRef);
+
+        if (!snap.exists()) return;
+
+        const data = snap.data();
+
+        const title = prompt(
+            "Record Title",
+            data.title || ""
+        );
+
+        if (title === null) return;
+
+        const type = prompt(
+            "Record Type",
+            data.type || ""
+        );
+
+        if (type === null) return;
+
+        const amount = prompt(
+            "Amount",
+            data.amount || 0
+        );
+
+        if (amount === null) return;
+
+        const status = prompt(
+            "Status",
+            data.status || "Active"
+        );
+
+        if (status === null) return;
+
+        await updateDoc(recordRef, {
+
+            title,
+
+            type,
+
+            amount: Number(amount),
+
+            status,
+
+            updatedAt: serverTimestamp()
+
+        });
+
+        notify("Record updated!");
+
+        await loadRecords();
+
+        await loadSummary();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        notify(error.message, "error");
+
+    }
+
+};
+
+// ========================================
+// DELETE RECORD
+// ========================================
+
+window.deleteRecord = async function(id) {
+
+    if (!confirm("Delete this record?")) return;
+
+    try {
+
+        await deleteDoc(
+
+            doc(db, "records", id)
+
+        );
+
+        notify("Record deleted!");
+
+        await loadRecords();
+
+        await loadSummary();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        notify(error.message, "error");
+
+    }
+
+};
+// ========================================
+// ANNOUNCEMENT MANAGEMENT SYSTEM
+// v16.0
+// ========================================
+
+// Cache
+announcementCache = [];
+
+// ========================================
+// LOAD ANNOUNCEMENTS
+// ========================================
+
+async function loadAnnouncements() {
+
+    const container = document.getElementById("adminAnnouncementContainer");
+
+    if (!container) return;
+
+    try {
+
+        const snapshot = await getDocs(
+            query(
+                collection(db, "announcements"),
+                orderBy("createdAt", "desc")
+            )
+        );
+
+        announcementCache = [];
+
+        container.innerHTML = "";
+
+        if (snapshot.empty) {
+
+            container.innerHTML = `
+                <div class="empty-state">
+                    📢 No announcements yet.
+                </div>
+            `;
+
+            return;
+        }
+
+        snapshot.forEach(docSnap => {
+
+            const data = docSnap.data();
+
+            announcementCache.push({
+                id: docSnap.id,
+                ...data
+            });
+
+            container.innerHTML += `
+
+                <div class="announcement-card">
+
+                    <h3>
+                        📢 ${data.title || "Announcement"}
+                    </h3>
+
+                    <p>
+                        ${data.message || ""}
+                    </p>
+
+                    <small>
+                        Posted by:
+                        <strong>${data.author || "Admin"}</strong>
+                    </small>
+
+                    <br><br>
+
+                    <button onclick="editAnnouncement('${docSnap.id}')">
+                        ✏ Edit
+                    </button>
+
+                    <button onclick="deleteAnnouncement('${docSnap.id}')">
+                        🗑 Delete
+                    </button>
+
+                </div>
+
+            `;
+
+        });
+
+    }
+
+    catch (error) {
+
+        console.error("LOAD ANNOUNCEMENT ERROR:", error);
+
+        notify(error.message, "error");
+
+    }
+
+}
+
+// ========================================
+// ADD ANNOUNCEMENT
+// ========================================
+
+async function addAnnouncement(data) {
+
+    try {
+
+        await addDoc(
+
+            collection(db, "announcements"),
+
+            {
+
+                ...data,
+
+                author: currentUser?.email || "Admin",
+
+                createdAt: serverTimestamp()
+
+            }
+
+        );
+
+        notify("Announcement posted!");
+
+        await loadAnnouncements();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        notify(error.message, "error");
+
+    }
+
+}
+
+// ========================================
+// ANNOUNCEMENT FORM
+// ========================================
+
+const announcementForm = document.getElementById("announcementForm");
+
+if (announcementForm) {
+
+    announcementForm.addEventListener("submit", async (e) => {
+
+        e.preventDefault();
+
+        const title = getValue("announcementTitle");
+
+        const message = getValue("announcementMessage");
+
+        if (!title) {
+
+            notify("Announcement title is required.");
+
+            return;
+
+        }
+
+        if (!message) {
+
+            notify("Announcement message is required.");
+
+            return;
+
+        }
+
+        await addAnnouncement({
+
+            title,
+
+            message
+
+        });
+
+        announcementForm.reset();
+
+    });
+
+}
+
+// ========================================
+// EDIT ANNOUNCEMENT
+// ========================================
+
+window.editAnnouncement = async function(id) {
+
+    try {
+
+        const announcementRef = doc(db, "announcements", id);
+
+        const snap = await getDoc(announcementRef);
+
+        if (!snap.exists()) return;
+
+        const data = snap.data();
+
+        const title = prompt(
+            "Announcement Title",
+            data.title || ""
+        );
+
+        if (title === null) return;
+
+        const message = prompt(
+            "Announcement Message",
+            data.message || ""
+        );
+
+        if (message === null) return;
+
+        await updateDoc(
+
+            announcementRef,
+
+            {
+
+                title,
+
+                message,
+
+                updatedAt: serverTimestamp()
+
+            }
+
+        );
+
+        notify("Announcement updated!");
+
+        await loadAnnouncements();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        notify(error.message, "error");
+
+    }
+
+};
+
+// ========================================
+// DELETE ANNOUNCEMENT
+// ========================================
+
+window.deleteAnnouncement = async function(id) {
+
+    if (!confirm("Delete this announcement?")) return;
+
+    try {
+
+        await deleteDoc(
+
+            doc(db, "announcements", id)
+
+        );
+
+        notify("Announcement deleted!");
+
+        await loadAnnouncements();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        notify(error.message, "error");
+
+    }
+
+};
+// ========================================
+// COLLECTION MANAGEMENT
+// v16.0 (FIXED)
+// ========================================
+
+// Cache
+collectionCache = [];
+
+// ========================================
+// LOAD COLLECTIONS
+// ========================================
+
+async function loadCollections() {
+
+    const container = document.getElementById("collectionContainer");
+
+    if (!container) return;
+
+    try {
+
+        const snapshot = await getDocs(
+            query(
+                collection(db, "collections"),
+                orderBy("createdAt", "desc")
+            )
+        );
+
+        collectionCache = [];
+
+        container.innerHTML = "";
+
+        if (snapshot.empty) {
+
+            container.innerHTML = `
+                <div class="empty-state">
+                    No collections found.
+                </div>
+            `;
+
+            return;
+        }
+
+        snapshot.forEach(docSnap => {
+
+            const data = docSnap.data();
+
+            collectionCache.push({
+                id: docSnap.id,
+                ...data
+            });
+
+            container.innerHTML += `
+
+                <div class="data-card">
+
+                    <h3>👤 ${data.studentName || "Unknown Student"}</h3>
+
+                    <p>
+                        <strong>Student ID:</strong>
+                        ${data.studentId || "N/A"}
+                    </p>
+
+                    <p>
+                        <strong>Course:</strong>
+                        ${data.course || "N/A"}
+                    </p>
+
+                    <p>
+                        <strong>Year Level:</strong>
+                        ${data.yearLevel || "N/A"}
+                    </p>
+
+                    <p>
+                        <strong>Payment Type:</strong>
+                        ${data.paymentType || "N/A"}
+                    </p>
+
+                    <p>
+                        <strong>Date:</strong>
+                        ${data.date || "-"}
+                    </p>
+
+                    <p>
+                        <strong>Amount:</strong>
+                        ${peso(data.amount)}
+                    </p>
+
+                    <p>
+                        <strong>Remarks:</strong>
+                        ${data.remarks || "-"}
+                    </p>
+
+                    <br>
+
+                    <button onclick="editCollection('${docSnap.id}')">
+                        ✏ Edit
+                    </button>
+
+                    <button onclick="deleteCollection('${docSnap.id}')">
+                        🗑 Delete
+                    </button>
+
+                </div>
+
+            `;
+
+        });
+
+    }
+
+    catch(error){
+
+        console.error("LOAD COLLECTION ERROR:", error);
+
+        notify(error.message,"error");
+
+    }
+
+}
+
+// ========================================
+// ADD COLLECTION
+// ========================================
+
+async function addCollection(data){
+
+    try{
+
+        await addDoc(
+
+            collection(db,"collections"),
+
+            {
+
+                ...data,
+
+                createdAt: serverTimestamp()
+
+            }
+
+        );
+
+        notify("Collection saved!");
+
+        await loadCollections();
+
+        await loadSummary();
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        notify(error.message,"error");
+
+    }
+
+}
+
+// ========================================
+// COLLECTION FORM
+// ========================================
+
+const collectionForm =
+document.getElementById("collectionForm");
+
+if(collectionForm){
+
+    collectionForm.addEventListener("submit",async(e)=>{
+
+        e.preventDefault();
+
+        //const studentName =
+        //getValue("studentName");
+
+        const yearLevel =
+        getValue("yearLevel");
+
+        //const paymentType =
+        //getValue("paymentType");
+
+        const amount =
+        Number(getValue("amount"));
+
+        const date =
+        getValue("date");
+
+
+        //if(!studentName){
+
+        //    notify("Student name is required.");
+
+        //    return;
+
+        //}
+
+        if(isNaN(amount) || amount<=0){
+
+            notify("Invalid amount.");
+
+            return;
+
+        }
+
+        await addCollection({
+
+            //studentName,
+
+            //studentId,
+
+            //course,
+
+            yearLevel: yearLevel,
+            
+            //paymentType,
+
+            amount,
+
+            date,
+
+
+        });
+
+        collectionForm.reset();
+
+    });
+
+}
+
+// ========================================
+// EDIT COLLECTION
+// ========================================
+
+window.editCollection =
+async function(id){
+
+    try{
+
+        const refDoc =
+        doc(db,"collections",id);
+
+        const snap =
+        await getDoc(refDoc);
+
+        if(!snap.exists()) return;
+
+        const data =
+        snap.data();
+
+        const amount =
+        prompt(
+            "Collection Amount",
+            data.amount
+        );
+
+        if(amount===null) return;
+
+        const remarks =
+        prompt(
+            "Remarks",
+            data.remarks || ""
+        );
+
+        if(remarks===null) return;
+
+        await updateDoc(
+
+            refDoc,
+
+            {
+
+                amount:Number(amount),
+
+                remarks,
+
+                updatedAt:serverTimestamp()
+
+            }
+
+        );
+
+        notify("Collection updated!");
+
+        await loadCollections();
+
+        await loadSummary();
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        notify(error.message,"error");
+
+    }
+
+};
+
+// ========================================
+// DELETE COLLECTION
+// ========================================
+
+window.deleteCollection =
+async function(id){
+
+    if(!confirm("Delete this collection?"))
+        return;
+
+    try{
+
+        await deleteDoc(
+
+            doc(db,"collections",id)
+
+        );
+
+        notify("Collection deleted!");
+
+        await loadCollections();
+
+        await loadSummary();
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        notify(error.message,"error");
+
+    }
+
+};
+
+ // ========================================
+// SUMMARY SYSTEM
+// FINAL FIX v17.0
+// ========================================
+
+async function loadSummary() {
+
+    try {
+
+        // -----------------------------
+        // LOAD COLLECTIONS
+        // -----------------------------
+
+        const collectionSnap = await getDocs(
+            collection(db, "collections")
+        );
+
+        let totalCollections = 0;
+
+        collectionCache = [];
+
+        collectionSnap.forEach(docSnap => {
+
+            const data = docSnap.data();
+
+            collectionCache.push({
+                id: docSnap.id,
+                ...data
+            });
+
+            totalCollections += Number(data.amount || 0);
+
+        });
+
+        // -----------------------------
+        // LOAD PROJECTS
+        // -----------------------------
+
+        const projectSnap = await getDocs(
+            collection(db, "projects")
+        );
+
+        let totalProjectExpenses = 0;
+
+        projectCache = [];
+
+        projectSnap.forEach(docSnap => {
+
+            const data = docSnap.data();
+
+            projectCache.push({
+                id: docSnap.id,
+                ...data
+            });
+
+            totalProjectExpenses +=
+                Number(data.actualExpenses || 0);
+
+        });
+
+        // -----------------------------
+        // LOAD EXPENSES
+        // -----------------------------
+
+        const expenseSnap = await getDocs(
+            collection(db, "expenses")
+        );
+
+        let manualExpenses = 0;
+
+        expenseCache = [];
+
+        expenseSnap.forEach(docSnap => {
+
+            const data = docSnap.data();
+
+            expenseCache.push({
+                id: docSnap.id,
+                ...data
+            });
+
+            manualExpenses +=
+                Number(data.amount || 0);
+
+        });
+
+        // -----------------------------
+        // LOAD RECORDS
+        // -----------------------------
+
+        const recordSnap = await getDocs(
+            collection(db, "records")
+        );
+
+        recordCache = [];
+
+        recordSnap.forEach(docSnap => {
+
+            recordCache.push({
+                id: docSnap.id,
+                ...docSnap.data()
+            });
+
+        });
+
+        // -----------------------------
+        // COMPUTE TOTALS
+        // -----------------------------
+
+        const totalExpenses =
+            manualExpenses +
+            totalProjectExpenses;
+
+        const availableBalance =
+            totalCollections -
+            totalExpenses;
+
+        // -----------------------------
+        // DASHBOARD COUNTS
+        // -----------------------------
+
+        setText(
+            "collectionCount",
+            collectionCache.length
+        );
+
+        setText(
+            "projectCount",
+            projectCache.length
+        );
+
+        setText(
+            "expenseCount",
+            expenseCache.length
+        );
+
+        setText(
+            "recordCount",
+            recordCache.length
+        );
+
+        // -----------------------------
+        // FINANCIAL SUMMARY
+        // -----------------------------
+
+        setText(
+            "totalCollections",
+            peso(totalCollections)
+        );
+
+        setText(
+            "totalExpenses",
+            peso(totalExpenses)
+        );
+
+        setText(
+            "currentBalance",
+            peso(availableBalance)
+        );
+
+        // -----------------------------
+        // TREASURY STATUS
+        // -----------------------------
+
+        const status =
+            document.getElementById(
+                "dashboardStatus"
+            );
+
+        if (status) {
+
+            if (availableBalance < 0) {
+
+                status.textContent =
+                    "🔴 Deficit";
+
+            }
+
+            else if (availableBalance === 0) {
+
+                status.textContent =
+                    "🟡 Balanced";
+
+            }
+
+            else {
+
+                status.textContent =
+                    "🟢 Healthy";
+
+            }
+
+        }
+
+        console.log(
+            "Summary Updated Successfully"
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "SUMMARY ERROR:",
+            error
+        );
+
+        notify(
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+            
+        });
+
+        // ----------------------------
+        // PROJECTS ACTUAL EXPENSES (AUTOMATIC COMPUTATION)
+        // ----------------------------
+        // Dito natin kukunin ang actualExpenses ng bawat project para ibawas sa dashboard
+        const projectSnap = await getDocs(
+            collection(db, "projects")
+        );
+
+        projectSnap.forEach(docSnap => {
+
+            const data = docSnap.data();
+
+            // Kunin ang actual expenses ng bawat site/project (default sa 0 kung wala)
+            const actualExpenses = Number(data.actualExpenses || 0);
+
+            // Ipag-add silang lahat para makuha ang kabuuang nagastos ng buong system
+            totalExpenses += actualExpenses;
+
+        });
+
+        // Kuhanin ang natitirang pera/budget para sa buong site
+        const remainingSiteBudget = totalCollections - totalExpenses;
+
+        // ----------------------------
+        // DISPLAY TO DASHBOARD UI Elements
+        // ----------------------------
+        // Siguraduhin na ang mga ID na ito ay tugma sa iyong HTML dashboard cards!
+        
+        setText("totalCollectionsDisplay", peso(totalCollections));
+        setText("totalExpensesDisplay", peso(totalExpenses));
+        setText("remainingBudgetDisplay", peso(remainingSiteBudget));
+
+        // Display per Year Level (Kung may UI elements ka para dito)
+        setText("firstYearDisplay", peso(firstYear));
+        setText("secondYearDisplay", peso(secondYear));
+        setText("thirdYearDisplay", peso(thirdYear));
+        setText("fourthYearDisplay", peso(fourthYear));
+
+        console.log("SUMMARY UPDATED successfully!");
+
+    } catch (error) {
+
+        console.error("LOAD SUMMARY ERROR:", error);
+
+        notify(error.message, "error");
+
+    }
+
+}
+
+// ========================================
+// ADVANCED SEARCH SYSTEM
+// v16.0
+// ========================================
+
+const searchInput = document.getElementById("searchInput");
+
+if (searchInput) {
+
+    searchInput.addEventListener("input", performSearch);
+
+}
+
+// ========================================
+// SEARCH FUNCTION
+// ========================================
+
+function performSearch() {
+
+    const keyword = searchInput.value
+        .trim()
+        .toLowerCase();
+
+    const cards = document.querySelectorAll(
+        ".data-card, .announcement-card"
+    );
+
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+
+        const text = card.textContent.toLowerCase();
+
+        if (
+            keyword === "" ||
+            text.includes(keyword)
+        ) {
+
+            card.style.display = "";
+
+            visibleCount++;
+
+        }
+
+        else {
+
+            card.style.display = "none";
+
+        }
+
+    });
+
+    showSearchResult(visibleCount);
+
+}
+
+// ========================================
+// SEARCH RESULT
+// ========================================
+
+function showSearchResult(count) {
+
+    let result = document.getElementById("searchResult");
+
+    if (!result) {
+
+        result = document.createElement("div");
+
+        result.id = "searchResult";
+
+        result.className = "search-result";
+
+        const parent =
+            searchInput.parentElement;
+
+        parent.appendChild(result);
+
+    }
+
+    if (searchInput.value.trim() === "") {
+
+        result.textContent = "";
+
+        return;
+
+    }
+
+    if (count === 0) {
+
+        result.innerHTML = `
+            <p style="color:red;">
+                ❌ No results found.
+            </p>
+        `;
+
+    }
+
+    else {
+
+        result.innerHTML = `
+            <p>
+                ✅ ${count} result(s) found.
+            </p>
+        `;
+
+    }
+
+}
+
+// ========================================
+// CLEAR SEARCH
+// ========================================
+
+function clearSearch() {
+
+    if (!searchInput) return;
+
+    searchInput.value = "";
+
+    performSearch();
+
+}
+
+// ========================================
+// OPTIONAL ESC SHORTCUT
+// ========================================
+
+document.addEventListener("keydown", (event) => {
+
+    if (
+        event.key === "Escape" &&
+        document.activeElement === searchInput
+    ) {
+
+        clearSearch();
+
+    }
+
+});
+// ========================================
+// EXPORT TREASURY REPORT
+// v16.0
+// ========================================
+
+const exportButton = document.getElementById("exportReport");
+
+if (exportButton) {
+
+    exportButton.addEventListener("click", exportTreasuryReport);
+
+}
+
+async function exportTreasuryReport() {
+
+    try {
+
+        notify("Generating treasury report...");
+
+        const report = {
+
+            generatedAt: new Date().toLocaleString("en-PH"),
+
+            projects: projectCache.length,
+
+            expenses: expenseCache.length,
+
+            records: recordCache.length,
+
+            announcements: announcementCache.length,
+
+            collections: collectionCache.length,
+
+            totals: {
+
+                collections:
+                    document.getElementById("totalCollections")?.textContent || "₱0.00",
+
+                expenses:
+                    document.getElementById("totalExpenses")?.textContent || "₱0.00",
+
+                balance:
+                    document.getElementById("currentBalance")?.textContent || "₱0.00"
+
+            },
+
+            breakdown: {
+
+                firstYear:
+                    document.getElementById("firstYearCollection")?.textContent || "₱0.00",
+
+                secondYear:
+                    document.getElementById("secondYearCollection")?.textContent || "₱0.00",
+
+                thirdYear:
+                    document.getElementById("thirdYearCollection")?.textContent || "₱0.00",
+
+                fourthYear:
+                    document.getElementById("fourthYearCollection")?.textContent || "₱0.00"
+
+            }
+
+        };
+
+        console.table(report);
+
+        console.log(report);
+
+        // Download JSON report
+
+        const blob = new Blob(
+
+            [
+                JSON.stringify(report, null, 4)
+            ],
+
+            {
+                type: "application/json"
+            }
+
+        );
+
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+
+        link.href = url;
+
+        link.download =
+            "Dalubwikaan_Treasury_Report_" +
+            Date.now() +
+            ".json";
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+
+        notify("Treasury report exported successfully.");
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "EXPORT ERROR:",
+            error
+        );
+
+        notify(
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+// ========================================
+// FIREBASE CONNECTION & SYSTEM STARTUP
+// v16.0
+// ========================================
+
+async function firebaseConnectionCheck() {
+
+    try {
+
+        console.log("Checking Firebase connection...");
+
+        // Firestore Test
+        await getDocs(
+            collection(db, "announcements")
+        );
+
+        console.log("✅ Firestore Connected");
+
+        // Authentication Test
+        if (auth.currentUser) {
+
+            console.log(
+                `✅ Logged in as ${auth.currentUser.email}`
+            );
+
+        } else {
+
+            console.warn(
+                "⚠ No authenticated user."
+            );
+
+        }
+
+        console.log("✅ Firebase Ready");
+
+        return true;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "❌ FIREBASE CONNECTION FAILED",
+            error
+        );
+
+        notify(
+            "Unable to connect to Firebase.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+}
+
+// ========================================
+// RELOAD DASHBOARD
+// ========================================
+
+async function reloadDashboard() {
+
+    try {
+
+        notify("Refreshing dashboard...");
+
+        await Promise.all([
+
+            loadProjects(),
+
+            loadExpenses(),
+
+            loadRecords(),
+
+            loadAnnouncements(),
+
+            loadCollections(),
+
+            loadSummary()
+
+        ]);
+
+        notify("Dashboard updated.");
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Dashboard Reload Error:",
+            error
+        );
+
+        notify(
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+// ========================================
+// START SYSTEM
+// ========================================
+
+(async function startSystem() {
+
+    const connected =
+        await firebaseConnectionCheck();
+
+    if (!connected) {
+
+        console.warn(
+            "System startup cancelled."
+        );
+
+        return;
+
+    }
+
+    console.log(`
+
+========================================
+
+📚 DALUBWIKAAN TREASURY SYSTEM
+
+Version: 16.0
+
+========================================
+
+✅ Firebase Connected
+✅ Authentication Ready
+✅ Dashboard Ready
+✅ Projects Ready
+✅ Expenses Ready
+✅ Records Ready
+✅ Announcements Ready
+✅ Collections Ready
+✅ Summary Ready
+✅ Search Ready
+✅ Export Ready
+
+🚀 SYSTEM ONLINE
+
+========================================
+
+`);
+
+})();
+
+// ========================================
+// OPTIONAL MANUAL REFRESH BUTTON
+// ========================================
+
+const refreshButton =
+document.getElementById("refreshDashboard");
+
+if (refreshButton) {
+
+    refreshButton.addEventListener(
+
+        "click",
+
+        reloadDashboard
+
+    );
+
+}
+// ========================================
+// DASHBOARD ANALYTICS
+// v16.0
+// ========================================
+
+// Analytics Data
+const analytics = {
+    collections: 0,
+    expenses: 0,
+    balance: 0,
+    projects: 0,
+    records: 0,
+    announcements: 0
+};
+
+// ========================================
+// UPDATE ANALYTICS
+// ========================================
+
+function updateAnalytics() {
+
+    analytics.collections = collectionCache.reduce(
+        (sum, item) => sum + Number(item.amount || 0),
+        0
+    );
+
+    analytics.expenses = expenseCache.reduce(
+        (sum, item) => sum + Number(item.amount || 0),
+        0
+    );
+
+    analytics.balance =
+        analytics.collections -
+        analytics.expenses;
+
+    analytics.projects =
+        projectCache.length;
+
+    analytics.records =
+        recordCache.length;
+
+    analytics.announcements =
+        announcementCache.length;
+
+    displayAnalytics();
+
+}
+
+// ========================================
+// DISPLAY ANALYTICS
+// ========================================
+
+function displayAnalytics() {
+
+    setText(
+        "analyticsCollections",
+        peso(analytics.collections)
+    );
+
+    setText(
+        "analyticsExpenses",
+        peso(analytics.expenses)
+    );
+
+    setText(
+        "analyticsBalance",
+        peso(analytics.balance)
+    );
+
+    setText(
+        "analyticsProjects",
+        analytics.projects
+    );
+
+    setText(
+        "analyticsRecords",
+        analytics.records
+    );
+
+    setText(
+        "analyticsAnnouncements",
+        analytics.announcements
+    );
+
+}
+
+// ========================================
+// YEAR LEVEL ANALYTICS
+// ========================================
+
+function getYearLevelStats() {
+
+    const stats = {
+        first: 0,
+        second: 0,
+        third: 0,
+        fourth: 0
+    };
+
+    collectionCache.forEach(item => {
+
+        const level =
+            (item.yearLevel || "").toLowerCase();
+
+        const amount =
+            Number(item.amount || 0);
+
+        if (level.includes("1") || level.includes("first")) {
+
+            stats.first += amount;
+
+        } else if (level.includes("2") || level.includes("second")) {
+
+            stats.second += amount;
+
+        } else if (level.includes("3") || level.includes("third")) {
+
+            stats.third += amount;
+
+        } else if (level.includes("4") || level.includes("fourth")) {
+
+            stats.fourth += amount;
+
+        }
+
+    });
+
+    return stats;
+
+}
+
+// ========================================
+// TOP COLLECTION YEAR
+// ========================================
+
+function getTopYearLevel() {
+
+    const stats = getYearLevelStats();
+
+    let top = "First Year";
+    let highest = stats.first;
+
+    if (stats.second > highest) {
+
+        highest = stats.second;
+        top = "Second Year";
+
+    }
+
+    if (stats.third > highest) {
+
+        highest = stats.third;
+        top = "Third Year";
+
+    }
+
+    if (stats.fourth > highest) {
+
+        highest = stats.fourth;
+        top = "Fourth Year";
+
+    }
+
+    setText("topYearLevel", top);
+
+    setText("topYearAmount", peso(highest));
+
+}
+
+// ========================================
+// REFRESH ANALYTICS
+// ========================================
+
+async function refreshAnalytics() {
+
+    updateAnalytics();
+
+    getTopYearLevel();
+
+    console.log("Analytics Updated");
+
+}
+// ========================================
+// STUDENT MANAGEMENT SYSTEM
+// v16.0
+// ========================================
+
+let studentCache = [];
+
+// ========================================
+// LOAD STUDENTS
+// ========================================
+
+async function loadStudents() {
+
+    const container =
+        document.getElementById("studentContainer");
+
+    try {
+
+        const snapshot = await getDocs(
+            query(
+                collection(db, "students"),
+                orderBy("studentName")
+            )
+        );
+
+        studentCache = [];
+
+        if (container) {
+
+            container.innerHTML = "";
+
+        }
+
+        snapshot.forEach(docSnap => {
+
+            const data = docSnap.data();
+
+            studentCache.push({
+                id: docSnap.id,
+                ...data
+            });
+
+            if (container) {
+
+                container.innerHTML += `
+
+                <div class="data-card">
+
+                    <h3>👤 ${data.studentName}</h3>
+
+                    <p><strong>ID:</strong> ${data.studentId}</p>
+
+                    <p><strong>Course:</strong> ${data.course}</p>
+
+                    <p><strong>Year:</strong> ${data.yearLevel}</p>
+
+                    <button onclick="editStudent('${docSnap.id}')">
+                        ✏ Edit
+                    </button>
+
+                    <button onclick="deleteStudent('${docSnap.id}')">
+                        🗑 Delete
+                    </button>
+
+                </div>
+
+                `;
+
+            }
+
+        });
+
+        populateStudentDropdown();
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        notify(error.message,"error");
+
+    }
+
+}
+
+// ========================================
+// ADD STUDENT
+// ========================================
+
+async function addStudent(data){
+
+    try{
+
+        await addDoc(
+
+            collection(db,"students"),
+
+            {
+
+                ...data,
+
+                createdAt: serverTimestamp()
+
+            }
+
+        );
+
+        notify("Student added.");
+
+        await loadStudents();
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        notify(error.message,"error");
+
+    }
+
+}
+
+// ========================================
 // STUDENT FORM
-// ------------------------------------------------------
+// ========================================
 
-const studentForm = $("studentForm");
+const studentForm =
+document.getElementById("studentForm");
 
-if (studentForm) {
+if(studentForm){
 
-    studentForm.addEventListener("submit", async (e) => {
+    studentForm.addEventListener("submit",async(e)=>{
 
         e.preventDefault();
 
         await addStudent({
 
-            studentName: getValue("studentName"),
+            studentName:
+                getValue("studentName"),
 
-            studentId: getValue("studentId"),
+            studentId:
+                getValue("studentId"),
 
-            course: getValue("course"),
+            course:
+                getValue("course"),
 
-            yearLevel: getValue("yearLevel")
+            yearLevel:
+                getValue("yearLevel")
 
         });
 
@@ -386,87 +2742,113 @@ if (studentForm) {
 
 }
 
-// ------------------------------------------------------
+// ========================================
 // EDIT STUDENT
-// ------------------------------------------------------
+// ========================================
 
-window.editStudent = async function(id) {
+window.editStudent =
+async function(id){
 
-    const refDoc = doc(db, "students", id);
+    try{
 
-    const snap = await getDoc(refDoc);
+        const refDoc =
+            doc(db,"students",id);
 
-    if (!snap.exists()) return;
+        const snap =
+            await getDoc(refDoc);
 
-    const data = snap.data();
+        if(!snap.exists()) return;
 
-    const studentName = prompt(
+        const data =
+            snap.data();
 
-        "Student Name",
+        const studentName =
+            prompt(
+                "Student Name",
+                data.studentName
+            );
 
-        data.studentName
+        if(studentName===null)
+            return;
 
-    );
+        await updateDoc(
 
-    if (studentName === null) return;
+            refDoc,
 
-    await updateDoc(
+            {
 
-        refDoc,
+                studentName,
 
-        {
+                updatedAt:
+                    serverTimestamp()
 
-            studentName,
+            }
 
-            updatedAt: serverTimestamp()
+        );
 
-        }
+        notify("Student updated.");
 
-    );
+        await loadStudents();
 
-    notify("Student updated.");
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        notify(error.message,"error");
+
+    }
 
 };
 
-// ------------------------------------------------------
+// ========================================
 // DELETE STUDENT
-// ------------------------------------------------------
+// ========================================
 
-window.deleteStudent = async function(id) {
+window.deleteStudent =
+async function(id){
 
-    if (!confirm("Delete this student?")) return;
+    if(!confirm("Delete student?"))
+        return;
 
-    await deleteDoc(
+    try{
 
-        doc(db, "students", id)
+        await deleteDoc(
+            doc(db,"students",id)
+        );
 
-    );
+        notify("Student deleted.");
 
-    notify("Student deleted.");
+        await loadStudents();
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        notify(error.message,"error");
+
+    }
 
 };
 
-// ------------------------------------------------------
-// POPULATE STUDENT DROPDOWN
-// ------------------------------------------------------
+// ========================================
+// POPULATE DROPDOWN
+// ========================================
 
-function populateStudentDropdown() {
+function populateStudentDropdown(){
 
-    const select = $("studentSelect");
+    const select =
+        document.getElementById("studentSelect");
 
-    if (!select) return;
+    if(!select) return;
 
-    select.innerHTML = `
+    select.innerHTML =
+        '<option value="">Select Student</option>';
 
-        <option value="">
-
-            Select Student
-
-        </option>
-
-    `;
-
-    cache.students.forEach(student => {
+    studentCache.forEach(student=>{
 
         select.innerHTML += `
 
@@ -481,1182 +2863,419 @@ function populateStudentDropdown() {
     });
 
 }
-// ======================================================
-// COLLECTIONS MODULE
-// VERSION 20.0
-// PART 3
-// ======================================================
+// ========================================
+// COLLECTION STUDENT AUTO-FILL
+// v16.0
+// ========================================
 
-// ------------------------------------------------------
-// LOAD COLLECTIONS (Realtime)
-// ------------------------------------------------------
+const studentSelect =
+document.getElementById("studentSelect");
 
-function loadCollections() {
+if(studentSelect){
 
-    const container = $("collectionContainer");
-
-    const q = query(
-        collection(db, "collections"),
-        orderBy("createdAt", "desc")
+    studentSelect.addEventListener(
+        "change",
+        fillStudentInformation
     );
-
-    onSnapshot(q, (snapshot) => {
-
-        cache.collections = [];
-
-        if (container) {
-
-            container.innerHTML = "";
-
-        }
-
-        snapshot.forEach(docSnap => {
-
-            const data = docSnap.data();
-
-            cache.collections.push({
-
-                id: docSnap.id,
-
-                ...data
-
-            });
-
-            if (container) {
-
-                container.innerHTML += `
-
-                <div class="data-card">
-
-                    <h3>${data.studentName || "Unknown Student"}</h3>
-
-                    <p><b>Student ID:</b> ${data.studentId || "-"}</p>
-
-                    <p><b>Course:</b> ${data.course || "-"}</p>
-
-                    <p><b>Year:</b> ${data.yearLevel || "-"}</p>
-
-                    <p><b>Payment:</b> ${data.paymentType || "-"}</p>
-
-                    <p><b>Amount:</b> ${peso(data.amount || 0)}</p>
-
-                    <p><b>Date:</b> ${data.date || "-"}</p>
-
-                    <div class="action-buttons">
-
-                        <button onclick="editCollection('${docSnap.id}')">
-
-                            Edit
-
-                        </button>
-
-                        <button onclick="deleteCollection('${docSnap.id}')">
-
-                            Delete
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-                `;
-
-            }
-
-        });
-
-        loadSummary();
-
-    }, (error) => {
-
-        console.error(error);
-
-        notify(error.message, "error");
-
-    });
 
 }
 
-// ------------------------------------------------------
-// ADD COLLECTION
-// ------------------------------------------------------
+function fillStudentInformation(){
 
-async function addCollection(data) {
+    const id = studentSelect.value;
 
-    try {
+    if(!id){
 
-        await addDoc(
+        clearStudentFields();
 
-            collection(db, "collections"),
-
-            {
-
-                ...data,
-
-                createdAt: serverTimestamp()
-
-            }
-
-        );
-
-        notify("Collection saved.");
+        return;
 
     }
 
-    catch (error) {
+    const student = studentCache.find(
+        item => item.id === id
+    );
 
-        console.error(error);
+    if(!student) return;
 
-        notify(error.message, "error");
+    const name =
+    document.getElementById("studentName");
+
+    const studentId =
+    document.getElementById("studentId");
+
+    const course =
+    document.getElementById("course");
+
+    const yearLevel =
+    document.getElementById("yearLevel");
+
+    if(name)
+        name.value = student.studentName || "";
+
+    if(studentId)
+        studentId.value = student.studentId || "";
+
+    if(course)
+        course.value = student.course || "";
+
+    if(yearLevel)
+        yearLevel.value = student.yearLevel || "";
+
+}
+
+// ========================================
+// CLEAR STUDENT FIELDS
+// ========================================
+
+function clearStudentFields(){
+
+    const ids = [
+
+        "studentName",
+
+        "studentId",
+
+        "course",
+
+        "yearLevel"
+
+    ];
+
+    ids.forEach(id=>{
+
+        const input =
+        document.getElementById(id);
+
+        if(input){
+
+            input.value="";
+
+        }
+
+    });
+
+}
+
+// ========================================
+// COLLECTION VALIDATION
+// ========================================
+
+function validateCollectionForm(){
+
+    if(!getValue("studentName")){
+
+        notify("Student name is required.");
+
+        return false;
 
     }
 
-}
+    if(!getValue("studentId")){
 
-// ------------------------------------------------------
-// COLLECTION FORM
-// ------------------------------------------------------
+        notify("Student ID is required.");
 
-const collectionForm = $("collectionForm");
+        return false;
 
-if (collectionForm) {
+    }
 
-    collectionForm.addEventListener("submit", async (e) => {
+    if(!getValue("course")){
 
-        e.preventDefault();
+        notify("Course is required.");
 
-        await addCollection({
+        return false;
 
-            studentName: getValue("studentName"),
+    }
 
-            studentId: getValue("studentId"),
+    if(!getValue("yearLevel")){
 
-            course: getValue("course"),
+        notify("Year Level is required.");
 
-            yearLevel: getValue("yearLevel"),
+        return false;
 
-            paymentType: getValue("paymentType"),
+    }
 
-            amount: Number(getValue("amount")),
+    const amount =
+    Number(getValue("amount"));
 
-            date: getValue("date"),
+    if(isNaN(amount) || amount<=0){
 
-            remarks: getValue("remarks")
+        notify("Invalid payment amount.");
 
-        });
+        return false;
 
-        collectionForm.reset();
+    }
 
-    });
+    if(!getValue("paymentType")){
 
-}
+        notify("Select payment type.");
 
-// ------------------------------------------------------
-// EDIT COLLECTION
-// ------------------------------------------------------
+        return false;
 
-window.editCollection = async function(id) {
+    }
 
-    const refDoc = doc(db, "collections", id);
+    if(!getValue("date")){
 
-    const snap = await getDoc(refDoc);
+        notify("Collection date is required.");
 
-    if (!snap.exists()) return;
+        return false;
 
-    const data = snap.data();
+    }
 
-    const amount = prompt(
-
-        "Collection Amount",
-
-        data.amount
-
-    );
-
-    if (amount === null) return;
-
-    const remarks = prompt(
-
-        "Remarks",
-
-        data.remarks || ""
-
-    );
-
-    if (remarks === null) return;
-
-    await updateDoc(
-
-        refDoc,
-
-        {
-
-            amount: Number(amount),
-
-            remarks,
-
-            updatedAt: serverTimestamp()
-
-        }
-
-    );
-
-    notify("Collection updated.");
-
-};
-
-// ------------------------------------------------------
-// DELETE COLLECTION
-// ------------------------------------------------------
-
-window.deleteCollection = async function(id) {
-
-    if (!confirm("Delete this collection?")) return;
-
-    await deleteDoc(
-
-        doc(db, "collections", id)
-
-    );
-
-    notify("Collection deleted.");
-
-};
-// ======================================================
-// PROJECTS MODULE
-// VERSION 20.0
-// PART 4
-// ======================================================
-
-// ------------------------------------------------------
-// LOAD PROJECTS
-// ------------------------------------------------------
-
-function loadProjects() {
-
-    const container = $("projectContainer");
-
-    const q = query(
-        collection(db, "projects"),
-        orderBy("createdAt", "desc")
-    );
-
-    onSnapshot(q, (snapshot) => {
-
-        cache.projects = [];
-
-        if (container) {
-
-            container.innerHTML = "";
-
-        }
-
-        snapshot.forEach(docSnap => {
-
-            const data = docSnap.data();
-
-            cache.projects.push({
-
-                id: docSnap.id,
-
-                ...data
-
-            });
-
-            const budget = Number(data.budget || 0);
-            const actual = Number(data.actualExpenses || 0);
-            const remaining = budget - actual;
-
-            if (container) {
-
-                container.innerHTML += `
-
-                <div class="data-card">
-
-                    <h3>${data.name || "Untitled Project"}</h3>
-
-                    <p><b>Status:</b> ${data.status || "Planning"}</p>
-
-                    <p><b>Budget:</b> ${peso(budget)}</p>
-
-                    <p><b>Actual Expenses:</b> ${peso(actual)}</p>
-
-                    <p><b>Remaining:</b> ${peso(remaining)}</p>
-
-                    <button onclick="editProject('${docSnap.id}')">
-                        Edit
-                    </button>
-
-                    <button onclick="deleteProject('${docSnap.id}')">
-                        Delete
-                    </button>
-
-                </div>
-
-                `;
-
-            }
-
-        });
-
-        loadSummary();
-
-    });
+    return true;
 
 }
+// ========================================
+// STUDENT PAYMENT HISTORY
+// v16.0
+// ========================================
 
-// ------------------------------------------------------
-// ADD PROJECT
-// ------------------------------------------------------
+async function viewStudentHistory(studentId){
 
-async function addProject(data){
+    const container =
+    document.getElementById("paymentHistory");
+
+    if(!container) return;
 
     try{
 
-        await addDoc(
+        const snapshot =
+        await getDocs(
 
-            collection(db,"projects"),
-
-            {
-
-                ...data,
-
-                budget:Number(data.budget||0),
-
-                actualExpenses:Number(data.actualExpenses||0),
-
-                createdAt:serverTimestamp()
-
-            }
+            query(
+                collection(db,"collections"),
+                orderBy("createdAt","desc")
+            )
 
         );
 
-        notify("Project added.");
+        container.innerHTML="";
 
-    }
+        let totalPaid = 0;
 
-    catch(error){
+        let paymentCount = 0;
 
-        console.error(error);
-
-        notify(error.message,"error");
-
-    }
-
-}
-
-// ------------------------------------------------------
-// PROJECT FORM
-// ------------------------------------------------------
-
-const projectForm = $("projectForm");
-
-if(projectForm){
-
-    projectForm.addEventListener("submit",async(e)=>{
-
-        e.preventDefault();
-
-        await addProject({
-
-            name:getValue("projectName"),
-
-            description:getValue("projectDescription"),
-
-            status:getValue("projectStatus"),
-
-            budget:getValue("projectBudget"),
-
-            actualExpenses:getValue("projectActualExpenses")
-
-        });
-
-        projectForm.reset();
-
-    });
-
-}
-
-// ------------------------------------------------------
-// EDIT PROJECT
-// ------------------------------------------------------
-
-window.editProject = async function(id){
-
-    const refDoc = doc(db,"projects",id);
-
-    const snap = await getDoc(refDoc);
-
-    if(!snap.exists()) return;
-
-    const data = snap.data();
-
-    const budget = prompt(
-
-        "Budget",
-
-        data.budget
-
-    );
-
-    if(budget===null) return;
-
-    const actual = prompt(
-
-        "Actual Expenses",
-
-        data.actualExpenses || 0
-
-    );
-
-    if(actual===null) return;
-
-    const status = prompt(
-
-        "Status",
-
-        data.status || "Planning"
-
-    );
-
-    if(status===null) return;
-
-    await updateDoc(
-
-        refDoc,
-
-        {
-
-            budget:Number(budget),
-
-            actualExpenses:Number(actual),
-
-            status,
-
-            updatedAt:serverTimestamp()
-
-        }
-
-    );
-
-    notify("Project updated.");
-
-};
-
-// ------------------------------------------------------
-// DELETE PROJECT
-// ------------------------------------------------------
-
-window.deleteProject = async function(id){
-
-    if(!confirm("Delete this project?")) return;
-
-    await deleteDoc(
-
-        doc(db,"projects",id)
-
-    );
-
-    notify("Project deleted.");
-
-};
-
-// ======================================================
-// SUMMARY
-// ======================================================
-
-function loadSummary(){
-
-    const totalCollections = cache.collections.reduce(
-
-        (sum,item)=>sum+Number(item.amount||0),
-
-        0
-
-    );
-
-    const projectExpenses = cache.projects.reduce(
-
-        (sum,item)=>sum+Number(item.actualExpenses||0),
-
-        0
-
-    );
-
-    const manualExpenses = cache.expenses.reduce(
-
-        (sum,item)=>sum+Number(item.amount||0),
-
-        0
-
-    );
-
-    const totalExpenses =
-
-        projectExpenses +
-
-        manualExpenses;
-
-    const balance =
-
-        totalCollections -
-
-        totalExpenses;
-
-    setText(
-
-        "totalCollections",
-
-        peso(totalCollections)
-
-    );
-
-    setText(
-
-        "totalExpenses",
-
-        peso(totalExpenses)
-
-    );
-
-    setText(
-
-        "currentBalance",
-
-        peso(balance)
-
-    );
-
-    setText(
-
-        "projectCount",
-
-        cache.projects.length
-
-    );
-
-    setText(
-
-        "collectionCount",
-
-        cache.collections.length
-
-    );
-
-    setText(
-
-        "expenseCount",
-
-        cache.expenses.length
-
-    );
-
-}
-// ======================================================
-// EXPENSES MODULE
-// VERSION 20.0
-// PART 5
-// ======================================================
-
-// ------------------------------------------------------
-// LOAD EXPENSES
-// ------------------------------------------------------
-
-function loadExpenses() {
-
-    const container = $("expenseContainer");
-
-    const q = query(
-
-        collection(db, "expenses"),
-
-        orderBy("createdAt", "desc")
-
-    );
-
-    onSnapshot(q, (snapshot) => {
-
-        cache.expenses = [];
-
-        if (container) {
-
-            container.innerHTML = "";
-
-        }
-
-        snapshot.forEach(docSnap => {
-
-            const data = docSnap.data();
-
-            cache.expenses.push({
-
-                id: docSnap.id,
-
-                ...data
-
-            });
-
-            if (container) {
-
-                container.innerHTML += `
-
-                <div class="data-card">
-
-                    <h3>${data.category || "Expense"}</h3>
-
-                    <p><b>Description:</b> ${data.description || "-"}</p>
-
-                    <p><b>Amount:</b> ${peso(data.amount || 0)}</p>
-
-                    <p><b>Date:</b> ${data.date || "-"}</p>
-
-                    <p><b>Receipt:</b>
-
-                        ${
-                            data.receiptURL
-
-                            ? `<a href="${data.receiptURL}" target="_blank">View</a>`
-
-                            : "None"
-
-                        }
-
-                    </p>
-
-                    <button onclick="editExpense('${docSnap.id}')">
-
-                        Edit
-
-                    </button>
-
-                    <button onclick="deleteExpense('${docSnap.id}')">
-
-                        Delete
-
-                    </button>
-
-                </div>
-
-                `;
-
-            }
-
-        });
-
-        loadSummary();
-
-    }, (error) => {
-
-        console.error(error);
-
-        notify(error.message, "error");
-
-    });
-
-}
-
-// ------------------------------------------------------
-// ADD EXPENSE
-// ------------------------------------------------------
-
-async function addExpense(data) {
-
-    try {
-
-        await addDoc(
-
-            collection(db, "expenses"),
-
-            {
-
-                ...data,
-
-                amount: Number(data.amount || 0),
-
-                createdAt: serverTimestamp()
-
-            }
-
-        );
-
-        notify("Expense added.");
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        notify(error.message, "error");
-
-    }
-
-}
-
-// ------------------------------------------------------
-// EXPENSE FORM
-// ------------------------------------------------------
-
-const expenseForm = $("expenseForm");
-
-if (expenseForm) {
-
-    expenseForm.addEventListener("submit", async (e) => {
-
-        e.preventDefault();
-
-        let receiptURL = "";
-
-        const file = $("expenseReceipt")?.files[0];
-
-        if (file) {
-
-            const storageRef = ref(
-
-                storage,
-
-                `expenses/${Date.now()}_${file.name}`
-
-            );
-
-            await uploadBytes(
-
-                storageRef,
-
-                file
-
-            );
-
-            receiptURL = await getDownloadURL(
-
-                storageRef
-
-            );
-
-        }
-
-        await addExpense({
-
-            category: getValue("expenseCategory"),
-
-            description: getValue("expenseDescription"),
-
-            amount: getValue("expenseAmount"),
-
-            date: getValue("expenseDate"),
-
-            receiptURL
-
-        });
-
-        expenseForm.reset();
-
-    });
-
-}
-
-// ------------------------------------------------------
-// EDIT EXPENSE
-// ------------------------------------------------------
-
-window.editExpense = async function(id) {
-
-    const refDoc = doc(
-
-        db,
-
-        "expenses",
-
-        id
-
-    );
-
-    const snap = await getDoc(refDoc);
-
-    if (!snap.exists()) return;
-
-    const data = snap.data();
-
-    const amount = prompt(
-
-        "Expense Amount",
-
-        data.amount
-
-    );
-
-    if (amount === null) return;
-
-    const description = prompt(
-
-        "Description",
-
-        data.description || ""
-
-    );
-
-    if (description === null) return;
-
-    await updateDoc(
-
-        refDoc,
-
-        {
-
-            amount: Number(amount),
-
-            description,
-
-            updatedAt: serverTimestamp()
-
-        }
-
-    );
-
-    notify("Expense updated.");
-
-};
-
-// ------------------------------------------------------
-// DELETE EXPENSE
-// ------------------------------------------------------
-
-window.deleteExpense = async function(id) {
-
-    if (!confirm("Delete this expense?")) return;
-
-    try {
-
-        const refDoc = doc(
-
-            db,
-
-            "expenses",
-
-            id
-
-        );
-
-        const snap = await getDoc(refDoc);
-
-        if (snap.exists()) {
-
-            const data = snap.data();
-
-            if (data.receiptURL) {
-
-                try {
-
-                    const path = decodeURIComponent(
-
-                        data.receiptURL.split("/o/")[1].split("?")[0]
-
-                    );
-
-                    await deleteObject(
-
-                        ref(storage, path)
-
-                    );
-
-                }
-
-                catch (e) {
-
-                    console.warn("Receipt not removed from storage.");
-
-                }
-
-            }
-
-        }
-
-        await deleteDoc(refDoc);
-
-        notify("Expense deleted.");
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        notify(error.message, "error");
-
-    }
-
-};
-
-// ------------------------------------------------------
-// TOTAL EXPENSES
-// ------------------------------------------------------
-
-function getTotalExpenses() {
-
-    return cache.expenses.reduce(
-
-        (sum, item) =>
-
-            sum + Number(item.amount || 0),
-
-        0
-
-    );
-
-}
-// ======================================================
-// RECORDS & ANNOUNCEMENTS MODULE
-// VERSION 20.0
-// PART 6
-// ======================================================
-
-// ------------------------------------------------------
-// LOAD RECORDS
-// ------------------------------------------------------
-
-function loadRecords() {
-
-    const container = $("recordContainer");
-
-    const q = query(
-        collection(db, "records"),
-        orderBy("createdAt", "desc")
-    );
-
-    onSnapshot(q, (snapshot) => {
-
-        cache.records = [];
-
-        if (container) {
-
-            container.innerHTML = "";
-
-        }
-
-        snapshot.forEach(docSnap => {
-
-            const data = docSnap.data();
-
-            cache.records.push({
-
-                id: docSnap.id,
-
-                ...data
-
-            });
-
-            if (container) {
-
-                container.innerHTML += `
-
-                <div class="data-card">
-
-                    <h3>${data.title || "Record"}</h3>
-
-                    <p>${data.description || "-"}</p>
-
-                    <p><b>Date:</b> ${data.date || "-"}</p>
-
-                    <button onclick="editRecord('${docSnap.id}')">
-
-                        Edit
-
-                    </button>
-
-                    <button onclick="deleteRecord('${docSnap.id}')">
-
-                        Delete
-
-                    </button>
-
-                </div>
-
-                `;
-
-            }
-
-        });
-
-        setText("recordCount", cache.records.length);
-
-    }, error => {
-
-        console.error(error);
-
-        notify(error.message, "error");
-
-    });
-
-}
-
-// ------------------------------------------------------
-// ADD RECORD
-// ------------------------------------------------------
-
-async function addRecord(data){
-
-    try{
-
-        await addDoc(
-
-            collection(db,"records"),
-
-            {
-
-                ...data,
-
-                createdAt:serverTimestamp()
-
-            }
-
-        );
-
-        notify("Record added.");
-
-    }
-
-    catch(error){
-
-        console.error(error);
-
-        notify(error.message,"error");
-
-    }
-
-}
-
-// ------------------------------------------------------
-// RECORD FORM
-// ------------------------------------------------------
-
-const recordForm = $("recordForm");
-
-if(recordForm){
-
-    recordForm.addEventListener("submit",async(e)=>{
-
-        e.preventDefault();
-
-        await addRecord({
-
-            title:getValue("recordTitle"),
-
-            description:getValue("recordDescription"),
-
-            date:getValue("recordDate")
-
-        });
-
-        recordForm.reset();
-
-    });
-
-}
-
-// ------------------------------------------------------
-// EDIT RECORD
-// ------------------------------------------------------
-
-window.editRecord = async function(id){
-
-    const refDoc = doc(db,"records",id);
-
-    const snap = await getDoc(refDoc);
-
-    if(!snap.exists()) return;
-
-    const data = snap.data();
-
-    const title = prompt(
-
-        "Title",
-
-        data.title
-
-    );
-
-    if(title===null) return;
-
-    const description = prompt(
-
-        "Description",
-
-        data.description || ""
-
-    );
-
-    if(description===null) return;
-
-    await updateDoc(
-
-        refDoc,
-
-        {
-
-            title,
-
-            description,
-
-            updatedAt:serverTimestamp()
-
-        }
-
-    );
-
-    notify("Record updated.");
-
-};
-
-// ------------------------------------------------------
-// DELETE RECORD
-// ------------------------------------------------------
-
-window.deleteRecord = async function(id){
-
-    if(!confirm("Delete this record?")) return;
-
-    await deleteDoc(
-
-        doc(db,"records",id)
-
-    );
-
-    notify("Record deleted.");
-
-};
-
-// ======================================================
-// ANNOUNCEMENTS
-// ======================================================
-
-function loadAnnouncements(){
-
-    const container = $("announcementContainer");
-
-    const q = query(
-
-        collection(db,"announcements"),
-
-        orderBy("createdAt","desc")
-
-    );
-
-    onSnapshot(q,(snapshot)=>{
-
-        cache.announcements=[];
-
-        if(container){
-
-            container.innerHTML="";
-
-        }
+        let latestDate = "-";
 
         snapshot.forEach(docSnap=>{
 
             const data = docSnap.data();
 
-            cache.announcements.push({
+            if(data.studentId !== studentId)
+                return;
+
+            paymentCount++;
+
+            totalPaid += Number(data.amount || 0);
+
+            if(latestDate === "-")
+                latestDate = data.date || "-";
+
+            container.innerHTML += `
+
+            <div class="history-card">
+
+                <h4>${data.paymentType}</h4>
+
+                <p><strong>Date:</strong> ${data.date}</p>
+
+                <p><strong>Amount:</strong> ${peso(data.amount)}</p>
+
+                <p><strong>Remarks:</strong> ${data.remarks || "-"}</p>
+
+            </div>
+
+            `;
+
+        });
+
+        if(paymentCount===0){
+
+            container.innerHTML=`
+
+            <div class="empty-state">
+
+                No payment history.
+
+            </div>
+
+            `;
+
+        }
+
+        updateHistorySummary(
+            totalPaid,
+            paymentCount,
+            latestDate
+        );
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        notify(error.message,"error");
+
+    }
+
+}
+// ========================================
+// TREASURER RECEIPT GENERATOR
+// v16.0
+// ========================================
+
+function generateReceiptNumber() {
+
+    const now = new Date();
+
+    return "DLB-" +
+        now.getFullYear() +
+        String(now.getMonth() + 1).padStart(2, "0") +
+        String(now.getDate()).padStart(2, "0") +
+        "-" +
+        Date.now().toString().slice(-6);
+
+}
+
+// ========================================
+// GENERATE RECEIPT
+// ========================================
+
+function generateReceipt(data) {
+
+    const receiptNumber = generateReceiptNumber();
+
+    const receipt = document.getElementById("receiptOutput");
+
+    if (!receipt) return;
+
+    receipt.innerHTML = `
+
+    <div class="receipt-paper">
+
+        <h2 style="text-align:center;">
+            DALUBWIKAAN
+        </h2>
+
+        <h3 style="text-align:center;">
+            Treasury Receipt
+        </h3>
+
+        <hr>
+
+        <p>
+            <strong>Receipt No:</strong>
+            ${receiptNumber}
+        </p>
+
+        <p>
+            <strong>Date:</strong>
+            ${data.date}
+        </p>
+
+        <p>
+            <strong>Year:</strong>
+            ${data.yearLevel}
+        </p>
+
+        <p>
+            <strong>Payment:</strong>
+            ${data.paymentType}
+        </p>
+
+        <p>
+            <strong>Amount:</strong>
+            ${peso(data.amount)}
+        </p>
+
+        <p>
+            <strong>Remarks:</strong>
+            ${data.remarks || "-"}
+        </p>
+
+        <hr>
+
+        <p>
+
+            Received By:
+
+            <br><br>
+
+            ______________________
+
+            <br>
+
+            Treasurer
+
+        </p>
+
+        <button onclick="printReceipt()">
+
+            🖨 Print Receipt
+
+        </button>
+
+    </div>
+
+    `;
+
+}
+// ========================================
+// RECEIPT ARCHIVE SYSTEM
+// v16.0
+// ========================================
+
+let receiptCache = [];
+
+// ========================================
+// LOAD RECEIPTS
+// ========================================
+
+async function loadReceipts(){
+
+    const container =
+    document.getElementById("receiptContainer");
+
+    if(!container) return;
+
+    try{
+
+        const snapshot =
+        await getDocs(
+
+            query(
+                collection(db,"receipts"),
+                orderBy("createdAt","desc")
+            )
+
+        );
+
+        receiptCache=[];
+
+        container.innerHTML="";
+
+        if(snapshot.empty){
+
+            container.innerHTML=`
+
+            <div class="empty-state">
+
+                No receipts found.
+
+            </div>
+
+            `;
+
+            return;
+
+        }
+
+        snapshot.forEach(docSnap=>{
+
+            const data=docSnap.data();
+
+            receiptCache.push({
 
                 id:docSnap.id,
 
@@ -1664,81 +3283,35 @@ function loadAnnouncements(){
 
             });
 
-            if(container){
+            container.innerHTML+=`
 
-                container.innerHTML += `
+            <div class="data-card">
 
-                <div class="announcement-card">
+                <h3>${data.receiptNumber}</h3>
 
-                    <h3>${data.title || "-"}</h3>
+                <p><strong>Student:</strong> ${data.studentName}</p>
 
-                    <p>${data.message || "-"}</p>
+                <p><strong>Amount:</strong> ${peso(data.amount)}</p>
 
-                    <small>${data.date || "-"}</small>
+                <p><strong>Date:</strong> ${data.date}</p>
 
-                    <br><br>
+                <button onclick="viewReceipt('${docSnap.id}')">
 
-                    <button onclick="editAnnouncement('${docSnap.id}')">
+                    👁 View
 
-                        Edit
+                </button>
 
-                    </button>
+                <button onclick="deleteReceipt('${docSnap.id}')">
 
-                    <button onclick="deleteAnnouncement('${docSnap.id}')">
+                    🗑 Delete
 
-                        Delete
+                </button>
 
-                    </button>
+            </div>
 
-                </div>
-
-                `;
-
-            }
+            `;
 
         });
-
-        setText(
-
-            "announcementCount",
-
-            cache.announcements.length
-
-        );
-
-    },error=>{
-
-        console.error(error);
-
-        notify(error.message,"error");
-
-    });
-
-}
-
-// ------------------------------------------------------
-// ADD ANNOUNCEMENT
-// ------------------------------------------------------
-
-async function addAnnouncement(data){
-
-    try{
-
-        await addDoc(
-
-            collection(db,"announcements"),
-
-            {
-
-                ...data,
-
-                createdAt:serverTimestamp()
-
-            }
-
-        );
-
-        notify("Announcement posted.");
 
     }
 
@@ -1751,418 +3324,415 @@ async function addAnnouncement(data){
     }
 
 }
+// ========================================
+// PDF RECEIPT GENERATOR
+// v16.0
+// ========================================
 
-// ------------------------------------------------------
-// ANNOUNCEMENT FORM
-// ------------------------------------------------------
+window.downloadReceiptPDF = function () {
 
-const announcementForm = $("announcementForm");
+    if (!window.jspdf) {
 
-if(announcementForm){
+        notify("jsPDF library not found.", "error");
 
-    announcementForm.addEventListener("submit",async(e)=>{
+        return;
 
-        e.preventDefault();
+    }
 
-        await addAnnouncement({
+    const { jsPDF } = window.jspdf;
 
-            title:getValue("announcementTitle"),
+    const pdf = new jsPDF();
 
-            message:getValue("announcementMessage"),
+    const receiptNumber =
+        document.getElementById("receiptNumber")?.textContent || "-";
 
-            date:getValue("announcementDate")
+    const receiptDate =
+        document.getElementById("receiptDate")?.textContent || "-";
 
-        });
+    const year =
+        document.getElementById("receiptYear")?.textContent || "-";
 
-        announcementForm.reset();
+    const amount =
+        document.getElementById("receiptAmount")?.textContent || "-";
 
-    });
+    const remarks =
+        document.getElementById("receiptRemarks")?.textContent || "-";
 
-}
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(18);
+    pdf.text("DALUBWIKAAN", 105, 20, { align: "center" });
 
-// ------------------------------------------------------
-// EDIT ANNOUNCEMENT
-// ------------------------------------------------------
+    pdf.setFontSize(14);
+    pdf.text("Treasury Receipt", 105, 30, { align: "center" });
 
-window.editAnnouncement = async function(id){
+    pdf.setLineWidth(0.5);
+    pdf.line(20, 36, 190, 36);
 
-    const refDoc = doc(db,"announcements",id);
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(11);
 
-    const snap = await getDoc(refDoc);
+    let y = 48;
 
-    if(!snap.exists()) return;
+    pdf.text(`Receipt No: ${receiptNumber}`, 20, y); y += 10;
+    pdf.text(`Date: ${receiptDate}`, 20, y); y += 10;
+    pdf.text(`Year Level: ${year}`, 20, y); y += 10;
+    pdf.text(`Amount: ${amount}`, 20, y); y += 10;
+    pdf.text(`Remarks: ${remarks}`, 20, y); y += 20;
 
-    const data = snap.data();
+    pdf.line(20, y, 190, y);
 
-    const title = prompt(
+    y += 18;
 
-        "Title",
+    pdf.text("Received By:", 20, y);
 
-        data.title
+    y += 25;
 
+    pdf.text("__________________________", 20, y);
+
+    y += 8;
+
+    pdf.text("Treasurer", 20, y);
+
+    pdf.save(`${receiptNumber}.pdf`);
+
+    notify("Receipt PDF downloaded.");
+
+};
+// ========================================
+// EXCEL & CSV EXPORT SYSTEM
+// v16.0
+// ========================================
+
+window.exportCollectionsCSV = function () {
+
+    exportCSV(
+        "Collections_Report.csv",
+        collectionCache,
+        [
+            "studentName",
+            "studentId",
+            "course",
+            "yearLevel",
+            "paymentType",
+            "amount",
+            "date",
+            "remarks"
+        ]
     );
-
-    if(title===null) return;
-
-    const message = prompt(
-
-        "Message",
-
-        data.message
-
-    );
-
-    if(message===null) return;
-
-    await updateDoc(
-
-        refDoc,
-
-        {
-
-            title,
-
-            message,
-
-            updatedAt:serverTimestamp()
-
-        }
-
-    );
-
-    notify("Announcement updated.");
 
 };
 
-// ------------------------------------------------------
-// DELETE ANNOUNCEMENT
-// ------------------------------------------------------
+window.exportExpensesCSV = function () {
 
-window.deleteAnnouncement = async function(id){
-
-    if(!confirm("Delete this announcement?")) return;
-
-    await deleteDoc(
-
-        doc(db,"announcements",id)
-
+    exportCSV(
+        "Expenses_Report.csv",
+        expenseCache,
+        [
+            "category",
+            "description",
+            "amount",
+            "receiptURL"
+        ]
     );
-
-    notify("Announcement deleted.");
 
 };
-// ======================================================
-// ADMIN FINAL MODULE
-// VERSION 20.0
-// PART 7
-// ======================================================
 
+window.exportProjectsCSV = function () {
 
-// ======================================================
-// DASHBOARD ANALYTICS
-// ======================================================
+    exportCSV(
+        "Projects_Report.csv",
+        projectCache,
+        [
+            "name",
+            "description",
+            "status",
+            "budget"
+        ]
+    );
 
-function updateAnalytics(){
+};
 
-    setText("studentCount",cache.students.length);
+window.exportStudentsCSV = function () {
 
-    setText("collectionCount",cache.collections.length);
+    exportCSV(
+        "Students_Report.csv",
+        studentCache,
+        [
+            "studentName",
+            "studentId",
+            "course",
+            "yearLevel"
+        ]
+    );
 
-    setText("projectCount",cache.projects.length);
+};
+// ========================================
+// AUDIT LOG SYSTEM
+// v16.0
+// ========================================
 
-    setText("expenseCount",cache.expenses.length);
+let auditCache = [];
 
-    setText("recordCount",cache.records.length);
+// ========================================
+// WRITE AUDIT LOG
+// ========================================
 
-    setText("announcementCount",cache.announcements.length);
+async function writeAuditLog(action, details = "") {
 
-}
+    try {
 
+        await addDoc(
 
-// ======================================================
-// REFRESH ALL
-// ======================================================
+            collection(db, "auditLogs"),
 
-window.refreshDashboard=function(){
+            {
 
-    loadStudents();
+                action,
 
-    loadCollections();
+                details,
 
-    loadProjects();
+                adminEmail:
+                    auth.currentUser?.email || "Unknown",
 
-    loadExpenses();
+                adminUID:
+                    auth.currentUser?.uid || "",
 
-    loadRecords();
+                createdAt:
+                    serverTimestamp()
 
-    loadAnnouncements();
+            }
 
-    loadSummary();
-
-    updateAnalytics();
-
-    console.log("Dashboard refreshed.");
-
-}
-
-
-// ======================================================
-// EXPORT COLLECTION CSV
-// ======================================================
-
-window.exportCollections=function(){
-
-    if(cache.collections.length===0){
-
-        notify("No collections.");
-
-        return;
+        );
 
     }
 
-    let csv="Student,Student ID,Course,Year Level,Payment Type,Amount,Date\n";
+    catch(error){
 
-    cache.collections.forEach(item=>{
-
-        csv+=`"${item.studentName||""}","${item.studentId||""}","${item.course||""}","${item.yearLevel||""}","${item.paymentType||""}","${item.amount||0}","${item.date||""}"\n`;
-
-    });
-
-    const blob=new Blob(
-
-        [csv],
-
-        {
-
-            type:"text/csv"
-
-        }
-
-    );
-
-    const url=URL.createObjectURL(blob);
-
-    const a=document.createElement("a");
-
-    a.href=url;
-
-    a.download="Collections.csv";
-
-    a.click();
-
-    URL.revokeObjectURL(url);
-
-}
-
-
-// ======================================================
-// EXPORT PROJECT CSV
-// ======================================================
-
-window.exportProjects=function(){
-
-    if(cache.projects.length===0){
-
-        notify("No projects.");
-
-        return;
+        console.error(
+            "AUDIT ERROR:",
+            error
+        );
 
     }
 
-    let csv="Project,Budget,Actual Expenses,Status\n";
-
-    cache.projects.forEach(item=>{
-
-        csv+=`"${item.name||""}","${item.budget||0}","${item.actualExpenses||0}","${item.status||""}"\n`;
-
-    });
-
-    const blob=new Blob(
-
-        [csv],
-
-        {
-
-            type:"text/csv"
-
-        }
-
-    );
-
-    const url=URL.createObjectURL(blob);
-
-    const a=document.createElement("a");
-
-    a.href=url;
-
-    a.download="Projects.csv";
-
-    a.click();
-
-    URL.revokeObjectURL(url);
-
 }
+// ========================================
+// BACKUP & RESTORE SYSTEM
+// v16.0
+// ========================================
 
+window.backupSystem = async function () {
 
-// ======================================================
-// EXPORT EXPENSE CSV
-// ======================================================
+    try {
 
-window.exportExpenses=function(){
+        notify("Creating backup...");
 
-    if(cache.expenses.length===0){
+        const backup = {
 
-        notify("No expenses.");
+            version: "16.0",
 
-        return;
+            createdAt: new Date().toISOString(),
+
+            projects: projectCache,
+
+            expenses: expenseCache,
+
+            records: recordCache,
+
+            collections: collectionCache,
+
+            announcements: announcementCache,
+
+            students: studentCache,
+
+            receipts: receiptCache,
+
+            auditLogs: auditCache
+
+        };
+
+        const blob = new Blob(
+
+            [
+
+                JSON.stringify(
+                    backup,
+                    null,
+                    2
+                )
+
+            ],
+
+            {
+
+                type: "application/json"
+
+            }
+
+        );
+
+        const url =
+            URL.createObjectURL(blob);
+
+        const link =
+            document.createElement("a");
+
+        link.href = url;
+
+        link.download =
+            `Treasury_Backup_${Date.now()}.json`;
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+
+        notify("Backup completed.");
+
+        await writeAuditLog(
+
+            "System Backup",
+
+            "Backup file downloaded"
+
+        );
 
     }
 
-    let csv="Category,Description,Amount,Date\n";
+    catch(error){
 
-    cache.expenses.forEach(item=>{
+        console.error(error);
 
-        csv+=`"${item.category||""}","${item.description||""}","${item.amount||0}","${item.date||""}"\n`;
+        notify(error.message,"error");
 
-    });
+    }
 
-    const blob=new Blob(
+};
+// ========================================
+// NOTIFICATION CENTER
+// v16.0
+// ========================================
 
-        [csv],
+let notificationCache = [];
 
-        {
+// Add Notification
+function addNotification(title, message, type = "info") {
 
-            type:"text/csv"
-
-        }
-
-    );
-
-    const url=URL.createObjectURL(blob);
-
-    const a=document.createElement("a");
-
-    a.href=url;
-
-    a.download="Expenses.csv";
-
-    a.click();
-
-    URL.revokeObjectURL(url);
-
-}
-
-
-// ======================================================
-// SYSTEM REPORT
-// ======================================================
-
-window.exportSystemReport=function(){
-
-    const report={
-
-        generated:new Date().toLocaleString(),
-
-        students:cache.students.length,
-
-        collections:cache.collections.length,
-
-        projects:cache.projects.length,
-
-        expenses:cache.expenses.length,
-
-        records:cache.records.length,
-
-        announcements:cache.announcements.length,
-
-        totalCollections:cache.collections.reduce(
-
-            (a,b)=>a+Number(b.amount||0),
-
-            0
-
-        ),
-
-        totalExpenses:
-
-            cache.expenses.reduce(
-
-                (a,b)=>a+Number(b.amount||0),
-
-                0
-
-            )+
-
-            cache.projects.reduce(
-
-                (a,b)=>a+Number(b.actualExpenses||0),
-
-                0
-
-            )
-
+    const notification = {
+        id: Date.now(),
+        title,
+        message,
+        type,
+        time: new Date().toLocaleString()
     };
 
-    const blob=new Blob(
+    notificationCache.unshift(notification);
 
-        [
-
-            JSON.stringify(
-
-                report,
-
-                null,
-
-                2
-
-            )
-
-        ],
-
-        {
-
-            type:"application/json"
-
-        }
-
-    );
-
-    const url=URL.createObjectURL(blob);
-
-    const a=document.createElement("a");
-
-    a.href=url;
-
-    a.download="SystemReport.json";
-
-    a.click();
-
-    URL.revokeObjectURL(url);
+    renderNotifications();
 
 }
 
+// Render Notifications
+function renderNotifications() {
 
-// ======================================================
-// INITIALIZE COUNTS
-// ======================================================
+    const container =
+        document.getElementById("notificationContainer");
 
-setInterval(()=>{
+    if (!container) return;
 
-    updateAnalytics();
+    container.innerHTML = "";
 
-},3000);
+    if (notificationCache.length === 0) {
 
+        container.innerHTML = `
+            <div class="empty-state">
+                No notifications.
+            </div>
+        `;
 
-// ======================================================
-// READY
-// ======================================================
+        updateNotificationCount();
 
-console.log("===================================");
+        return;
 
-console.log("DALUBWIKAAN TREASURY ADMIN");
+    }
 
-console.log("Version 20.0");
+    notificationCache.forEach(item => {
 
-console.log("System Ready");
+        container.innerHTML += `
 
-console.log("===================================");
+        <div class="notification-card ${item.type}">
+
+            <h4>${item.title}</h4>
+
+            <p>${item.message}</p>
+
+            <small>${item.time}</small>
+
+        </div>
+
+        `;
+
+    });
+
+    updateNotificationCount();
+
+}
+
+// Badge Count
+function updateNotificationCount() {
+
+    const badge =
+        document.getElementById("notificationCount");
+
+    if (!badge) return;
+
+    badge.textContent =
+        notificationCache.length;
+
+}
+
+// Clear Notifications
+window.clearNotifications = function () {
+
+    notificationCache = [];
+
+    renderNotifications();
+
+    notify("Notifications cleared.");
+
+};
+function checkLowBalance() {
+
+    const collections =
+        collectionCache.reduce(
+            (sum, item) => sum + Number(item.amount || 0),
+            0
+        );
+
+    const expenses =
+        expenseCache.reduce(
+            (sum, item) => sum + Number(item.amount || 0),
+            0
+        );
+
+    const balance =
+        collections - expenses;
+
+    if (balance < 1000) {
+
+        addNotification(
+
+            "⚠ Low Balance",
+
+            `Remaining balance is ${peso(balance)}`,
+
+            "warning"
+
+        );
+
+    }
+
+}
