@@ -1,13 +1,14 @@
 // =================================
 // DALUBWIKAAN TREASURY DASHBOARD
-// VERSION 5.0 POLISHED
+// VERSION 6.0 FIXED
 // FIREBASE REAL-TIME
-// PROJECT TRANSPARENCY
-// BUDGET MONITORING
-// ANNOUNCEMENT BOARD
-// PDF REPORT
+// PROJECT NAME COMPATIBILITY FIX
 // =================================
 
+
+// =================================
+// FIREBASE
+// =================================
 
 import { db } from "./firebase.js";
 
@@ -30,7 +31,7 @@ from
 
 
 // =================================
-// VARIABLES
+// GLOBAL VARIABLES
 // =================================
 
 
@@ -39,19 +40,28 @@ let collectionChart = null;
 let budgetChart = null;
 
 
+let projectExpenses = {};
+
+
 
 window.totalFunds = 0;
-window.expenseTotal = 0;
+
 window.currentExpenses = 0;
+
+window.expenseTotal = 0;
 
 window.totalProjectActualExpenses = 0;
 
 
 
-let projectExpenses = {};
+window.projectActualExpenseTotal = 0;
 
 
 
+
+// =================================
+// REPORT STORAGE
+// =================================
 
 
 let reportData = {
@@ -59,15 +69,11 @@ let reportData = {
 
     funds:0,
 
-
     expenses:0,
-
 
     remaining:0,
 
-
     years:{},
-
 
     projects:[]
 
@@ -77,24 +83,15 @@ let reportData = {
 
 
 
-
-
-
-
-
 // =================================
-// HELPERS
+// BASIC HELPERS
 // =================================
-
 
 
 function setText(id,value){
 
 
-    const element =
-
-    document.getElementById(id);
-
+    const element = document.getElementById(id);
 
 
     if(element){
@@ -109,9 +106,6 @@ function setText(id,value){
 
 
 
-
-
-
 function peso(value){
 
 
@@ -120,10 +114,48 @@ function peso(value){
     Number(value || 0)
 
     .toLocaleString(
+
         "en-PH",
+
         {
+
             minimumFractionDigits:2
+
         }
+
+    );
+
+
+}
+
+
+
+
+// =================================
+// PROJECT NAME RESOLVER
+// FIX UNKNOWN PROJECT ISSUE
+// =================================
+
+
+function getProjectName(data){
+
+
+    return (
+
+        data.projectName ||
+
+        data.project ||
+
+        data.name ||
+
+        data.title ||
+
+        data.category ||
+
+        data.projectTitle ||
+
+        "Unknown Project"
+
     );
 
 
@@ -135,24 +167,22 @@ function peso(value){
 
 
 
-
-
 // =================================
-// PROJECT STATUS BADGE
+// STATUS BADGE
 // =================================
 
 
 function statusBadge(status){
 
 
-    const currentStatus =
+    const current =
 
     String(status || "Planning")
     .trim();
 
 
 
-    if(currentStatus === "Completed"){
+    if(current === "Completed"){
 
 
         return `
@@ -170,7 +200,8 @@ function statusBadge(status){
 
 
 
-    if(currentStatus === "Ongoing"){
+
+    if(current === "Ongoing"){
 
 
         return `
@@ -185,7 +216,6 @@ function statusBadge(status){
 
 
     }
-
 
 
 
@@ -205,27 +235,26 @@ function statusBadge(status){
 
 
 
+function financialStatus(budget, spent) {
 
+    budget = Number(budget || 0);
+    spent = Number(spent || 0);
 
+    if (budget <= 0) {
+        return "0% done";
+    }
 
+    const percent = Math.round((spent / budget) * 100);
 
+    if (percent >= 100) {
+        if (spent > budget) {
+            return `⚠️ ${percent}% Over Budget`;
+        }
+        return "✅ 100% Complete";
+    }
 
-
-// =================================
-// FINANCIAL STATUS
-// =================================
-
-function financialStatus(statusText) {
-    return statusText || "0% done";
+    return `${percent}% done`;
 }
-
-
-
-
-
-
-
-
 
 // =================================
 // LOAD COLLECTIONS
@@ -239,13 +268,19 @@ function loadCollections(){
     const q = query(
 
         collection(
+
             db,
+
             "collections"
+
         ),
 
         orderBy(
+
             "createdAt",
+
             "desc"
+
         )
 
     );
@@ -272,12 +307,9 @@ function loadCollections(){
 
                 "First Year":0,
 
-
                 "Second Year":0,
 
-
                 "Third Year":0,
-
 
                 "Fourth Year":0
 
@@ -288,12 +320,12 @@ function loadCollections(){
 
 
 
-
-
             const table =
 
             document.getElementById(
+
                 "transactionTable"
+
             );
 
 
@@ -311,29 +343,21 @@ function loadCollections(){
 
 
 
-
-
-
-
             snapshot.forEach((doc)=>{
 
 
 
-                const data =
-
-                doc.data();
-
-
-
+                const data = doc.data();
 
 
 
                 const amount =
 
                 Number(
-                    data.amount || 0
-                );
 
+                    data.amount || 0
+
+                );
 
 
 
@@ -345,10 +369,23 @@ function loadCollections(){
 
 
 
+                if(
+
+                    data.yearLevel &&
+
+                    yearTotals[data.yearLevel] !== undefined
+
+                ){
+
+                    yearTotals[data.yearLevel] += amount;
+
+                }
 
 
-                if (data.yearLevel && yearTotals[data.yearLevel] !==undefined) {yearTotals[data.yearLevel] += amount; }
 
+
+
+                if(table){
 
 
                     table.innerHTML += `
@@ -359,21 +396,17 @@ function loadCollections(){
 
                     <td>
 
-
                     ${data.date || "N/A"}
-                    
 
                     </td>
+
+
 
                     <td>
 
                     ${data.yearLevel || "N/A"}
-                    
 
                     </td>
-
-
-                    
 
 
 
@@ -383,10 +416,14 @@ function loadCollections(){
                     ${peso(amount)}
 
                     </td>
+
+
+
+
                     <td>
-                      <span class="${data.status ? data.status.toLowercase() : 'pending'}">
-                      ${data.status || "Recorded"}
-                      </span>
+
+                    ${data.status || "Recorded"}
+
                     </td>
 
 
@@ -397,10 +434,11 @@ function loadCollections(){
                     `;
 
 
+                }
 
-                })
 
 
+            });
 
 
 
@@ -410,27 +448,21 @@ function loadCollections(){
             if(snapshot.empty && table){
 
 
-
                 table.innerHTML = `
 
 
                 <tr>
 
-
                 <td colspan="4">
-
 
                 No collection records yet.
 
-
                 </td>
-
 
                 </tr>
 
 
                 `;
-
 
 
             }
@@ -441,32 +473,13 @@ function loadCollections(){
 
 
 
-
-            window.totalFunds =
-
-            totalFunds;
+            window.totalFunds = totalFunds;
 
 
+            reportData.funds = totalFunds;
 
 
-
-
-
-            reportData.funds =
-
-            totalFunds;
-
-
-
-
-
-
-
-            reportData.years =
-
-            yearTotals;
-
-
+            reportData.years = yearTotals;
 
 
 
@@ -487,20 +500,13 @@ function loadCollections(){
 
 
 
-
-
             setText(
 
                 "firstYear",
 
-                peso(
-                    yearTotals["First Year"]
-                )
+                peso(yearTotals["First Year"])
 
             );
-
-
-
 
 
 
@@ -508,14 +514,9 @@ function loadCollections(){
 
                 "secondYear",
 
-                peso(
-                    yearTotals["Second Year"]
-                )
+                peso(yearTotals["Second Year"])
 
             );
-
-
-
 
 
 
@@ -523,14 +524,9 @@ function loadCollections(){
 
                 "thirdYear",
 
-                peso(
-                    yearTotals["Third Year"]
-                )
+                peso(yearTotals["Third Year"])
 
             );
-
-
-
 
 
 
@@ -538,9 +534,7 @@ function loadCollections(){
 
                 "fourthYear",
 
-                peso(
-                    yearTotals["Fourth Year"]
-                )
+                peso(yearTotals["Fourth Year"])
 
             );
 
@@ -550,31 +544,13 @@ function loadCollections(){
 
 
 
-            updateProgress(
-                yearTotals
-            );
+            updateProgress(yearTotals);
 
 
-
-
-
-
-
-            createCollectionChart(
-                yearTotals
-            );
-
-
-
-
-
+            createCollectionChart(yearTotals);
 
 
             updateBalance();
-
-
-
-
 
 
             hideLoader();
@@ -584,16 +560,13 @@ function loadCollections(){
         }
 
 
-
     );
 
 
-
 }
-
 // =================================
-// LOAD PROJECTS + BUDGET MONITORING
-// PROJECT TRANSPARENCY SYSTEM
+// LOAD PROJECTS
+// FIXED PROJECT TRANSPARENCY SYSTEM
 // =================================
 
 
@@ -603,16 +576,23 @@ function loadProjects(){
     const projectQuery = query(
 
         collection(
+
             db,
+
             "projects"
+
         ),
 
         orderBy(
+
             "createdAt",
+
             "desc"
+
         )
 
     );
+
 
 
 
@@ -623,49 +603,10 @@ function loadProjects(){
         projectQuery,
 
         async(projectSnapshot)=>{
-            window.projectActualExpenseTotal = 0;
 
 
 
-            const table =
-
-            document.getElementById(
-                "projectTable"
-            );
-
-
-
-
-
-            if(table){
-
-                table.innerHTML="";
-
-            }
-
-
-
-
-
-
-            // =========================
-            // LOAD EXPENSES
-            // =========================
-
-
-            const expenseSnapshot =
-
-            await getDocs(
-
-                collection(
-                    db,
-                    "expenses"
-                )
-
-            );
-
-
-
+            window.totalProjectActualExpenses = 0;
 
 
             projectExpenses = {};
@@ -674,208 +615,159 @@ function loadProjects(){
 
 
 
+            const table =
 
+            document.getElementById(
 
+                "projectTable"
 
+            );
+
+            if(table){
+
+                table.innerHTML = "";
+
+            }
+
+            // =================================
+            // LOAD EXPENSES
+            // =================================
+            const expenseSnapshot =
+
+            await getDocs(
+
+                collection(
+
+                    db,
+
+                    "expenses"
+
+                )
+
+            );
             expenseSnapshot.forEach(
-                (expenseDoc)=>{
 
+                (expenseDoc)=>{
 
                     const expense =
 
                     expenseDoc.data();
 
+                    const expenseProject =
 
-
-
-                    const projectName =
-
-                    expense.project ||
-                        expense.category ||
-                        "Unknown project";
-
-
-
-
-
+                    getProjectName(expense);
 
                     if(
-                        !projectExpenses[projectName]
+
+                        !projectExpenses[expenseProject]
+
                     ){
 
-
-                        projectExpenses[projectName]=0;
-
+                        projectExpenses[expenseProject] = 0;
 
                     }
 
-
-
-
-
-
-
-                    projectExpenses[projectName]
+                    projectExpenses[expenseProject]
 
                     +=
 
                     Number(
+
                         expense.amount || 0
+
                     );
-
-
 
 
                 }
 
             );
 
-
-
-
-
-
-
-
-
-            reportData.projects=[];
-
-
-
-
-
-
+            reportData.projects = [];
 
             projectSnapshot.forEach(
-                (projectDoc)=>{
 
+                (projectDoc)=>{
 
                     const data =
 
                     projectDoc.data();
 
-
-
-
-
-
-
+                    // =========================
+                    // PROJECT NAME FIX
+                    // =========================
 
                     const name =
 
-                    data.name ||
-
-                    "Unnamed Project";
-
-
-
-
-
-
-
+                    getProjectName(data);
 
                     const budget =
 
                     Number(
-                        data.budget || 0
+
+                        data.budget ||
+
+                        data.amount ||
+
+                        0
+
                     );
 
+                    // =========================
+                    // EXPENSE MATCHING FIX
+                    // =========================
+                    const savedExpense =
 
+                    Number(
 
+                        projectExpenses[name] || 0
 
+                    );
 
+                    const manualExpense =
 
+                    Number(
 
+                        data.actualExpenses || 0
+
+                    );
 
                     const spent =
-                        Number(data.actualExpenses) || 0;
 
-                    window.projectActualExpenseTotal += spent;
+                    savedExpense > 0
 
+                    ?
 
+                    savedExpense
 
+                    :
 
+                    manualExpense;
 
-
-
-
+                    window.totalProjectActualExpenses
+                    +=
+                    spent;
                     const remaining =
-
                     budget - spent;
-
-
-
-
-
-
-
-
-                    // =====================
-                    // IMPORTANT STATUS FIX
-                    // =====================
-
-
-                    let status =
-
-                    data.status;
-
-
-
-                    if(!status){
-
-                        status = "Planning";
-
-                    }
-
-
-
-
-
-
-
+                    const status =
+                    data.status ||
+                    "Planning";
                     const projectData = {
-
-
-                        name,
-
-
+                      name,
                         budget,
-
-
-                        spent,
-
-
+                   spent,
                         remaining,
-
-
                         status,
-
-
                         description:
 
                         data.description || ""
 
-
                     };
 
-
-
-
-
-
-
-
                     reportData.projects.push(
+
                         projectData
+
                     );
-
-
-
-
-
-
-
-
 
                     if(table){
 
@@ -891,205 +783,108 @@ function loadProjects(){
 
                         <td>
 
-
-
                         <strong>
 
                         ${name}
 
                         </strong>
 
-
-
                         <br><br>
-
-
 
                         ${statusBadge(status)}
 
-
-
                         </td>
-
-
-
-
-
-
-
 
                         <td>
 
+<strong>Budget</strong>
 
+<br>
 
-                        <strong>
+${peso(budget)}
 
-                        Allocated Budget
+<br><br>
 
-                        </strong>
+<strong>Expenses</strong>
 
+<br>
 
-                        <br>
+${peso(spent)}
 
+<br><br>
 
-                        ${peso(budget)}
+<strong>Progress</strong>
 
+<br>
 
+${financialStatus(budget, spent)}
 
+<br><br>
 
+<strong>Remaining</strong>
 
-                        <br><br>
+<br>
 
+${peso(remaining)}
 
-
-
-
-                        <strong>
-
-                        Actual Expenses
-
-                        </strong>
-
-
-                        <br>
-
-
-                        ${peso(spent)}
-
-
-
-
-
-
-
-                        <br><br>
-
-
-
-
-
-                        ${financialStatus(
-
-                            data.utilizationStatus,
-
-                        
-
-                        )}
-
-
-
-
-
-                        </td>
-
-
-
-
-
-
-
-
+</td>
 
                         <td>
-
-
 
                         ${
+
                             data.description ||
 
                             "No project description."
+
                         }
-
-
 
                         </td>
 
-
-
-
-
-
-
                         </tr>
 
-
-
                         `;
-
-
-
                     }
-
-
-
-
-
-
 
                 }
 
             );
 
-
-
-
-
-
-
-
-
             if(
-                projectSnapshot.empty
-                &&
+
+                projectSnapshot.empty &&
+
                 table
+
             ){
-
-
 
                 table.innerHTML = `
 
-
-
                 <tr>
-
 
                 <td colspan="3">
 
-
                 No projects available.
-
 
                 </td>
 
-
                 </tr>
-
 
 
                 `;
 
 
-
             }
-window.expenseTotal = totalExpenses;
-        updateFinancialSummary();
 
+            updateFinancialSummary();
         }
-);
+    );
 }
-
-
-
-
-
-
-
-
 // =================================
-// LOAD EXPENSE TRANSPARENCY
+// LOAD EXPENSES
 // RECEIPT MONITORING
+// FIXED PROJECT NAME MATCHING
 // =================================
-
 
 
 function loadExpenses(){
@@ -1099,19 +894,23 @@ function loadExpenses(){
     const expenseQuery = query(
 
         collection(
+
             db,
+
             "expenses"
+
         ),
 
 
         orderBy(
+
             "createdAt",
+
             "desc"
+
         )
 
-
     );
-
 
 
 
@@ -1132,9 +931,10 @@ function loadExpenses(){
             const container =
 
             document.getElementById(
-                "expensePreview"
-            );
 
+                "expensePreview"
+
+            );
 
 
 
@@ -1151,8 +951,7 @@ function loadExpenses(){
 
 
 
-
-            container.innerHTML="";
+            container.innerHTML = "";
 
 
 
@@ -1170,6 +969,7 @@ function loadExpenses(){
 
 
             snapshot.forEach(
+
                 (expenseDoc)=>{
 
 
@@ -1187,9 +987,10 @@ function loadExpenses(){
                     const amount =
 
                     Number(
-                        data.amount || 0
-                    );
 
+                        data.amount || 0
+
+                    );
 
 
 
@@ -1199,6 +1000,16 @@ function loadExpenses(){
 
                     totalExpenses += amount;
 
+
+
+
+
+
+
+
+                    const projectName =
+
+                    getProjectName(data);
 
 
 
@@ -1216,6 +1027,7 @@ function loadExpenses(){
 
 
 
+
                     if(data.receipt){
 
 
@@ -1223,9 +1035,7 @@ function loadExpenses(){
                         receiptHTML = `
 
 
-
                         <div class="receipt-box">
-
 
 
                         <img
@@ -1244,6 +1054,8 @@ function loadExpenses(){
 
 
                         <br>
+
+
 
 
 
@@ -1282,9 +1094,7 @@ function loadExpenses(){
 
                         <p>
 
-
                         📄 No receipt uploaded.
-
 
                         </p>
 
@@ -1311,13 +1121,19 @@ function loadExpenses(){
 
 
 
+
+
+
                     <h3>
 
-
-                    💸 ${data.projectName || "Unknown Project"}
+                    💸 ${projectName}
 
 
                     </h3>
+
+
+
+
 
 
 
@@ -1346,19 +1162,33 @@ function loadExpenses(){
 
 
 
+
                     <p>
+
+
+                    <strong>
+
+                    Description:
+
+                    </strong>
+
+
+                    <br>
 
 
                     ${
 
-                    data.description ||
+                        data.description ||
 
-                    "No description provided."
+                        "No description provided."
 
                     }
 
 
+
                     </p>
+
+
 
 
 
@@ -1372,12 +1202,12 @@ function loadExpenses(){
 
 
 
+
                     </div>
 
 
 
                     `;
-
 
 
 
@@ -1388,41 +1218,127 @@ function loadExpenses(){
 
 
 
-if(snapshot.empty){
 
-    container.innerHTML = `
 
-        <p>
 
-        No expense records available.
 
-        </p>
 
-    `;
+            if(snapshot.empty){
 
-}
 
-reportData.expenses = totalExpenses;
 
-// Recompute total expenses if projects are already loaded
-window.currentExpenses =
-    totalExpenses + window.totalProjectActualExpenses;
+                container.innerHTML = `
 
-window.currentExpenses =
-    reportData.expenses + window.totalProjectActualExpenses;
 
-setText(
-    "totalExpenses",
-    peso(window.currentExpenses)
-);
+                <p>
 
-updateBalance();
 
-updateBudgetChart();
+                No expense records available.
 
-    }
 
-);
+                </p>
+
+
+                `;
+
+
+
+            }
+
+
+
+
+
+
+
+
+            reportData.expenses =
+
+            totalExpenses;
+
+
+
+
+
+
+
+
+            window.expenseTotal =
+
+            totalExpenses;
+
+
+
+
+
+
+
+
+            window.currentExpenses =
+
+            Number(
+
+                reportData.expenses || 0
+
+            )
+
+            +
+
+            Number(
+
+                window.totalProjectActualExpenses || 0
+
+            );
+
+
+
+
+
+
+
+
+
+            setText(
+
+                "totalExpenses",
+
+                peso(
+
+                    window.currentExpenses
+
+                )
+
+            );
+
+
+
+
+
+
+
+
+            updateBalance();
+
+
+
+
+
+
+
+
+            updateBudgetChart();
+
+
+
+
+
+        }
+
+
+    );
+
+
+
 }
 // =================================
 // ANNOUNCEMENT BOARD
@@ -1435,7 +1351,9 @@ function loadAnnouncements(){
     const container =
 
     document.getElementById(
+
         "announcementContainer"
+
     );
 
 
@@ -1454,14 +1372,20 @@ function loadAnnouncements(){
     const q = query(
 
         collection(
+
             db,
+
             "announcements"
+
         ),
 
 
         orderBy(
+
             "createdAt",
+
             "desc"
+
         )
 
 
@@ -1480,6 +1404,8 @@ function loadAnnouncements(){
         q,
 
         (snapshot)=>{
+
+
 
 
 
@@ -1506,7 +1432,6 @@ function loadAnnouncements(){
                 `;
 
 
-
                 return;
 
 
@@ -1518,7 +1443,8 @@ function loadAnnouncements(){
 
 
 
-            container.innerHTML="";
+            container.innerHTML = "";
+
 
 
 
@@ -1527,7 +1453,9 @@ function loadAnnouncements(){
 
 
             snapshot.forEach(
+
                 (docSnap)=>{
+
 
 
                     const data =
@@ -1539,13 +1467,11 @@ function loadAnnouncements(){
 
 
 
-
-
                     container.innerHTML += `
 
 
-                    <div class="announcement-card">
 
+                    <div class="announcement-card">
 
 
                     <h3>
@@ -1553,9 +1479,9 @@ function loadAnnouncements(){
 
                     📢 ${
 
-                    data.title ||
+                        data.title ||
 
-                    "Announcement"
+                        "Announcement"
 
                     }
 
@@ -1568,21 +1494,19 @@ function loadAnnouncements(){
 
 
 
-
                     <p>
 
 
                     ${
 
-                    data.message ||
+                        data.message ||
 
-                    ""
+                        ""
 
                     }
 
 
                     </p>
-
 
 
 
@@ -1597,18 +1521,16 @@ function loadAnnouncements(){
 
                     ${
 
-                    data.createdBy ||
+                        data.createdBy ||
 
-                    data.user ||
+                        data.user ||
 
-                    "Administrator"
+                        "Administrator"
 
                     }
 
 
-
                     </small>
-
 
 
                     </div>
@@ -1625,8 +1547,8 @@ function loadAnnouncements(){
 
 
 
-        }
 
+        }
 
 
     );
@@ -1645,7 +1567,6 @@ function loadAnnouncements(){
 
 // =================================
 // BALANCE COMPUTATION
-// WITH ABONADO DETECTION
 // =================================
 
 
@@ -1655,14 +1576,19 @@ function updateBalance(){
 
     const balance =
 
+
     Number(
+
         window.totalFunds || 0
+
     )
 
     -
 
     Number(
+
         window.currentExpenses || 0
+
     );
 
 
@@ -1671,9 +1597,10 @@ function updateBalance(){
 
 
 
-    reportData.remaining =
 
-    balance;
+
+    reportData.remaining = balance;
+
 
 
 
@@ -1684,8 +1611,11 @@ function updateBalance(){
     const balanceElement =
 
     document.getElementById(
+
         "remainingBalance"
+
     );
+
 
 
 
@@ -1711,7 +1641,9 @@ function updateBalance(){
             <br>
 
             ${peso(
+
                 Math.abs(balance)
+
             )}
 
 
@@ -1721,7 +1653,9 @@ function updateBalance(){
 
 
             balanceElement.classList.add(
+
                 "danger-status"
+
             );
 
 
@@ -1749,7 +1683,9 @@ function updateBalance(){
 
 
             balanceElement.classList.remove(
+
                 "danger-status"
+
             );
 
 
@@ -1830,6 +1766,7 @@ function updateProgress(data){
 
 
 
+
     const progressData = {
 
 
@@ -1841,6 +1778,7 @@ function updateProgress(data){
 
 
 
+
         secondProgress:
 
         data["Second Year"],
@@ -1848,9 +1786,11 @@ function updateProgress(data){
 
 
 
+
         thirdProgress:
 
         data["Third Year"],
+
 
 
 
@@ -1879,8 +1819,6 @@ function updateProgress(data){
 
 
 
-
-
             const bar =
 
             document.getElementById(id);
@@ -1895,7 +1833,6 @@ function updateProgress(data){
 
 
                 bar.style.width =
-
 
                 (
 
@@ -1918,7 +1855,6 @@ function updateProgress(data){
 
 
         }
-
 
 
     );
@@ -1947,8 +1883,11 @@ function createCollectionChart(data){
     const canvas =
 
     document.getElementById(
+
         "collectionChart"
+
     );
+
 
 
 
@@ -1982,7 +1921,6 @@ function createCollectionChart(data){
 
 
 
-
     collectionChart =
 
     new Chart(
@@ -1992,62 +1930,57 @@ function createCollectionChart(data){
         {
 
 
-
-        type:"bar",
-
-
-
-
-        data:{
-
-
-            labels:
-
-            Object.keys(data),
+            type:"bar",
 
 
 
 
-            datasets:[{
+            data:{
 
 
-                label:
+                labels:
 
-                "Collected Funds",
-
-
-
-                data:
-
-                Object.values(data)
+                Object.keys(data),
 
 
 
-            }]
+
+                datasets:[{
+
+
+                    label:
+
+                    "Collected Funds",
 
 
 
-        },
+                    data:
 
+                    Object.values(data)
+
+
+
+                }]
+
+
+
+            },
 
 
 
 
 
-
-        options:{
-
-
-            responsive:true
+            options:{
 
 
+                responsive:true
 
-        }
+
+            }
 
 
 
         }
-
 
 
     );
@@ -2066,7 +1999,6 @@ function createCollectionChart(data){
 
 // =================================
 // BUDGET MONITORING CHART
-// SHOW REAL EXPENSES
 // =================================
 
 
@@ -2077,7 +2009,9 @@ function updateBudgetChart(){
     const canvas =
 
     document.getElementById(
+
         "budgetChart"
+
     );
 
 
@@ -2112,12 +2046,23 @@ function updateBudgetChart(){
 
 
 
-
     const remaining =
 
-    window.totalFunds -
+    Number(
 
-    window.currentExpenses;
+        window.totalFunds || 0
+
+    )
+
+    -
+
+    Number(
+
+        window.currentExpenses || 0
+
+    );
+
+
 
 
 
@@ -2134,88 +2079,87 @@ function updateBudgetChart(){
         {
 
 
-
-        type:"doughnut",
-
+            type:"doughnut",
 
 
 
 
-        data:{
+            data:{
 
 
 
-            labels:[
+                labels:[
 
 
-            "Expenses",
-
-
-            remaining < 0
-
-            ?
-
-            "Abonado"
-
-            :
-
-            "Remaining"
+                    "Expenses",
 
 
 
-            ],
+                    remaining < 0
+
+                    ?
+
+                    "Abonado"
+
+                    :
+
+                    "Remaining"
 
 
 
-
-
-
-            datasets:[{
-
-
-                data:[
-
-
-                window.currentExpenses,
-
-
-                Math.abs(
-                    remaining
-                )
-
-
-                ]
-
-
-
-            }]
-
-
-
-        },
+                ],
 
 
 
 
+                datasets:[{
+
+
+                    data:[
+
+
+
+                        Number(
+
+                            window.currentExpenses || 0
+
+                        ),
+
+
+
+                        Math.abs(
+
+                            remaining
+
+                        )
+
+
+
+                    ]
+
+
+
+                }]
+
+
+
+            },
 
 
 
 
-        options:{
+
+            options:{
 
 
-            responsive:true
+                responsive:true
+
+
+            }
 
 
 
         }
-
-
-
-
-
-        }
-
 
 
     );
@@ -2223,10 +2167,8 @@ function updateBudgetChart(){
 
 
 }
-
 // =================================
 // PDF TREASURY REPORT
-// PROJECT TRANSPARENCY VERSION
 // =================================
 
 
@@ -2236,7 +2178,9 @@ function generatePDF(){
     const button =
 
     document.getElementById(
+
         "generateReport"
+
     );
 
 
@@ -2246,7 +2190,6 @@ function generatePDF(){
     if(!button)
 
     return;
-
 
 
 
@@ -2319,10 +2262,6 @@ function generatePDF(){
 
 
 
-
-
-
-
         pdf.text(
 
             "Academic Year 2026-2027",
@@ -2349,9 +2288,7 @@ function generatePDF(){
 
         pdf.text(
 
-            "Generated: "
-
-            +
+            "Generated: " +
 
             new Date()
 
@@ -2401,16 +2338,11 @@ function generatePDF(){
 
 
 
-
         pdf.text(
 
-            "Total Funds: "
+            "Total Funds: " +
 
-            +
-
-            peso(
-                reportData.funds
-            ),
+            peso(reportData.funds),
 
             20,
 
@@ -2434,20 +2366,15 @@ function generatePDF(){
 
         pdf.text(
 
-            "Total Expenses: "
+            "Total Expenses: " +
 
-            +
-
-            peso(
-                reportData.expenses
-            ),
+            peso(reportData.expenses),
 
             20,
 
             y
 
         );
-
 
 
 
@@ -2465,13 +2392,9 @@ function generatePDF(){
 
         pdf.text(
 
-            "Balance: "
+            "Balance: " +
 
-            +
-
-            peso(
-                reportData.remaining
-            ),
+            peso(reportData.remaining),
 
             20,
 
@@ -2518,13 +2441,9 @@ function generatePDF(){
 
 
 
-        reportData.projects
-
-        .forEach(
+        reportData.projects.forEach(
 
             (project)=>{
-
-
 
 
 
@@ -2542,13 +2461,13 @@ ${peso(project.budget)}
 Spent:
 ${peso(project.spent)}
 
-Balance:
+Remaining:
 ${peso(project.remaining)}
 `,
 
-                    20,
+                20,
 
-                    y
+                y
 
                 );
 
@@ -2558,7 +2477,8 @@ ${peso(project.remaining)}
 
 
 
-                y += 35;
+
+                y += 40;
 
 
 
@@ -2567,7 +2487,8 @@ ${peso(project.remaining)}
 
 
 
-                if(y > 270){
+                if(y > 260){
+
 
 
                     pdf.addPage();
@@ -2577,9 +2498,6 @@ ${peso(project.remaining)}
 
 
                 }
-
-
-
 
 
 
@@ -2602,8 +2520,8 @@ ${peso(project.remaining)}
 
 
 
-
     };
+
 
 
 }
@@ -2628,8 +2546,11 @@ function enableSearch(){
     const search =
 
     document.getElementById(
+
         "searchRecord"
+
     );
+
 
 
 
@@ -2684,10 +2605,7 @@ function enableSearch(){
 
 
 
-
-
                     row.style.display =
-
 
                     row.innerText
 
@@ -2695,20 +2613,13 @@ function enableSearch(){
 
                     .includes(keyword)
 
-
                     ?
-
 
                     ""
 
-
                     :
 
-
                     "none";
-
-
-
 
 
 
@@ -2718,12 +2629,7 @@ function enableSearch(){
 
 
 
-
-
-
-
         }
-
 
     );
 
@@ -2751,7 +2657,9 @@ function hideLoader(){
     const loader =
 
     document.getElementById(
+
         "loader"
+
     );
 
 
@@ -2764,7 +2672,7 @@ function hideLoader(){
 
 
 
-        loader.style.opacity="0";
+        loader.style.opacity = "0";
 
 
 
@@ -2776,12 +2684,11 @@ function hideLoader(){
 
 
 
-            loader.style.display="none";
+            loader.style.display = "none";
 
 
 
         },500);
-
 
 
 
@@ -2800,7 +2707,7 @@ function hideLoader(){
 
 
 // =================================
-// DARK / LIGHT MODE
+// DARK MODE
 // =================================
 
 
@@ -2811,7 +2718,9 @@ function initializeTheme(){
     const button =
 
     document.getElementById(
+
         "themeToggle"
+
     );
 
 
@@ -2820,10 +2729,13 @@ function initializeTheme(){
 
 
 
-    const savedTheme =
+
+    const saved =
 
     localStorage.getItem(
+
         "theme"
+
     );
 
 
@@ -2833,19 +2745,21 @@ function initializeTheme(){
 
 
 
-    if(savedTheme==="dark"){
+    if(saved === "dark"){
 
 
 
         document.body.classList.add(
+
             "dark"
+
         );
 
 
 
         if(button)
 
-        button.textContent="☀";
+        button.textContent = "☀";
 
 
 
@@ -2867,10 +2781,10 @@ function initializeTheme(){
 
 
 
-
-
             document.body.classList.toggle(
+
                 "dark"
+
             );
 
 
@@ -2882,9 +2796,10 @@ function initializeTheme(){
             const dark =
 
             document.body.classList.contains(
-                "dark"
-            );
 
+                "dark"
+
+            );
 
 
 
@@ -2928,12 +2843,7 @@ function initializeTheme(){
 
 
 
-
-
-
-
         };
-
 
 
 
@@ -2958,59 +2868,53 @@ function initializeTheme(){
 
 window.addEventListener(
 
-"load",
+    "load",
 
-()=>{
-
-
-
-    loadCollections();
+    ()=>{
 
 
 
-    loadProjects();
+        loadCollections();
+
+
+        loadProjects();
+
+
+        loadExpenses();
+
+
+        loadAnnouncements();
 
 
 
-    loadExpenses();
+        generatePDF();
 
 
-
-    loadAnnouncements();
-
+        enableSearch();
 
 
-
-    generatePDF();
-
-
-
-    enableSearch();
-
-
-
-    initializeTheme();
+        initializeTheme();
 
 
 
 
 
 
-    setTimeout(()=>{
+
+        setTimeout(()=>{
+
+
+            hideLoader();
 
 
 
-        hideLoader();
+        },800);
 
 
 
-    },800);
+    }
 
-
-
-
-
-});
+);
 
 
 
@@ -3021,12 +2925,11 @@ window.addEventListener(
 
 
 // =================================
-// AUTO SYNC CHECK
+// AUTO SYNC MONITOR
 // =================================
 
 
 setInterval(()=>{
-
 
 
     console.log(
@@ -3034,7 +2937,6 @@ setInterval(()=>{
         "Dalubwikaan Treasury Dashboard Sync..."
 
     );
-
 
 
 },30000);
@@ -3054,21 +2956,21 @@ setInterval(()=>{
 
 window.addEventListener(
 
-"error",
+    "error",
 
-(event)=>{
-
-
-    console.error(
-
-        "Dashboard Error:",
-
-        event.error
-
-    );
+    (event)=>{
 
 
-}
+        console.error(
+
+            "Dashboard Error:",
+
+            event.error
+
+        );
+
+
+    }
 
 );
 
@@ -3078,25 +2980,23 @@ window.addEventListener(
 
 
 
-
-
 window.addEventListener(
 
-"unhandledrejection",
+    "unhandledrejection",
 
-(event)=>{
-
-
-    console.error(
-
-        "Promise Error:",
-
-        event.reason
-
-    );
+    (event)=>{
 
 
-}
+        console.error(
+
+            "Promise Error:",
+
+            event.reason
+
+        );
+
+
+    }
 
 );
 
@@ -3112,19 +3012,17 @@ console.log(`
 
 ========================================
 
-DALUBWIKAAN TREASURY DASHBOARD v5.0
+DALUBWIKAAN TREASURY DASHBOARD v6.0
 
 ✓ Firebase Real-Time Sync
 
-✓ Project Status Monitoring
+✓ Project Name Compatibility Fix
 
-✓ Ongoing / Completed / Planning
+✓ Unknown Project Removed
 
-✓ Budget Transparency
+✓ Budget Monitoring
 
 ✓ Expense Tracking
-
-✓ Abonado Detection
 
 ✓ Receipt Monitoring
 
