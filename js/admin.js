@@ -596,7 +596,7 @@ async function loadExpenses() {
 
                 <div class="data-card">
 
-                    <h3>💸 ${data.project || "Expense"}</h3>
+                    <h3>💸 ${data.category || "Expense"}</h3>
 
                     <p>${data.description || ""}</p>
 
@@ -717,15 +717,15 @@ if (expenseForm) {
 
         e.preventDefault();
 
-        const project = getValue("expenseProject");
+        const category = getValue("expenseProject");
 
         const amount = Number(getValue("expenseAmount"));
 
         const description = getValue("expenseDescription");
 
-        if (!project) {
+        if (!category) {
 
-            notify("Enter a project name.");
+            notify("Select an expense category.");
 
             return;
 
@@ -740,7 +740,8 @@ if (expenseForm) {
         }
 
         await addExpense({
-            project,
+
+            category,
 
             amount,
 
@@ -1704,222 +1705,81 @@ async function(id){
 
 };
 
- // ========================================
+ //========================================
 // SUMMARY SYSTEM
-// FINAL FIX v17.0
+// v16.0
 // ========================================
 
 async function loadSummary() {
 
     try {
 
-        // -----------------------------
-        // LOAD COLLECTIONS
-        // -----------------------------
+        // ----------------------------
+        // Totals
+        // ----------------------------
+
+        let totalCollections = 0;
+        let totalExpenses = 0;
+
+        let firstYear = 0;
+        let secondYear = 0;
+        let thirdYear = 0;
+        let fourthYear = 0;
+
+        // ----------------------------
+        // COLLECTIONS
+        // ----------------------------
 
         const collectionSnap = await getDocs(
             collection(db, "collections")
         );
 
-        let totalCollections = 0;
-
-        collectionCache = [];
-
         collectionSnap.forEach(docSnap => {
 
             const data = docSnap.data();
 
-            collectionCache.push({
-                id: docSnap.id,
-                ...data
-            });
+            const amount = Number(data.amount) || 0;
 
-            totalCollections += Number(data.amount || 0);
+            totalCollections += amount;
 
-        });
+            const level = (data.yearLevel || "").toLowerCase();
 
-        // -----------------------------
-        // LOAD PROJECTS
-        // -----------------------------
+            if (
+                level.includes("1") ||
+                level.includes("first")
+            ) {
 
-        const projectSnap = await getDocs(
-            collection(db, "projects")
-        );
-
-        let totalProjectExpenses = 0;
-
-        projectCache = [];
-
-        projectSnap.forEach(docSnap => {
-
-            const data = docSnap.data();
-
-            projectCache.push({
-                id: docSnap.id,
-                ...data
-            });
-
-            totalProjectExpenses +=
-                Number(data.actualExpenses || 0);
-
-        });
-
-        // -----------------------------
-        // LOAD EXPENSES
-        // -----------------------------
-
-        const expenseSnap = await getDocs(
-            collection(db, "expenses")
-        );
-
-        let manualExpenses = 0;
-
-        expenseCache = [];
-
-        expenseSnap.forEach(docSnap => {
-
-            const data = docSnap.data();
-
-            expenseCache.push({
-                id: docSnap.id,
-                ...data
-            });
-
-            manualExpenses +=
-                Number(data.amount || 0);
-
-        });
-
-        // -----------------------------
-        // LOAD RECORDS
-        // -----------------------------
-
-        const recordSnap = await getDocs(
-            collection(db, "records")
-        );
-
-        recordCache = [];
-
-        recordSnap.forEach(docSnap => {
-
-            recordCache.push({
-                id: docSnap.id,
-                ...docSnap.data()
-            });
-
-        });
-
-        // -----------------------------
-        // COMPUTE TOTALS
-        // -----------------------------
-
-        const totalExpenses =
-            manualExpenses +
-            totalProjectExpenses;
-
-        const availableBalance =
-            totalCollections -
-            totalExpenses;
-
-        // -----------------------------
-        // DASHBOARD COUNTS
-        // -----------------------------
-
-        setText(
-            "collectionCount",
-            collectionCache.length
-        );
-
-        setText(
-            "projectCount",
-            projectCache.length
-        );
-
-        setText(
-            "expenseCount",
-            expenseCache.length
-        );
-
-        setText(
-            "recordCount",
-            recordCache.length
-        );
-
-        // -----------------------------
-        // FINANCIAL SUMMARY
-        // -----------------------------
-
-        setText(
-            "totalCollections",
-            peso(totalCollections)
-        );
-
-        setText(
-            "totalExpenses",
-            peso(totalExpenses)
-        );
-
-        setText(
-            "currentBalance",
-            peso(availableBalance)
-        );
-
-        // -----------------------------
-        // TREASURY STATUS
-        // -----------------------------
-
-        const status =
-            document.getElementById(
-                "dashboardStatus"
-            );
-
-        if (status) {
-
-            if (availableBalance < 0) {
-
-                status.textContent =
-                    "🔴 Deficit";
+                firstYear += amount;
 
             }
 
-            else if (availableBalance === 0) {
+            else if (
+                level.includes("2") ||
+                level.includes("second")
+            ) {
 
-                status.textContent =
-                    "🟡 Balanced";
-
-            }
-
-            else {
-
-                status.textContent =
-                    "🟢 Healthy";
+                secondYear += amount;
 
             }
 
-        }
+            else if (
+                level.includes("3") ||
+                level.includes("third")
+            ) {
 
-        console.log(
-            "Summary Updated Successfully"
-        );
+                thirdYear += amount;
 
-    }
+            }
 
-    catch (error) {
+            else if (
+                level.includes("4") ||
+                level.includes("fourth")
+            ) {
 
-        console.error(
-            "SUMMARY ERROR:",
-            error
-        );
+                fourthYear += amount;
 
-        notify(
-            error.message,
-            "error"
-        );
+            }
 
-    }
-
-}
-            
         });
 
         // ----------------------------
