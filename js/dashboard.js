@@ -4,15 +4,10 @@
 // FIREBASE REAL-TIME
 // PROJECT NAME COMPATIBILITY FIX
 // =================================
-
-
 // =================================
 // FIREBASE
 // =================================
-
 import { db } from "./firebase.js";
-
-
 import {
 
     collection,
@@ -20,232 +15,99 @@ import {
     query,
     orderBy,
     getDocs
-
 }
-
 from
-
 "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-
-
-
-
 // =================================
 // GLOBAL VARIABLES
 // =================================
-
-
 let collectionChart = null;
-
 let budgetChart = null;
-
-
 let projectExpenses = {};
-
-
-
 window.totalFunds = 0;
-
 window.currentExpenses = 0;
-
 window.expenseTotal = 0;
-
 window.totalProjectActualExpenses = 0;
-
-
-
 window.projectActualExpenseTotal = 0;
-
-
-
-
 // =================================
 // REPORT STORAGE
 // =================================
-
-
 let reportData = {
-
-
     funds:0,
-
     expenses:0,
-
     remaining:0,
-
     years:{},
-
     projects:[]
-
-
 };
-
-
-
-
 // =================================
 // BASIC HELPERS
 // =================================
-
-
 function setText(id,value){
-
-
     const element = document.getElementById(id);
-
-
     if(element){
-
-        element.textContent = value;
-
+      element.textContent = value;
     }
-
-
 }
-
-
-
-
 function peso(value){
-
-
     return "₱" +
-
     Number(value || 0)
-
     .toLocaleString(
-
         "en-PH",
-
         {
-
             minimumFractionDigits:2
-
         }
-
     );
-
-
 }
-
-
-
-
 // =================================
 // PROJECT NAME RESOLVER
 // FIX UNKNOWN PROJECT ISSUE
 // =================================
-
-
 function getProjectName(data){
-
-
     return (
-
         data.projectName ||
-
         data.project ||
-
         data.name ||
-
         data.title ||
-
         data.category ||
-
         data.projectTitle ||
-
         "Unknown Project"
-
     );
-
-
 }
-
-
-
-
-
-
-
 // =================================
 // STATUS BADGE
 // =================================
-
-
 function statusBadge(status){
-
-
     const current =
-
     String(status || "Planning")
     .trim();
-
-
-
     if(current === "Completed"){
-
-
         return `
-
         <span class="status completed">
-
         🟢 Completed
-
         </span>
-
         `;
-
-
     }
-
-
-
 
     if(current === "Ongoing"){
-
-
         return `
-
         <span class="status ongoing">
-
         🔵 Ongoing
-
         </span>
-
         `;
-
-
     }
-
-
-
-
     return `
-
     <span class="status planning">
-
     🟡 Planning
-
     </span>
-
     `;
-
-
 }
-
-
-
 function financialStatus(budget, spent) {
-
     budget = Number(budget || 0);
     spent = Number(spent || 0);
-
     if (budget <= 0) {
         return "0% done";
     }
-
     const percent = Math.round((spent / budget) * 100);
-
     if (percent >= 100) {
         if (spent > budget) {
             return `⚠️ ${percent}% Over Budget`;
@@ -255,24 +117,14 @@ function financialStatus(budget, spent) {
 
     return `${percent}% done`;
 }
-
 // =================================
 // LOAD COLLECTIONS
 // =================================
-
-
 function loadCollections(){
-
-
-
     const q = query(
-
         collection(
-
             db,
-
             "collections"
-
         ),
 
         orderBy(
@@ -284,91 +136,37 @@ function loadCollections(){
         )
 
     );
-
-
-
-
-
-
     onSnapshot(
 
         q,
 
         (snapshot)=>{
 
-
-
             let totalFunds = 0;
-
-
-
             let yearTotals = {
-
-
                 "First Year":0,
-
                 "Second Year":0,
-
                 "Third Year":0,
-
                 "Fourth Year":0
-
-
             };
-
-
-
-
-
             const table =
-
             document.getElementById(
-
                 "transactionTable"
-
             );
-
-
-
-
-
-
             if(table){
 
                 table.innerHTML="";
 
             }
-
-
-
-
-
             snapshot.forEach((doc)=>{
-
-
-
                 const data = doc.data();
-
-
-
-                const amount =
-
-                Number(
+              const amount =
+             Number(
 
                     data.amount || 0
 
                 );
-
-
-
-
-
                 totalFunds += amount;
-
-
-
-
-
                 if(
 
                     data.yearLevel &&
@@ -380,46 +178,23 @@ function loadCollections(){
                     yearTotals[data.yearLevel] += amount;
 
                 }
-
-
-
-
-
                 if(table){
-
-
                     table.innerHTML += `
-
-
                     <tr>
-
-
                     <td>
-
                     ${data.date || "N/A"}
 
                     </td>
-
-
-
                     <td>
 
                     ${data.yearLevel || "N/A"}
 
                     </td>
-
-
-
-
                     <td>
 
                     ${peso(amount)}
 
                     </td>
-
-
-
-
                     <td>
 
                     ${data.status || "Recorded"}
@@ -436,14 +211,7 @@ function loadCollections(){
 
                 }
 
-
-
             });
-
-
-
-
-
 
             if(snapshot.empty && table){
 
@@ -467,39 +235,13 @@ function loadCollections(){
 
             }
 
-
-
-
-
-
-
             window.totalFunds = totalFunds;
-
-
             reportData.funds = totalFunds;
-
-
             reportData.years = yearTotals;
-
-
-
-
-
-
-
             setText(
-
                 "totalFunds",
-
                 peso(totalFunds)
-
             );
-
-
-
-
-
-
             setText(
 
                 "firstYear",
@@ -507,9 +249,6 @@ function loadCollections(){
                 peso(yearTotals["First Year"])
 
             );
-
-
-
             setText(
 
                 "secondYear",
