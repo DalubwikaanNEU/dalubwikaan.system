@@ -395,28 +395,6 @@ window.addEventListener("unhandledrejection",(event)=>{
 
 });
 
-
-// =====================================================
-// PLACEHOLDERS
-// (These will be implemented in the next parts.)
-// =====================================================
-
-async function loadProjects(){}
-
-async function loadExpenses(){}
-
-async function loadCollections(){}
-
-async function loadStudents(){}
-
-async function loadRecords(){}
-
-async function loadAnnouncements(){}
-
-async function loadReceipts(){}
-
-async function loadSummary(){}
-
 // =====================================================
 // PROJECTS MODULE
 // VERSION 18.0
